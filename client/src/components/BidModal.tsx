@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { X, DollarSign, Zap } from 'lucide-react';
+import { X, DollarSign, Zap, Check } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import api from '../lib/api';
 
@@ -54,64 +54,63 @@ export default function BidModal({ isOpen, onClose, listingId, listingTitle, cur
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+          className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4"
           onClick={onClose}
         >
           <motion.div
-            initial={{ scale: 0.9, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            exit={{ scale: 0.9, opacity: 0 }}
-            className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6"
+            initial={{ scale: 0.95, opacity: 0, y: 10 }}
+            animate={{ scale: 1, opacity: 1, y: 0 }}
+            exit={{ scale: 0.95, opacity: 0, y: 10 }}
+            transition={{ type: 'spring', damping: 25, stiffness: 350 }}
+            className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 border border-slate-100"
             onClick={(e) => e.stopPropagation()}
           >
             {success ? (
-              <div className="text-center py-8">
-                <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <svg className="w-8 h-8 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                  </svg>
+              <div className="text-center py-10">
+                <div className="w-16 h-16 bg-emerald-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Check className="w-8 h-8 text-emerald-500" />
                 </div>
-                <h3 className="text-xl font-bold text-gray-900">Bid Placed!</h3>
-                <p className="text-gray-500 mt-1">Your bid of ${bidAmount.toLocaleString()} has been placed.</p>
+                <h3 className="text-xl font-bold text-slate-900">Bid Placed!</h3>
+                <p className="text-slate-500 mt-1">Your bid of ${bidAmount.toLocaleString()} has been placed.</p>
               </div>
             ) : (
               <>
-                <div className="flex items-center justify-between mb-5">
-                  <h3 className="text-lg font-bold text-gray-900">Place a Bid</h3>
-                  <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
+                <div className="flex items-center justify-between mb-6">
+                  <h3 className="text-lg font-bold text-slate-900">Place a Bid</h3>
+                  <button onClick={onClose} className="p-1.5 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-all">
                     <X className="w-5 h-5" />
                   </button>
                 </div>
 
-                <p className="text-sm text-gray-500 mb-4 truncate">{listingTitle}</p>
+                <p className="text-sm text-slate-500 mb-5 truncate">{listingTitle}</p>
 
-                <div className="bg-gray-50 rounded-lg p-3 mb-4">
-                  <span className="text-sm text-gray-500">Current highest bid</span>
-                  <div className="text-2xl font-bold text-navy-800">${currentBid.toLocaleString()}/mo</div>
+                <div className="bg-slate-50 rounded-xl p-4 mb-5 border border-slate-100">
+                  <span className="text-xs font-medium text-slate-400 uppercase tracking-wider">Current highest bid</span>
+                  <div className="text-2xl font-bold text-slate-900 mt-1">${currentBid.toLocaleString()}<span className="text-base font-normal text-slate-400">/mo</span></div>
                 </div>
 
                 <div className="mb-4">
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Your Bid</label>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">Your Bid</label>
                   <div className="relative">
-                    <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                    <DollarSign className="absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
                     <input
                       type="number"
                       value={bidAmount}
                       onChange={(e) => { setBidAmount(Number(e.target.value)); setError(''); }}
-                      className="w-full pl-10 pr-16 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-electric-500 focus:border-electric-500 text-lg font-semibold"
+                      className="w-full pl-10 pr-16 py-3.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 text-lg font-semibold transition-all"
                       min={currentBid + 1}
                     />
-                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">/mo</span>
+                    <span className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 text-sm">/mo</span>
                   </div>
                 </div>
 
                 {/* Quick bid buttons */}
-                <div className="flex gap-2 mb-4">
+                <div className="flex gap-2 mb-5">
                   {quickBids.map((inc) => (
                     <button
                       key={inc}
                       onClick={() => setBidAmount(currentBid + inc)}
-                      className="flex-1 py-1.5 text-sm border border-gray-200 rounded-lg hover:bg-electric-50 hover:border-electric-300 transition-colors"
+                      className="flex-1 py-2 text-sm font-medium border border-slate-200 rounded-xl hover:bg-brand-50 hover:border-brand-300 hover:text-brand-700 transition-all"
                     >
                       +${inc}
                     </button>
@@ -121,23 +120,23 @@ export default function BidModal({ isOpen, onClose, listingId, listingTitle, cur
                 {/* Auto-bid toggle */}
                 <button
                   onClick={() => setShowAutoBid(!showAutoBid)}
-                  className="flex items-center gap-2 text-sm text-electric-600 hover:text-electric-700 mb-3"
+                  className="flex items-center gap-2 text-sm font-medium text-brand-600 hover:text-brand-700 mb-4 transition-colors"
                 >
                   <Zap className="w-4 h-4" />
                   {showAutoBid ? 'Hide auto-bid' : 'Set up auto-bid'}
                 </button>
 
                 {showAutoBid && (
-                  <div className="mb-4 p-3 bg-electric-50 rounded-lg">
-                    <label className="block text-sm font-medium text-electric-700 mb-1">Maximum auto-bid</label>
-                    <p className="text-xs text-electric-600 mb-2">We'll automatically bid for you up to this amount ($25 increments).</p>
+                  <div className="mb-5 p-4 bg-brand-50/50 rounded-xl border border-brand-100">
+                    <label className="block text-sm font-medium text-brand-700 mb-1">Maximum auto-bid</label>
+                    <p className="text-xs text-brand-600/70 mb-3">We'll automatically bid for you up to this amount ($25 increments).</p>
                     <div className="relative">
-                      <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-electric-400" />
+                      <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-brand-400" />
                       <input
                         type="number"
                         value={autoBidMax}
                         onChange={(e) => setAutoBidMax(Number(e.target.value))}
-                        className="w-full pl-9 pr-4 py-2 border border-electric-200 rounded-lg focus:ring-2 focus:ring-electric-500"
+                        className="w-full pl-9 pr-4 py-2.5 border border-brand-200 rounded-xl focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all"
                         min={bidAmount + 25}
                         placeholder={`Min $${bidAmount + 25}`}
                       />
@@ -146,18 +145,18 @@ export default function BidModal({ isOpen, onClose, listingId, listingTitle, cur
                 )}
 
                 {error && (
-                  <p className="text-red-500 text-sm mb-3">{error}</p>
+                  <div className="text-rose-600 text-sm mb-4 bg-rose-50 px-3 py-2 rounded-lg border border-rose-100">{error}</div>
                 )}
 
                 <button
                   onClick={handleBid}
                   disabled={loading}
-                  className="w-full bg-electric-500 hover:bg-electric-600 text-white py-3 rounded-lg font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full bg-brand-600 hover:bg-brand-700 text-white py-3.5 rounded-xl font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed hover:shadow-lg hover:shadow-brand-600/25 active:scale-[0.98]"
                 >
                   {loading ? 'Placing bid...' : `Place Bid — $${bidAmount.toLocaleString()}/mo`}
                 </button>
 
-                <p className="text-xs text-gray-400 mt-3 text-center">
+                <p className="text-xs text-slate-400 mt-4 text-center">
                   By bidding, you agree to commit to this monthly rent if you win.
                 </p>
               </>

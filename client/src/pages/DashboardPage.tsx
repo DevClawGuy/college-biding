@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useSearchParams, Link, useNavigate } from 'react-router-dom';
 import { Gavel, Home, Heart, Bell, Clock, Trophy, XCircle, Check, ChevronRight } from 'lucide-react';
-// framer-motion available if needed
 import { useAuthStore } from '../store/authStore';
 import { useCountdown } from '../hooks/useCountdown';
 import api from '../lib/api';
@@ -16,20 +15,16 @@ const tabs = [
 function BidStatusBadge({ bid }: { bid: any }) {
   const countdown = useCountdown(bid.auctionEnd || '');
   const isWinning = bid.amount >= (bid.currentBid || 0);
+  const ended = bid.listingStatus === 'ended' || countdown.isExpired;
 
-  if (bid.listingStatus === 'ended') {
+  if (ended) {
     return isWinning
-      ? <span className="flex items-center gap-1 text-xs font-medium text-green-600 bg-green-50 px-2 py-1 rounded-full"><Trophy className="w-3 h-3" /> Won</span>
-      : <span className="flex items-center gap-1 text-xs font-medium text-red-600 bg-red-50 px-2 py-1 rounded-full"><XCircle className="w-3 h-3" /> Lost</span>;
-  }
-  if (countdown.isExpired) {
-    return isWinning
-      ? <span className="flex items-center gap-1 text-xs font-medium text-green-600 bg-green-50 px-2 py-1 rounded-full"><Trophy className="w-3 h-3" /> Won</span>
-      : <span className="flex items-center gap-1 text-xs font-medium text-red-600 bg-red-50 px-2 py-1 rounded-full"><XCircle className="w-3 h-3" /> Lost</span>;
+      ? <span className="flex items-center gap-1 text-xs font-semibold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-100"><Trophy className="w-3 h-3" /> Won</span>
+      : <span className="flex items-center gap-1 text-xs font-semibold text-rose-700 bg-rose-50 px-2.5 py-1 rounded-lg border border-rose-100"><XCircle className="w-3 h-3" /> Lost</span>;
   }
   return isWinning
-    ? <span className="flex items-center gap-1 text-xs font-medium text-electric-600 bg-electric-50 px-2 py-1 rounded-full"><Clock className="w-3 h-3" /> Winning</span>
-    : <span className="flex items-center gap-1 text-xs font-medium text-orange-600 bg-orange-50 px-2 py-1 rounded-full"><Clock className="w-3 h-3" /> Outbid</span>;
+    ? <span className="flex items-center gap-1 text-xs font-semibold text-brand-700 bg-brand-50 px-2.5 py-1 rounded-lg border border-brand-100"><Clock className="w-3 h-3" /> Winning</span>
+    : <span className="flex items-center gap-1 text-xs font-semibold text-amber-700 bg-amber-50 px-2.5 py-1 rounded-lg border border-amber-100"><Clock className="w-3 h-3" /> Outbid</span>;
 }
 
 export default function DashboardPage() {
@@ -45,10 +40,7 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!user) {
-      navigate('/login');
-      return;
-    }
+    if (!user) { navigate('/login'); return; }
     fetchTabData();
   }, [activeTab, user]);
 
@@ -56,81 +48,50 @@ export default function DashboardPage() {
     setLoading(true);
     try {
       switch (activeTab) {
-        case 'bids':
-          const bidsRes = await api.get('/bids/my/bids');
-          setBids(bidsRes.data);
-          break;
-        case 'listings':
-          const listingsRes = await api.get('/listings/my/listings');
-          setListings(listingsRes.data);
-          break;
-        case 'favorites':
-          const favsRes = await api.get('/favorites');
-          setFavorites(favsRes.data);
-          break;
-        case 'notifications':
-          const notifsRes = await api.get('/notifications');
-          setNotifications(notifsRes.data);
-          break;
+        case 'bids': setBids((await api.get('/bids/my/bids')).data); break;
+        case 'listings': setListings((await api.get('/listings/my/listings')).data); break;
+        case 'favorites': setFavorites((await api.get('/favorites')).data); break;
+        case 'notifications': setNotifications((await api.get('/notifications')).data); break;
       }
-    } catch (error) {
-      console.error('Failed to fetch data');
-    } finally {
-      setLoading(false);
-    }
+    } catch { /* */ } finally { setLoading(false); }
   };
 
-  const markAllRead = async () => {
-    await api.put('/notifications/read-all');
-    setNotifications(prev => prev.map(n => ({ ...n, read: true })));
-  };
-
-  const markRead = async (id: string) => {
-    await api.put(`/notifications/${id}/read`);
-    setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true } : n));
-  };
+  const markAllRead = async () => { await api.put('/notifications/read-all'); setNotifications(p => p.map(n => ({ ...n, read: true }))); };
+  const markRead = async (id: string) => { await api.put(`/notifications/${id}/read`); setNotifications(p => p.map(n => n.id === id ? { ...n, read: true } : n)); };
 
   if (!user) return null;
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6">
-      {/* Header */}
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
-        <p className="text-gray-500 text-sm mt-1">Welcome back, {user.name}</p>
+        <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Dashboard</h1>
+        <p className="text-slate-500 text-sm mt-1">Welcome back, {user.name}</p>
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-1 bg-gray-100 rounded-xl p-1 mb-6 overflow-x-auto">
+      <div className="flex gap-1 bg-slate-100 rounded-xl p-1 mb-8 overflow-x-auto">
         {tabs.map(({ id, label, icon: Icon }) => (
-          <button
-            key={id}
-            onClick={() => setSearchParams({ tab: id })}
+          <button key={id} onClick={() => setSearchParams({ tab: id })}
             className={`flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium whitespace-nowrap transition-all ${
-              activeTab === id ? 'bg-white shadow text-navy-800' : 'text-gray-500 hover:text-gray-700'
-            }`}
-          >
-            <Icon className="w-4 h-4" />
-            {label}
+              activeTab === id ? 'bg-white shadow-sm text-slate-900' : 'text-slate-500 hover:text-slate-700'
+            }`}>
+            <Icon className="w-4 h-4" />{label}
             {id === 'notifications' && notifications.filter(n => !n.read).length > 0 && activeTab !== 'notifications' && (
-              <span className="bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                {notifications.filter(n => !n.read).length}
-              </span>
+              <span className="bg-rose-500 text-white text-[10px] font-bold rounded-full w-5 h-5 flex items-center justify-center">{notifications.filter(n => !n.read).length}</span>
             )}
           </button>
         ))}
       </div>
 
-      {/* Content */}
       {loading ? (
         <div className="space-y-3">
           {[...Array(4)].map((_, i) => (
-            <div key={i} className="bg-white rounded-xl p-4 animate-pulse">
+            <div key={i} className="bg-white rounded-2xl p-5 card-shadow border border-slate-100">
               <div className="flex gap-4">
-                <div className="w-20 h-20 bg-gray-200 rounded-lg" />
-                <div className="flex-1 space-y-2">
-                  <div className="h-5 bg-gray-200 rounded w-1/3" />
-                  <div className="h-4 bg-gray-200 rounded w-1/4" />
+                <div className="w-20 h-20 skeleton rounded-xl" />
+                <div className="flex-1 space-y-2.5">
+                  <div className="h-5 skeleton rounded-lg w-1/3" />
+                  <div className="h-4 skeleton rounded-lg w-1/4" />
                 </div>
               </div>
             </div>
@@ -138,116 +99,88 @@ export default function DashboardPage() {
         </div>
       ) : (
         <>
-          {/* My Bids */}
           {activeTab === 'bids' && (
             <div className="space-y-3">
-              {bids.length === 0 ? (
-                <EmptyState icon={Gavel} title="No bids yet" desc="Start browsing listings and place your first bid!" />
-              ) : (
-                bids.map(bid => (
-                  <Link key={bid.id} to={`/listing/${bid.listingId}`}
-                    className="flex items-center gap-4 bg-white rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow border border-gray-100">
-                    <img src={bid.listingPhoto ? JSON.parse(bid.listingPhoto)[0] : ''} alt=""
-                      className="w-20 h-20 rounded-lg object-cover bg-gray-100" />
-                    <div className="flex-1 min-w-0">
-                      <h3 className="font-semibold text-gray-900 truncate">{bid.listingTitle}</h3>
-                      <p className="text-sm text-gray-500">Your bid: <span className="font-medium text-navy-800">${bid.amount?.toLocaleString()}/mo</span></p>
-                      <p className="text-xs text-gray-400 mt-0.5">Current: ${bid.currentBid?.toLocaleString()}/mo</p>
-                    </div>
-                    <div className="flex flex-col items-end gap-2">
-                      <BidStatusBadge bid={bid} />
-                      <ChevronRight className="w-4 h-4 text-gray-400" />
-                    </div>
-                  </Link>
-                ))
-              )}
+              {bids.length === 0 ? <EmptyState icon={Gavel} title="No bids yet" desc="Start browsing listings and place your first bid!" /> : bids.map(bid => (
+                <Link key={bid.id} to={`/listing/${bid.listingId}`}
+                  className="flex items-center gap-4 bg-white rounded-2xl p-4 card-shadow hover:card-shadow-hover transition-all border border-slate-100 group">
+                  <img src={bid.listingPhoto ? JSON.parse(bid.listingPhoto)[0] : ''} alt="" className="w-20 h-20 rounded-xl object-cover bg-slate-100" />
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-semibold text-slate-900 truncate group-hover:text-brand-600 transition-colors">{bid.listingTitle}</h3>
+                    <p className="text-sm text-slate-500 mt-0.5">Your bid: <span className="font-semibold text-slate-900">${bid.amount?.toLocaleString()}/mo</span></p>
+                    <p className="text-xs text-slate-400 mt-0.5">Current: ${bid.currentBid?.toLocaleString()}/mo</p>
+                  </div>
+                  <div className="flex flex-col items-end gap-2.5">
+                    <BidStatusBadge bid={bid} />
+                    <ChevronRight className="w-4 h-4 text-slate-300 group-hover:text-slate-500 transition-colors" />
+                  </div>
+                </Link>
+              ))}
             </div>
           )}
 
-          {/* My Listings */}
           {activeTab === 'listings' && (
             <div className="space-y-3">
-              {user.role !== 'landlord' ? (
-                <EmptyState icon={Home} title="Student Account" desc="Switch to a landlord account to create listings." />
-              ) : listings.length === 0 ? (
+              {user.role !== 'landlord' ? <EmptyState icon={Home} title="Student Account" desc="Switch to a landlord account to create listings." /> :
+               listings.length === 0 ? (
                 <EmptyState icon={Home} title="No listings yet" desc="Create your first listing to start receiving bids!">
-                  <Link to="/create-listing" className="mt-4 inline-block bg-electric-500 text-white px-6 py-2 rounded-lg font-medium hover:bg-electric-600 transition-colors">
-                    Create Listing
-                  </Link>
+                  <Link to="/create-listing" className="mt-5 inline-block bg-brand-600 text-white px-6 py-2.5 rounded-xl font-semibold hover:bg-brand-700 transition-all">Create Listing</Link>
                 </EmptyState>
-              ) : (
-                listings.map(listing => (
-                  <Link key={listing.id} to={`/listing/${listing.id}`}
-                    className="flex items-center gap-4 bg-white rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow border border-gray-100">
-                    <img src={listing.photos[0]} alt="" className="w-20 h-20 rounded-lg object-cover bg-gray-100" />
-                    <div className="flex-1 min-w-0">
-                      <h3 className="font-semibold text-gray-900 truncate">{listing.title}</h3>
-                      <p className="text-sm text-gray-500">{listing.bidCount} bids &middot; ${listing.currentBid.toLocaleString()}/mo</p>
-                      <p className="text-xs text-gray-400">{listing.status === 'active' ? 'Active' : 'Ended'}</p>
-                    </div>
-                    <ChevronRight className="w-4 h-4 text-gray-400" />
-                  </Link>
-                ))
-              )}
+              ) : listings.map(listing => (
+                <Link key={listing.id} to={`/listing/${listing.id}`}
+                  className="flex items-center gap-4 bg-white rounded-2xl p-4 card-shadow hover:card-shadow-hover transition-all border border-slate-100 group">
+                  <img src={listing.photos[0]} alt="" className="w-20 h-20 rounded-xl object-cover bg-slate-100" />
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-semibold text-slate-900 truncate group-hover:text-brand-600 transition-colors">{listing.title}</h3>
+                    <p className="text-sm text-slate-500 mt-0.5">{listing.bidCount} bids &middot; ${listing.currentBid.toLocaleString()}/mo</p>
+                    <span className={`text-xs font-medium mt-1 inline-block px-2 py-0.5 rounded-md ${listing.status === 'active' ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-500'}`}>
+                      {listing.status === 'active' ? 'Active' : 'Ended'}
+                    </span>
+                  </div>
+                  <ChevronRight className="w-4 h-4 text-slate-300 group-hover:text-slate-500 transition-colors" />
+                </Link>
+              ))}
             </div>
           )}
 
-          {/* Favorites */}
           {activeTab === 'favorites' && (
             <div className="space-y-3">
-              {favorites.length === 0 ? (
-                <EmptyState icon={Heart} title="No saved listings" desc="Heart listings to save them here for later." />
-              ) : (
-                favorites.map(listing => (
-                  <Link key={listing.id} to={`/listing/${listing.id}`}
-                    className="flex items-center gap-4 bg-white rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow border border-gray-100">
-                    <img src={listing.photos[0]} alt="" className="w-20 h-20 rounded-lg object-cover bg-gray-100" />
-                    <div className="flex-1 min-w-0">
-                      <h3 className="font-semibold text-gray-900 truncate">{listing.title}</h3>
-                      <p className="text-sm text-gray-500">${listing.currentBid.toLocaleString()}/mo &middot; {listing.bidCount} bids</p>
-                    </div>
-                    <ChevronRight className="w-4 h-4 text-gray-400" />
-                  </Link>
-                ))
-              )}
+              {favorites.length === 0 ? <EmptyState icon={Heart} title="No saved listings" desc="Heart listings to save them here for later." /> :
+               favorites.map(listing => (
+                <Link key={listing.id} to={`/listing/${listing.id}`}
+                  className="flex items-center gap-4 bg-white rounded-2xl p-4 card-shadow hover:card-shadow-hover transition-all border border-slate-100 group">
+                  <img src={listing.photos[0]} alt="" className="w-20 h-20 rounded-xl object-cover bg-slate-100" />
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-semibold text-slate-900 truncate group-hover:text-brand-600 transition-colors">{listing.title}</h3>
+                    <p className="text-sm text-slate-500 mt-0.5">${listing.currentBid.toLocaleString()}/mo &middot; {listing.bidCount} bids</p>
+                  </div>
+                  <ChevronRight className="w-4 h-4 text-slate-300 group-hover:text-slate-500 transition-colors" />
+                </Link>
+              ))}
             </div>
           )}
 
-          {/* Notifications */}
           {activeTab === 'notifications' && (
             <div>
               {notifications.length > 0 && (
-                <div className="flex justify-end mb-3">
-                  <button onClick={markAllRead} className="text-sm text-electric-500 hover:text-electric-600 font-medium flex items-center gap-1">
+                <div className="flex justify-end mb-4">
+                  <button onClick={markAllRead} className="text-sm text-brand-600 hover:text-brand-700 font-semibold flex items-center gap-1.5">
                     <Check className="w-4 h-4" /> Mark all read
                   </button>
                 </div>
               )}
               <div className="space-y-2">
-                {notifications.length === 0 ? (
-                  <EmptyState icon={Bell} title="No notifications" desc="You'll be notified when you get outbid or win an auction." />
-                ) : (
-                  notifications.map(notif => (
-                    <div
-                      key={notif.id}
-                      onClick={() => {
-                        markRead(notif.id);
-                        if (notif.listingId) navigate(`/listing/${notif.listingId}`);
-                      }}
-                      className={`p-4 rounded-xl cursor-pointer transition-colors ${
-                        notif.read ? 'bg-white border border-gray-100' : 'bg-electric-50 border border-electric-100'
-                      }`}
-                    >
-                      <div className="flex items-start justify-between">
-                        <p className={`text-sm ${notif.read ? 'text-gray-600' : 'text-gray-900 font-medium'}`}>
-                          {notif.message}
-                        </p>
-                        {!notif.read && <span className="w-2 h-2 rounded-full bg-electric-500 mt-1.5 ml-2 flex-shrink-0" />}
-                      </div>
-                      <p className="text-xs text-gray-400 mt-1">{new Date(notif.createdAt).toLocaleString()}</p>
+                {notifications.length === 0 ? <EmptyState icon={Bell} title="No notifications" desc="You'll be notified when you get outbid or win an auction." /> :
+                 notifications.map(notif => (
+                  <div key={notif.id} onClick={() => { markRead(notif.id); if (notif.listingId) navigate(`/listing/${notif.listingId}`); }}
+                    className={`p-4 rounded-2xl cursor-pointer transition-all ${notif.read ? 'bg-white border border-slate-100 hover:border-slate-200' : 'bg-brand-50 border border-brand-100 hover:bg-brand-100/50'}`}>
+                    <div className="flex items-start justify-between">
+                      <p className={`text-sm leading-relaxed ${notif.read ? 'text-slate-600' : 'text-slate-900 font-medium'}`}>{notif.message}</p>
+                      {!notif.read && <span className="w-2.5 h-2.5 rounded-full bg-brand-500 mt-1 ml-3 flex-shrink-0 ring-4 ring-brand-100" />}
                     </div>
-                  ))
-                )}
+                    <p className="text-xs text-slate-400 mt-1.5">{new Date(notif.createdAt).toLocaleString()}</p>
+                  </div>
+                ))}
               </div>
             </div>
           )}
@@ -259,10 +192,12 @@ export default function DashboardPage() {
 
 function EmptyState({ icon: Icon, title, desc, children }: { icon: any; title: string; desc: string; children?: React.ReactNode }) {
   return (
-    <div className="text-center py-16">
-      <Icon className="w-12 h-12 text-gray-300 mx-auto mb-4" />
-      <h3 className="text-lg font-semibold text-gray-700">{title}</h3>
-      <p className="text-gray-500 mt-1 text-sm">{desc}</p>
+    <div className="text-center py-20">
+      <div className="w-14 h-14 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
+        <Icon className="w-6 h-6 text-slate-400" />
+      </div>
+      <h3 className="text-lg font-semibold text-slate-700">{title}</h3>
+      <p className="text-slate-500 mt-1 text-sm">{desc}</p>
       {children}
     </div>
   );

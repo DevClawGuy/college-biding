@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { Search, Shield, Zap, TrendingUp } from 'lucide-react';
+import { Search, Shield, TrendingUp, ArrowRight, Zap, Star, Users, Building } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useEffect, useState } from 'react';
 import api from '../lib/api';
@@ -17,36 +17,58 @@ export default function HomePage() {
   return (
     <div className="min-h-screen">
       {/* Hero */}
-      <section className="relative bg-gradient-to-br from-navy-900 via-navy-800 to-navy-900 text-white overflow-hidden">
-        <div className="absolute inset-0 opacity-10">
-          <div className="absolute top-20 left-10 w-72 h-72 bg-electric-500 rounded-full blur-[120px]" />
-          <div className="absolute bottom-20 right-10 w-96 h-96 bg-electric-400 rounded-full blur-[150px]" />
+      <section className="relative overflow-hidden bg-white">
+        {/* Abstract background shapes */}
+        <div className="absolute inset-0 overflow-hidden">
+          <div className="absolute -top-40 -right-40 w-[600px] h-[600px] bg-brand-100/40 rounded-full blur-3xl" />
+          <div className="absolute -bottom-40 -left-40 w-[500px] h-[500px] bg-brand-50 rounded-full blur-3xl" />
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-gradient-to-br from-brand-50/50 to-transparent rounded-full" />
         </div>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-20 md:py-32 relative">
+
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 md:py-36 relative">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            className="text-center max-w-3xl mx-auto"
+            transition={{ duration: 0.7, ease: [0.23, 1, 0.32, 1] }}
+            className="text-center max-w-4xl mx-auto"
           >
-            <h1 className="text-4xl md:text-6xl font-bold mb-6 leading-tight">
+            <div className="inline-flex items-center gap-2 px-4 py-2 bg-brand-50 border border-brand-100 rounded-full text-sm font-medium text-brand-700 mb-8">
+              <Star className="w-4 h-4" />
+              Trusted by 1,200+ students across 25 universities
+            </div>
+
+            <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight text-slate-900 leading-[1.08]">
               Find Your
-              <span className="bg-gradient-to-r from-electric-400 to-electric-300 bg-clip-text text-transparent"> Off-Campus Home</span>
+              <span className="bg-gradient-to-r from-brand-600 via-brand-500 to-brand-400 bg-clip-text text-transparent"> Off-Campus</span>
+              <br />Home
             </h1>
-            <p className="text-lg md:text-xl text-gray-300 mb-8 max-w-2xl mx-auto">
+
+            <p className="text-lg md:text-xl text-slate-500 mt-6 mb-10 max-w-2xl mx-auto leading-relaxed">
               The fastest way to secure off-campus student housing. Browse verified homes near your campus, place bids, and move in with confidence.
             </p>
+
+            {/* Search bar */}
+            <div className="max-w-xl mx-auto mb-10">
+              <Link to="/listings" className="flex items-center gap-3 bg-white card-shadow hover:card-shadow-hover rounded-2xl px-5 py-4 transition-all group cursor-pointer">
+                <Search className="w-5 h-5 text-slate-400 group-hover:text-brand-500 transition-colors" />
+                <span className="text-slate-400 text-left flex-1">Search by city, university, or address...</span>
+                <span className="bg-brand-600 text-white px-5 py-2.5 rounded-xl text-sm font-semibold hover:bg-brand-700 transition-colors">
+                  Search
+                </span>
+              </Link>
+            </div>
+
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
               <Link
                 to="/listings"
-                className="bg-electric-500 hover:bg-electric-600 text-white px-8 py-3.5 rounded-xl font-semibold text-lg transition-all hover:shadow-lg hover:shadow-electric-500/25 flex items-center gap-2"
+                className="bg-brand-600 hover:bg-brand-700 text-white px-8 py-3.5 rounded-xl font-semibold text-base transition-all hover:shadow-xl hover:shadow-brand-600/20 active:scale-[0.98] flex items-center gap-2"
               >
-                <Search className="w-5 h-5" />
                 Browse Listings
+                <ArrowRight className="w-4 h-4" />
               </Link>
               <Link
                 to="/signup"
-                className="border border-white/20 hover:bg-white/10 text-white px-8 py-3.5 rounded-xl font-semibold text-lg transition-all"
+                className="text-slate-600 hover:text-slate-900 px-8 py-3.5 rounded-xl font-semibold text-base transition-colors border border-slate-200 hover:border-slate-300 hover:bg-white"
               >
                 Create Account
               </Link>
@@ -58,16 +80,17 @@ export default function HomePage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3, duration: 0.6 }}
-            className="grid grid-cols-3 gap-6 max-w-lg mx-auto mt-16"
+            className="grid grid-cols-3 gap-8 max-w-md mx-auto mt-20"
           >
             {[
-              { label: 'Active Listings', value: '50+' },
-              { label: 'Universities', value: '25+' },
-              { label: 'Bids Placed', value: '1.2K+' },
+              { icon: Building, label: 'Active Listings', value: '50+' },
+              { icon: Users, label: 'Universities', value: '25+' },
+              { icon: TrendingUp, label: 'Bids Placed', value: '1.2K+' },
             ].map((stat) => (
               <div key={stat.label} className="text-center">
-                <div className="text-2xl md:text-3xl font-bold text-electric-400">{stat.value}</div>
-                <div className="text-sm text-gray-400">{stat.label}</div>
+                <stat.icon className="w-5 h-5 text-brand-500 mx-auto mb-2" />
+                <div className="text-2xl md:text-3xl font-bold text-slate-900">{stat.value}</div>
+                <div className="text-xs text-slate-400 mt-0.5">{stat.label}</div>
               </div>
             ))}
           </motion.div>
@@ -75,20 +98,24 @@ export default function HomePage() {
       </section>
 
       {/* Features */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 py-20">
-        <h2 className="text-3xl font-bold text-center mb-12 text-gray-900">How HouseRush Works</h2>
-        <div className="grid md:grid-cols-3 gap-8">
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
+        <div className="text-center mb-14">
+          <h2 className="text-3xl md:text-4xl font-bold text-slate-900 tracking-tight">How HouseRush Works</h2>
+          <p className="text-slate-500 mt-3 max-w-lg mx-auto">Three simple steps to secure your perfect off-campus home.</p>
+        </div>
+        <div className="grid md:grid-cols-3 gap-6">
           {[
-            { icon: Search, title: 'Browse Listings', desc: 'Find apartments and rooms near your campus. Filter by price, size, distance, and amenities.' },
-            { icon: TrendingUp, title: 'Place Your Bid', desc: 'Bid on properties you love. Set auto-bid to stay competitive without constant monitoring.' },
-            { icon: Shield, title: 'Win & Move In', desc: 'When the auction ends, winners connect with landlords to finalize the lease. Secure and transparent.' },
-          ].map(({ icon: Icon, title, desc }) => (
-            <div key={title} className="bg-white rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow text-center">
-              <div className="w-14 h-14 bg-electric-50 rounded-xl flex items-center justify-center mx-auto mb-4">
-                <Icon className="w-7 h-7 text-electric-500" />
+            { icon: Search, title: 'Browse Listings', desc: 'Find apartments and rooms near your campus. Filter by price, size, distance, and amenities.', step: '01' },
+            { icon: TrendingUp, title: 'Place Your Bid', desc: 'Bid on properties you love. Set auto-bid to stay competitive without constant monitoring.', step: '02' },
+            { icon: Shield, title: 'Win & Move In', desc: 'When the auction ends, connect with landlords to finalize the lease. Secure and transparent.', step: '03' },
+          ].map(({ icon: Icon, title, desc, step }) => (
+            <div key={title} className="bg-white rounded-2xl p-7 card-shadow hover:card-shadow-hover transition-all duration-300 group relative overflow-hidden">
+              <div className="absolute top-5 right-5 text-4xl font-black text-slate-100 group-hover:text-brand-100 transition-colors">{step}</div>
+              <div className="w-12 h-12 bg-brand-50 rounded-xl flex items-center justify-center mb-5 group-hover:bg-brand-100 transition-colors">
+                <Icon className="w-6 h-6 text-brand-600" />
               </div>
-              <h3 className="text-lg font-semibold mb-2">{title}</h3>
-              <p className="text-gray-500 text-sm">{desc}</p>
+              <h3 className="text-lg font-semibold text-slate-900 mb-2">{title}</h3>
+              <p className="text-slate-500 text-sm leading-relaxed">{desc}</p>
             </div>
           ))}
         </div>
@@ -96,11 +123,14 @@ export default function HomePage() {
 
       {/* Featured Listings */}
       {featured.length > 0 && (
-        <section className="max-w-7xl mx-auto px-4 sm:px-6 pb-20">
-          <div className="flex items-center justify-between mb-8">
-            <h2 className="text-2xl font-bold text-gray-900">Ending Soon</h2>
-            <Link to="/listings?sort=ending_soonest" className="text-electric-500 hover:text-electric-600 font-medium text-sm">
-              View All →
+        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-24">
+          <div className="flex items-end justify-between mb-8">
+            <div>
+              <h2 className="text-2xl md:text-3xl font-bold text-slate-900 tracking-tight">Ending Soon</h2>
+              <p className="text-slate-500 mt-1">Don't miss these auctions about to close.</p>
+            </div>
+            <Link to="/listings?sort=ending_soonest" className="hidden sm:flex items-center gap-1.5 text-brand-600 hover:text-brand-700 font-semibold text-sm transition-colors">
+              View All <ArrowRight className="w-4 h-4" />
             </Link>
           </div>
           <div className="grid md:grid-cols-3 gap-6">
@@ -108,28 +138,66 @@ export default function HomePage() {
               <ListingCard key={listing.id} listing={listing} />
             ))}
           </div>
+          <Link to="/listings?sort=ending_soonest" className="sm:hidden flex items-center justify-center gap-1.5 text-brand-600 font-semibold text-sm mt-6">
+            View All Listings <ArrowRight className="w-4 h-4" />
+          </Link>
         </section>
       )}
 
       {/* CTA */}
-      <section className="bg-navy-900 text-white py-16">
-        <div className="max-w-3xl mx-auto text-center px-4">
-          <Zap className="w-10 h-10 text-electric-400 mx-auto mb-4" />
-          <h2 className="text-3xl font-bold mb-4">Ready to find your place?</h2>
-          <p className="text-gray-400 mb-8">Join thousands of students already bidding on the best off-campus housing.</p>
+      <section className="relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-br from-brand-600 to-brand-800" />
+        <div className="absolute inset-0 opacity-10">
+          <div className="absolute top-10 left-10 w-60 h-60 bg-white rounded-full blur-[80px]" />
+          <div className="absolute bottom-10 right-10 w-80 h-80 bg-white rounded-full blur-[100px]" />
+        </div>
+        <div className="max-w-3xl mx-auto text-center px-4 py-20 relative">
+          <Zap className="w-10 h-10 text-brand-200 mx-auto mb-5" />
+          <h2 className="text-3xl md:text-4xl font-bold text-white mb-4 tracking-tight">Ready to find your place?</h2>
+          <p className="text-brand-200 mb-8 text-lg">Join thousands of students already bidding on the best off-campus housing.</p>
           <Link
             to="/signup"
-            className="inline-block bg-electric-500 hover:bg-electric-600 text-white px-8 py-3.5 rounded-xl font-semibold text-lg transition-all"
+            className="inline-flex items-center gap-2 bg-white text-brand-700 px-8 py-4 rounded-xl font-semibold text-base hover:bg-brand-50 transition-all hover:shadow-xl active:scale-[0.98]"
           >
             Get Started Free
+            <ArrowRight className="w-4 h-4" />
           </Link>
         </div>
       </section>
 
       {/* Footer */}
-      <footer className="bg-gray-900 text-gray-400 py-8">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 text-center text-sm">
-          <p>&copy; 2026 HouseRush. The smart way to find student housing.</p>
+      <footer className="bg-slate-900 text-slate-400 border-t border-slate-800">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+          <div className="grid md:grid-cols-4 gap-8">
+            <div className="md:col-span-2">
+              <div className="flex items-center gap-2.5 mb-3">
+                <div className="w-7 h-7 bg-gradient-to-br from-brand-400 to-brand-600 rounded-lg flex items-center justify-center">
+                  <Zap className="w-3.5 h-3.5 text-white" />
+                </div>
+                <span className="text-lg font-bold text-white">HouseRush</span>
+              </div>
+              <p className="text-sm leading-relaxed max-w-xs">The fastest way to secure off-campus student housing. Trusted by students at top universities nationwide.</p>
+            </div>
+            <div>
+              <h4 className="text-sm font-semibold text-white mb-3">Platform</h4>
+              <ul className="space-y-2 text-sm">
+                <li><Link to="/listings" className="hover:text-white transition-colors">Browse Listings</Link></li>
+                <li><Link to="/signup" className="hover:text-white transition-colors">Create Account</Link></li>
+                <li><Link to="/login" className="hover:text-white transition-colors">Sign In</Link></li>
+              </ul>
+            </div>
+            <div>
+              <h4 className="text-sm font-semibold text-white mb-3">Company</h4>
+              <ul className="space-y-2 text-sm">
+                <li><span className="hover:text-white transition-colors cursor-pointer">About</span></li>
+                <li><span className="hover:text-white transition-colors cursor-pointer">Privacy</span></li>
+                <li><span className="hover:text-white transition-colors cursor-pointer">Terms</span></li>
+              </ul>
+            </div>
+          </div>
+          <div className="border-t border-slate-800 mt-10 pt-6 text-center text-sm">
+            <p>&copy; 2026 HouseRush. The smart way to find student housing.</p>
+          </div>
         </div>
       </footer>
     </div>

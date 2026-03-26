@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
-import { Home, Mail, Lock, Eye, EyeOff } from 'lucide-react';
+import { Mail, Lock, Eye, EyeOff, Zap } from 'lucide-react';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -23,81 +23,91 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-navy-900 via-navy-800 to-navy-900 flex items-center justify-center px-4">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8">
-        <Link to="/" className="flex items-center justify-center gap-2 mb-8">
-          <Home className="w-7 h-7 text-electric-500" />
-          <span className="text-2xl font-bold bg-gradient-to-r from-navy-800 to-electric-600 bg-clip-text text-transparent">
-            HouseRush
-          </span>
-        </Link>
-
-        <h2 className="text-2xl font-bold text-center mb-2">Welcome back</h2>
-        <p className="text-gray-500 text-center text-sm mb-6">Sign in to continue bidding</p>
-
-        {error && (
-          <div className="bg-red-50 border border-red-200 text-red-600 rounded-lg px-4 py-2 text-sm mb-4">
-            {error}
-          </div>
-        )}
-
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
-            <div className="relative">
-              <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-electric-500 focus:border-electric-500"
-                placeholder="you@university.edu"
-                required
-              />
-            </div>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
-            <div className="relative">
-              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-              <input
-                type={showPassword ? 'text' : 'password'}
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full pl-10 pr-10 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-electric-500 focus:border-electric-500"
-                placeholder="Your password"
-                required
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-              >
-                {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-              </button>
-            </div>
-          </div>
-
-          <button
-            type="submit"
-            disabled={isLoading}
-            className="w-full bg-electric-500 hover:bg-electric-600 text-white py-3 rounded-lg font-semibold transition-colors disabled:opacity-50"
-          >
-            {isLoading ? 'Signing in...' : 'Sign In'}
-          </button>
-        </form>
-
-        <div className="mt-4 p-3 bg-gray-50 rounded-lg text-xs text-gray-500">
-          <p className="font-medium mb-1">Demo accounts:</p>
-          <p>Student: alex.m@bu.edu / password123</p>
-          <p>Landlord: sarah.chen@realty.com / password123</p>
+    <div className="min-h-screen bg-slate-50 flex">
+      {/* Left panel - branding */}
+      <div className="hidden lg:flex lg:w-1/2 relative bg-gradient-to-br from-brand-600 to-brand-800 items-center justify-center p-12">
+        <div className="absolute inset-0 opacity-10">
+          <div className="absolute top-20 left-20 w-60 h-60 bg-white rounded-full blur-[80px]" />
+          <div className="absolute bottom-20 right-20 w-80 h-80 bg-white rounded-full blur-[100px]" />
         </div>
+        <div className="relative max-w-md">
+          <div className="flex items-center gap-3 mb-8">
+            <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur-sm">
+              <Zap className="w-5 h-5 text-white" />
+            </div>
+            <span className="text-2xl font-bold text-white">HouseRush</span>
+          </div>
+          <h2 className="text-4xl font-bold text-white leading-tight mb-4">
+            The fastest way to find off-campus housing.
+          </h2>
+          <p className="text-brand-200 text-lg leading-relaxed">
+            Browse verified homes near your campus, place competitive bids in real-time, and secure your perfect place.
+          </p>
+        </div>
+      </div>
 
-        <p className="text-center text-sm text-gray-500 mt-6">
-          Don't have an account?{' '}
-          <Link to="/signup" className="text-electric-500 hover:text-electric-600 font-medium">Sign up</Link>
-        </p>
+      {/* Right panel - form */}
+      <div className="flex-1 flex items-center justify-center px-4 py-12">
+        <div className="w-full max-w-md">
+          <Link to="/" className="lg:hidden flex items-center justify-center gap-2 mb-8">
+            <div className="w-8 h-8 bg-gradient-to-br from-brand-500 to-brand-700 rounded-lg flex items-center justify-center">
+              <Zap className="w-4 h-4 text-white" />
+            </div>
+            <span className="text-xl font-bold text-slate-900">HouseRush</span>
+          </Link>
+
+          <h2 className="text-2xl font-bold text-slate-900 mb-1">Welcome back</h2>
+          <p className="text-slate-500 text-sm mb-8">Sign in to continue bidding</p>
+
+          {error && (
+            <div className="bg-rose-50 border border-rose-200 text-rose-600 rounded-xl px-4 py-3 text-sm mb-5">{error}</div>
+          )}
+
+          <form onSubmit={handleSubmit} className="space-y-5">
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1.5">Email</label>
+              <div className="relative">
+                <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+                <input
+                  type="email" value={email} onChange={(e) => setEmail(e.target.value)}
+                  className="w-full pl-11 pr-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all text-sm"
+                  placeholder="you@university.edu" required
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1.5">Password</label>
+              <div className="relative">
+                <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+                <input
+                  type={showPassword ? 'text' : 'password'} value={password} onChange={(e) => setPassword(e.target.value)}
+                  className="w-full pl-11 pr-11 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all text-sm"
+                  placeholder="Your password" required
+                />
+                <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
+                  {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                </button>
+              </div>
+            </div>
+
+            <button type="submit" disabled={isLoading}
+              className="w-full bg-brand-600 hover:bg-brand-700 text-white py-3 rounded-xl font-semibold transition-all disabled:opacity-50 hover:shadow-lg hover:shadow-brand-600/25 active:scale-[0.98]">
+              {isLoading ? 'Signing in...' : 'Sign In'}
+            </button>
+          </form>
+
+          <div className="mt-5 p-4 bg-slate-50 rounded-xl border border-slate-100 text-xs text-slate-500">
+            <p className="font-semibold text-slate-600 mb-1.5">Demo accounts</p>
+            <p>Student: alex.m@bu.edu / password123</p>
+            <p>Landlord: sarah.chen@realty.com / password123</p>
+          </div>
+
+          <p className="text-center text-sm text-slate-500 mt-8">
+            Don't have an account?{' '}
+            <Link to="/signup" className="text-brand-600 hover:text-brand-700 font-semibold">Sign up</Link>
+          </p>
+        </div>
       </div>
     </div>
   );
