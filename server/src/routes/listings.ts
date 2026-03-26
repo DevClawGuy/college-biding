@@ -7,7 +7,7 @@ import { authenticateToken, AuthRequest } from '../middleware/auth';
 const router = Router();
 
 // Get all listings with filters
-router.get('/', (req: Request, res: Response) => {
+router.get('/', async (req: Request, res: Response) => {
   try {
     const { city, university, minPrice, maxPrice, beds, baths, maxDistance, search, sort, status } = req.query;
 
@@ -36,11 +36,11 @@ router.get('/', (req: Request, res: Response) => {
     const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
 
     if (sort === 'ending_soonest') {
-      results = db.select().from(schema.listings).where(whereClause).orderBy(asc(schema.listings.auctionEnd)).all();
+      results = await db.select().from(schema.listings).where(whereClause).orderBy(asc(schema.listings.auctionEnd));
     } else if (sort === 'lowest_bid') {
-      results = db.select().from(schema.listings).where(whereClause).orderBy(asc(schema.listings.currentBid)).all();
+      results = await db.select().from(schema.listings).where(whereClause).orderBy(asc(schema.listings.currentBid));
     } else {
-      results = db.select().from(schema.listings).where(whereClause).orderBy(desc(schema.listings.createdAt)).all();
+      results = await db.select().from(schema.listings).where(whereClause).orderBy(desc(schema.listings.createdAt));
     }
 
     // Parse JSON fields
@@ -59,15 +59,15 @@ router.get('/', (req: Request, res: Response) => {
 });
 
 // Get single listing
-router.get('/:id', (req: Request, res: Response) => {
+router.get('/:id', async (req: Request, res: Response) => {
   try {
-    const listing = db.select().from(schema.listings).where(eq(schema.listings.id, String(req.params.id))).get();
+    const listing = await db.select().from(schema.listings).where(eq(schema.listings.id, String(req.params.id))).get();
     if (!listing) {
       res.status(404).json({ error: 'Listing not found' });
       return;
     }
 
-    const landlord = db.select({
+    const landlord = await db.select({
       id: schema.users.id,
       name: schema.users.name,
       university: schema.users.university,
@@ -87,9 +87,9 @@ router.get('/:id', (req: Request, res: Response) => {
 });
 
 // Create listing (landlord only)
-router.post('/', authenticateToken, (req: AuthRequest, res: Response) => {
+router.post('/', authenticateToken, async (req: AuthRequest, res: Response) => {
   try {
-    const user = db.select().from(schema.users).where(eq(schema.users.id, req.userId!)).get();
+    const user = await db.select().from(schema.users).where(eq(schema.users.id, req.userId!)).get();
     if (!user || user.role !== 'landlord') {
       res.status(403).json({ error: 'Only landlords can create listings' });
       return;
@@ -102,7 +102,7 @@ router.post('/', authenticateToken, (req: AuthRequest, res: Response) => {
     } = req.body;
 
     const id = uuidv4();
-    db.insert(schema.listings).values({
+    await db.insert(schema.listings).values({
       id,
       landlordId: req.userId!,
       title,
@@ -130,7 +130,7 @@ router.post('/', authenticateToken, (req: AuthRequest, res: Response) => {
       createdAt: new Date().toISOString(),
     }).run();
 
-    const listing = db.select().from(schema.listings).where(eq(schema.listings.id, id)).get();
+    const listing = await db.select().from(schema.listings).where(eq(schema.listings.id, id)).get();
     res.status(201).json({
       ...listing!,
       photos: JSON.parse(listing!.photos),
@@ -144,9 +144,9 @@ router.post('/', authenticateToken, (req: AuthRequest, res: Response) => {
 });
 
 // Update listing
-router.put('/:id', authenticateToken, (req: AuthRequest, res: Response) => {
+router.put('/:id', authenticateToken, async (req: AuthRequest, res: Response) => {
   try {
-    const listing = db.select().from(schema.listings).where(eq(schema.listings.id, String(req.params.id))).get();
+    const listing = await db.select().from(schema.listings).where(eq(schema.listings.id, String(req.params.id))).get();
     if (!listing) {
       res.status(404).json({ error: 'Listing not found' });
       return;
@@ -166,9 +166,9 @@ router.put('/:id', authenticateToken, (req: AuthRequest, res: Response) => {
     if (req.body.tags) updates.tags = JSON.stringify(req.body.tags);
     if (req.body.photos) updates.photos = JSON.stringify(req.body.photos);
 
-    db.update(schema.listings).set(updates).where(eq(schema.listings.id, String(req.params.id))).run();
+    await db.update(schema.listings).set(updates).where(eq(schema.listings.id, String(req.params.id))).run();
 
-    const updated = db.select().from(schema.listings).where(eq(schema.listings.id, String(req.params.id))).get();
+    const updated = await db.select().from(schema.listings).where(eq(schema.listings.id, String(req.params.id))).get();
     res.json({
       ...updated!,
       photos: JSON.parse(updated!.photos),
@@ -181,12 +181,11 @@ router.put('/:id', authenticateToken, (req: AuthRequest, res: Response) => {
 });
 
 // Get landlord's listings
-router.get('/my/listings', authenticateToken, (req: AuthRequest, res: Response) => {
+router.get('/my/listings', authenticateToken, async (req: AuthRequest, res: Response) => {
   try {
-    const results = db.select().from(schema.listings)
+    const results = await db.select().from(schema.listings)
       .where(eq(schema.listings.landlordId, req.userId!))
-      .orderBy(desc(schema.listings.createdAt))
-      .all();
+      .orderBy(desc(schema.listings.createdAt));
 
     const parsed = results.map(l => ({
       ...l,

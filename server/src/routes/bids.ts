@@ -14,9 +14,9 @@ export function setBidSocket(socketIo: SocketServer) {
 const router = Router();
 
 // Get bids for a listing
-router.get('/listing/:listingId', (req, res: Response) => {
+router.get('/listing/:listingId', async (req, res: Response) => {
   try {
-    const bidsList = db.select({
+    const bidsList = await db.select({
       id: schema.bids.id,
       listingId: schema.bids.listingId,
       userId: schema.bids.userId,
@@ -29,8 +29,7 @@ router.get('/listing/:listingId', (req, res: Response) => {
       .from(schema.bids)
       .leftJoin(schema.users, eq(schema.bids.userId, schema.users.id))
       .where(eq(schema.bids.listingId, String(req.params.listingId)))
-      .orderBy(desc(schema.bids.amount))
-      .all();
+      .orderBy(desc(schema.bids.amount));
 
     // Anonymize - show university but not full name
     const anonymized = bidsList.map((b, i) => ({
@@ -45,12 +44,12 @@ router.get('/listing/:listingId', (req, res: Response) => {
 });
 
 // Place a bid
-router.post('/listing/:listingId', authenticateToken, (req: AuthRequest, res: Response) => {
+router.post('/listing/:listingId', authenticateToken, async (req: AuthRequest, res: Response) => {
   try {
     const { amount } = req.body;
     const listingId = String(req.params.listingId);
 
-    const listing = db.select().from(schema.listings).where(eq(schema.listings.id, listingId)).get();
+    const listing = await db.select().from(schema.listings).where(eq(schema.listings.id, listingId)).get();
     if (!listing) {
       res.status(404).json({ error: 'Listing not found' });
       return;
@@ -79,7 +78,7 @@ router.post('/listing/:listingId', authenticateToken, (req: AuthRequest, res: Re
     const bidId = uuidv4();
     const timestamp = new Date().toISOString();
 
-    db.insert(schema.bids).values({
+    await db.insert(schema.bids).values({
       id: bidId,
       listingId,
       userId: req.userId!,
@@ -89,12 +88,12 @@ router.post('/listing/:listingId', authenticateToken, (req: AuthRequest, res: Re
     }).run();
 
     // Update listing
-    db.update(schema.listings).set({
+    await db.update(schema.listings).set({
       currentBid: amount,
       bidCount: listing.bidCount + 1,
     }).where(eq(schema.listings.id, listingId)).run();
 
-    const bidder = db.select().from(schema.users).where(eq(schema.users.id, req.userId!)).get();
+    const bidder = await db.select().from(schema.users).where(eq(schema.users.id, req.userId!)).get();
 
     const bid = {
       id: bidId,
@@ -118,18 +117,15 @@ router.post('/listing/:listingId', authenticateToken, (req: AuthRequest, res: Re
     }
 
     // Create outbid notifications for previous bidders
-    const previousBidders = db.select({ userId: schema.bids.userId })
+    const previousBidders = await db.select({ userId: schema.bids.userId })
       .from(schema.bids)
-      .where(and(
-        eq(schema.bids.listingId, listingId),
-      ))
-      .all();
+      .where(eq(schema.bids.listingId, listingId));
 
     const uniqueBidders = [...new Set(previousBidders.map(b => b.userId))].filter(id => id !== req.userId);
 
     for (const bidderId of uniqueBidders) {
       const notifId = uuidv4();
-      db.insert(schema.notifications).values({
+      await db.insert(schema.notifications).values({
         id: notifId,
         userId: bidderId,
         type: 'outbid',
@@ -153,7 +149,7 @@ router.post('/listing/:listingId', authenticateToken, (req: AuthRequest, res: Re
     }
 
     // Process auto-bids
-    processAutoBids(listingId, amount, req.userId!);
+    await processAutoBids(listingId, amount, req.userId!);
 
     res.status(201).json(bid);
   } catch (error) {
@@ -162,15 +158,15 @@ router.post('/listing/:listingId', authenticateToken, (req: AuthRequest, res: Re
   }
 });
 
-function processAutoBids(listingId: string, currentAmount: number, excludeUserId: string) {
-  const activeAutoBids = db.select()
+async function processAutoBids(listingId: string, currentAmount: number, excludeUserId: string) {
+  const allAutoBids = await db.select()
     .from(schema.autoBids)
     .where(and(
       eq(schema.autoBids.listingId, listingId),
       eq(schema.autoBids.isActive, true),
-    ))
-    .all()
-    .filter(ab => ab.userId !== excludeUserId && ab.maxAmount > currentAmount);
+    ));
+
+  const activeAutoBids = allAutoBids.filter(ab => ab.userId !== excludeUserId && ab.maxAmount > currentAmount);
 
   if (activeAutoBids.length === 0) return;
 
@@ -185,7 +181,7 @@ function processAutoBids(listingId: string, currentAmount: number, excludeUserId
   const bidId = uuidv4();
   const timestamp = new Date().toISOString();
 
-  db.insert(schema.bids).values({
+  await db.insert(schema.bids).values({
     id: bidId,
     listingId,
     userId: topAutoBid.userId,
@@ -194,8 +190,8 @@ function processAutoBids(listingId: string, currentAmount: number, excludeUserId
     timestamp,
   }).run();
 
-  const listing = db.select().from(schema.listings).where(eq(schema.listings.id, listingId)).get();
-  db.update(schema.listings).set({
+  const listing = await db.select().from(schema.listings).where(eq(schema.listings.id, listingId)).get();
+  await db.update(schema.listings).set({
     currentBid: newAmount,
     bidCount: (listing?.bidCount || 0) + 1,
   }).where(eq(schema.listings.id, listingId)).run();
@@ -211,20 +207,20 @@ function processAutoBids(listingId: string, currentAmount: number, excludeUserId
 }
 
 // Set auto-bid
-router.post('/auto/:listingId', authenticateToken, (req: AuthRequest, res: Response) => {
+router.post('/auto/:listingId', authenticateToken, async (req: AuthRequest, res: Response) => {
   try {
     const { maxAmount } = req.body;
     const listingId = String(req.params.listingId);
 
     // Deactivate existing auto-bid
-    db.update(schema.autoBids).set({ isActive: false })
+    await db.update(schema.autoBids).set({ isActive: false })
       .where(and(
         eq(schema.autoBids.listingId, listingId),
         eq(schema.autoBids.userId, req.userId!),
       )).run();
 
     const id = uuidv4();
-    db.insert(schema.autoBids).values({
+    await db.insert(schema.autoBids).values({
       id,
       listingId,
       userId: req.userId!,
@@ -239,9 +235,9 @@ router.post('/auto/:listingId', authenticateToken, (req: AuthRequest, res: Respo
 });
 
 // Get user's bids
-router.get('/my/bids', authenticateToken, (req: AuthRequest, res: Response) => {
+router.get('/my/bids', authenticateToken, async (req: AuthRequest, res: Response) => {
   try {
-    const userBids = db.select({
+    const userBids = await db.select({
       id: schema.bids.id,
       listingId: schema.bids.listingId,
       amount: schema.bids.amount,
@@ -256,8 +252,7 @@ router.get('/my/bids', authenticateToken, (req: AuthRequest, res: Response) => {
       .from(schema.bids)
       .leftJoin(schema.listings, eq(schema.bids.listingId, schema.listings.id))
       .where(eq(schema.bids.userId, req.userId!))
-      .orderBy(desc(schema.bids.timestamp))
-      .all();
+      .orderBy(desc(schema.bids.timestamp));
 
     // Get unique listings with latest bid per listing
     const latestByListing = new Map<string, typeof userBids[0]>();

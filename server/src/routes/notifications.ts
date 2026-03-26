@@ -5,21 +5,20 @@ import { authenticateToken, AuthRequest } from '../middleware/auth';
 
 const router = Router();
 
-router.get('/', authenticateToken, (req: AuthRequest, res: Response) => {
+router.get('/', authenticateToken, async (req: AuthRequest, res: Response) => {
   try {
-    const notifs = db.select().from(schema.notifications)
+    const notifs = await db.select().from(schema.notifications)
       .where(eq(schema.notifications.userId, req.userId!))
-      .orderBy(desc(schema.notifications.createdAt))
-      .all();
+      .orderBy(desc(schema.notifications.createdAt));
     res.json(notifs);
   } catch (error) {
     res.status(500).json({ error: 'Internal server error' });
   }
 });
 
-router.put('/:id/read', authenticateToken, (req: AuthRequest, res: Response) => {
+router.put('/:id/read', authenticateToken, async (req: AuthRequest, res: Response) => {
   try {
-    db.update(schema.notifications)
+    await db.update(schema.notifications)
       .set({ read: true })
       .where(eq(schema.notifications.id, String(req.params.id)))
       .run();
@@ -29,9 +28,9 @@ router.put('/:id/read', authenticateToken, (req: AuthRequest, res: Response) => 
   }
 });
 
-router.put('/read-all', authenticateToken, (req: AuthRequest, res: Response) => {
+router.put('/read-all', authenticateToken, async (req: AuthRequest, res: Response) => {
   try {
-    db.update(schema.notifications)
+    await db.update(schema.notifications)
       .set({ read: true })
       .where(eq(schema.notifications.userId, req.userId!))
       .run();

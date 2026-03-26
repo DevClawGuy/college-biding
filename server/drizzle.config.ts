@@ -5,6 +5,6 @@ export default defineConfig({
   out: './drizzle',
   dialect: 'sqlite',
   dbCredentials: {
-    url: './dormbid.db',
+    url: process.env.DATABASE_URL || 'file:./dormbid.db',
   },
 });

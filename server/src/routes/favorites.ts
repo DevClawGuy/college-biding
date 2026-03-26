@@ -5,15 +5,14 @@ import { authenticateToken, AuthRequest } from '../middleware/auth';
 
 const router = Router();
 
-router.get('/', authenticateToken, (req: AuthRequest, res: Response) => {
+router.get('/', authenticateToken, async (req: AuthRequest, res: Response) => {
   try {
-    const favs = db.select({
+    const favs = await db.select({
       listing: schema.listings,
     })
       .from(schema.favorites)
       .innerJoin(schema.listings, eq(schema.favorites.listingId, schema.listings.id))
-      .where(eq(schema.favorites.userId, req.userId!))
-      .all();
+      .where(eq(schema.favorites.userId, req.userId!));
 
     const parsed = favs.map(f => ({
       ...f.listing,
@@ -28,9 +27,9 @@ router.get('/', authenticateToken, (req: AuthRequest, res: Response) => {
   }
 });
 
-router.post('/:listingId', authenticateToken, (req: AuthRequest, res: Response) => {
+router.post('/:listingId', authenticateToken, async (req: AuthRequest, res: Response) => {
   try {
-    const existing = db.select().from(schema.favorites)
+    const existing = await db.select().from(schema.favorites)
       .where(and(
         eq(schema.favorites.userId, req.userId!),
         eq(schema.favorites.listingId, String(req.params.listingId)),
@@ -41,7 +40,7 @@ router.post('/:listingId', authenticateToken, (req: AuthRequest, res: Response) 
       return;
     }
 
-    db.insert(schema.favorites).values({
+    await db.insert(schema.favorites).values({
       userId: req.userId!,
       listingId: String(req.params.listingId),
     }).run();
@@ -52,9 +51,9 @@ router.post('/:listingId', authenticateToken, (req: AuthRequest, res: Response) 
   }
 });
 
-router.delete('/:listingId', authenticateToken, (req: AuthRequest, res: Response) => {
+router.delete('/:listingId', authenticateToken, async (req: AuthRequest, res: Response) => {
   try {
-    db.delete(schema.favorites)
+    await db.delete(schema.favorites)
       .where(and(
         eq(schema.favorites.userId, req.userId!),
         eq(schema.favorites.listingId, String(req.params.listingId)),
@@ -66,8 +65,8 @@ router.delete('/:listingId', authenticateToken, (req: AuthRequest, res: Response
   }
 });
 
-router.get('/check/:listingId', authenticateToken, (req: AuthRequest, res: Response) => {
-  const fav = db.select().from(schema.favorites)
+router.get('/check/:listingId', authenticateToken, async (req: AuthRequest, res: Response) => {
+  const fav = await db.select().from(schema.favorites)
     .where(and(
       eq(schema.favorites.userId, req.userId!),
       eq(schema.favorites.listingId, String(req.params.listingId)),

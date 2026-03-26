@@ -16,7 +16,7 @@ router.post('/signup', async (req: Request, res: Response) => {
       return;
     }
 
-    const existing = db.select().from(schema.users).where(eq(schema.users.email, email)).get();
+    const existing = await db.select().from(schema.users).where(eq(schema.users.email, email)).get();
     if (existing) {
       res.status(409).json({ error: 'Email already registered' });
       return;
@@ -26,7 +26,7 @@ router.post('/signup', async (req: Request, res: Response) => {
     const isEduVerified = email.endsWith('.edu');
     const id = uuidv4();
 
-    db.insert(schema.users).values({
+    await db.insert(schema.users).values({
       id,
       email,
       password: hashedPassword,
@@ -40,7 +40,7 @@ router.post('/signup', async (req: Request, res: Response) => {
       createdAt: new Date().toISOString(),
     }).run();
 
-    const user = db.select().from(schema.users).where(eq(schema.users.id, id)).get();
+    const user = await db.select().from(schema.users).where(eq(schema.users.id, id)).get();
     const token = generateToken(id);
 
     const { password: _, ...userWithoutPassword } = user!;
@@ -60,7 +60,7 @@ router.post('/login', async (req: Request, res: Response) => {
       return;
     }
 
-    const user = db.select().from(schema.users).where(eq(schema.users.email, email)).get();
+    const user = await db.select().from(schema.users).where(eq(schema.users.email, email)).get();
     if (!user) {
       res.status(401).json({ error: 'Invalid credentials' });
       return;
@@ -81,8 +81,8 @@ router.post('/login', async (req: Request, res: Response) => {
   }
 });
 
-router.get('/me', authenticateToken, (req: AuthRequest, res: Response) => {
-  const user = db.select().from(schema.users).where(eq(schema.users.id, req.userId!)).get();
+router.get('/me', authenticateToken, async (req: AuthRequest, res: Response) => {
+  const user = await db.select().from(schema.users).where(eq(schema.users.id, req.userId!)).get();
   if (!user) {
     res.status(404).json({ error: 'User not found' });
     return;
@@ -94,7 +94,7 @@ router.get('/me', authenticateToken, (req: AuthRequest, res: Response) => {
 router.put('/me', authenticateToken, async (req: AuthRequest, res: Response) => {
   try {
     const { name, university, year, budgetMin, budgetMax } = req.body;
-    db.update(schema.users)
+    await db.update(schema.users)
       .set({
         ...(name && { name }),
         ...(university && { university }),
@@ -105,7 +105,7 @@ router.put('/me', authenticateToken, async (req: AuthRequest, res: Response) => 
       .where(eq(schema.users.id, req.userId!))
       .run();
 
-    const user = db.select().from(schema.users).where(eq(schema.users.id, req.userId!)).get();
+    const user = await db.select().from(schema.users).where(eq(schema.users.id, req.userId!)).get();
     const { password: _, ...userWithoutPassword } = user!;
     res.json(userWithoutPassword);
   } catch (error) {
