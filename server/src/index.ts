@@ -22,6 +22,11 @@ const io = new SocketServer(server, {
 // Set socket.io instance for bids
 setBidSocket(io);
 
+// Health check (before any auth middleware)
+app.get('/health', (_req, res) => {
+  res.json({ status: 'ok' });
+});
+
 // Middleware
 app.use(cors());
 app.use(express.json());
@@ -61,6 +66,6 @@ io.on('connection', (socket) => {
 });
 
 const PORT = process.env.PORT || 3001;
-server.listen(PORT, () => {
-  console.log(`DormBid server running on http://localhost:${PORT}`);
+server.listen(Number(PORT), '0.0.0.0', () => {
+  console.log(`DormBid server running on http://0.0.0.0:${PORT}`);
 });
