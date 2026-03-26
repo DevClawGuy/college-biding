@@ -3,7 +3,7 @@ import { drizzle } from 'drizzle-orm/libsql';
 import * as schema from './db/schema';
 import { eq } from 'drizzle-orm';
 import bcrypt from 'bcryptjs';
-import { v4 as uuidv4 } from 'uuid';
+import crypto from 'crypto';
 
 const client = createClient({
   url: process.env.DATABASE_URL || 'file:./houserush.db',
@@ -107,30 +107,30 @@ async function seed() {
 
   // Create landlord users
   const landlords = [
-    { id: uuidv4(), email: 'sarah.chen@realty.com', name: 'Sarah Chen', university: 'Boston Properties', role: 'landlord' as const },
-    { id: uuidv4(), email: 'mike.johnson@homes.com', name: 'Mike Johnson', university: 'Austin Rentals', role: 'landlord' as const },
-    { id: uuidv4(), email: 'lisa.park@apartments.com', name: 'Lisa Park', university: 'LA Housing Co', role: 'landlord' as const },
-    { id: uuidv4(), email: 'james.wilson@rent.com', name: 'James Wilson', university: 'NYC Living', role: 'landlord' as const },
-    { id: uuidv4(), email: 'maria.garcia@property.com', name: 'Maria Garcia', university: 'Chicago Realty', role: 'landlord' as const },
+    { id: crypto.randomUUID(), email: 'sarah.chen@realty.com', name: 'Sarah Chen', university: 'Boston Properties', role: 'landlord' as const },
+    { id: crypto.randomUUID(), email: 'mike.johnson@homes.com', name: 'Mike Johnson', university: 'Austin Rentals', role: 'landlord' as const },
+    { id: crypto.randomUUID(), email: 'lisa.park@apartments.com', name: 'Lisa Park', university: 'LA Housing Co', role: 'landlord' as const },
+    { id: crypto.randomUUID(), email: 'james.wilson@rent.com', name: 'James Wilson', university: 'NYC Living', role: 'landlord' as const },
+    { id: crypto.randomUUID(), email: 'maria.garcia@property.com', name: 'Maria Garcia', university: 'Chicago Realty', role: 'landlord' as const },
   ];
 
   // Create student users
   const students = [
-    { id: uuidv4(), email: 'alex.m@bu.edu', name: 'Alex Martinez', university: 'Boston University', year: 'Junior', budgetMin: 800, budgetMax: 1500 },
-    { id: uuidv4(), email: 'jordan.k@mit.edu', name: 'Jordan Kim', university: 'MIT', year: 'Senior', budgetMin: 1000, budgetMax: 2000 },
-    { id: uuidv4(), email: 'casey.r@utexas.edu', name: 'Casey Rodriguez', university: 'UT Austin', year: 'Sophomore', budgetMin: 600, budgetMax: 1200 },
-    { id: uuidv4(), email: 'taylor.w@ucla.edu', name: 'Taylor Wang', university: 'UCLA', year: 'Junior', budgetMin: 900, budgetMax: 1800 },
-    { id: uuidv4(), email: 'sam.l@nyu.edu', name: 'Sam Lee', university: 'NYU', year: 'Senior', budgetMin: 1200, budgetMax: 2500 },
-    { id: uuidv4(), email: 'morgan.b@uchicago.edu', name: 'Morgan Brown', university: 'UChicago', year: 'Junior', budgetMin: 800, budgetMax: 1600 },
-    { id: uuidv4(), email: 'riley.d@harvard.edu', name: 'Riley Davis', university: 'Harvard', year: 'Sophomore', budgetMin: 1000, budgetMax: 2200 },
-    { id: uuidv4(), email: 'avery.t@usc.edu', name: 'Avery Thompson', university: 'USC', year: 'Senior', budgetMin: 900, budgetMax: 1700 },
-    { id: uuidv4(), email: 'quinn.h@columbia.edu', name: 'Quinn Harris', university: 'Columbia', year: 'Junior', budgetMin: 1100, budgetMax: 2300 },
-    { id: uuidv4(), email: 'drew.p@northwestern.edu', name: 'Drew Patel', university: 'Northwestern', year: 'Sophomore', budgetMin: 700, budgetMax: 1400 },
-    { id: uuidv4(), email: 'jamie.n@bu.edu', name: 'Jamie Nguyen', university: 'Boston University', year: 'Senior', budgetMin: 850, budgetMax: 1600 },
-    { id: uuidv4(), email: 'charlie.f@utexas.edu', name: 'Charlie Foster', university: 'UT Austin', year: 'Junior', budgetMin: 650, budgetMax: 1300 },
-    { id: uuidv4(), email: 'sage.w@ucla.edu', name: 'Sage Williams', university: 'UCLA', year: 'Freshman', budgetMin: 800, budgetMax: 1500 },
-    { id: uuidv4(), email: 'ellis.c@nyu.edu', name: 'Ellis Carter', university: 'NYU', year: 'Senior', budgetMin: 1300, budgetMax: 2400 },
-    { id: uuidv4(), email: 'rowan.g@uchicago.edu', name: 'Rowan Garcia', university: 'UChicago', year: 'Junior', budgetMin: 750, budgetMax: 1500 },
+    { id: crypto.randomUUID(), email: 'alex.m@bu.edu', name: 'Alex Martinez', university: 'Boston University', year: 'Junior', budgetMin: 800, budgetMax: 1500 },
+    { id: crypto.randomUUID(), email: 'jordan.k@mit.edu', name: 'Jordan Kim', university: 'MIT', year: 'Senior', budgetMin: 1000, budgetMax: 2000 },
+    { id: crypto.randomUUID(), email: 'casey.r@utexas.edu', name: 'Casey Rodriguez', university: 'UT Austin', year: 'Sophomore', budgetMin: 600, budgetMax: 1200 },
+    { id: crypto.randomUUID(), email: 'taylor.w@ucla.edu', name: 'Taylor Wang', university: 'UCLA', year: 'Junior', budgetMin: 900, budgetMax: 1800 },
+    { id: crypto.randomUUID(), email: 'sam.l@nyu.edu', name: 'Sam Lee', university: 'NYU', year: 'Senior', budgetMin: 1200, budgetMax: 2500 },
+    { id: crypto.randomUUID(), email: 'morgan.b@uchicago.edu', name: 'Morgan Brown', university: 'UChicago', year: 'Junior', budgetMin: 800, budgetMax: 1600 },
+    { id: crypto.randomUUID(), email: 'riley.d@harvard.edu', name: 'Riley Davis', university: 'Harvard', year: 'Sophomore', budgetMin: 1000, budgetMax: 2200 },
+    { id: crypto.randomUUID(), email: 'avery.t@usc.edu', name: 'Avery Thompson', university: 'USC', year: 'Senior', budgetMin: 900, budgetMax: 1700 },
+    { id: crypto.randomUUID(), email: 'quinn.h@columbia.edu', name: 'Quinn Harris', university: 'Columbia', year: 'Junior', budgetMin: 1100, budgetMax: 2300 },
+    { id: crypto.randomUUID(), email: 'drew.p@northwestern.edu', name: 'Drew Patel', university: 'Northwestern', year: 'Sophomore', budgetMin: 700, budgetMax: 1400 },
+    { id: crypto.randomUUID(), email: 'jamie.n@bu.edu', name: 'Jamie Nguyen', university: 'Boston University', year: 'Senior', budgetMin: 850, budgetMax: 1600 },
+    { id: crypto.randomUUID(), email: 'charlie.f@utexas.edu', name: 'Charlie Foster', university: 'UT Austin', year: 'Junior', budgetMin: 650, budgetMax: 1300 },
+    { id: crypto.randomUUID(), email: 'sage.w@ucla.edu', name: 'Sage Williams', university: 'UCLA', year: 'Freshman', budgetMin: 800, budgetMax: 1500 },
+    { id: crypto.randomUUID(), email: 'ellis.c@nyu.edu', name: 'Ellis Carter', university: 'NYU', year: 'Senior', budgetMin: 1300, budgetMax: 2400 },
+    { id: crypto.randomUUID(), email: 'rowan.g@uchicago.edu', name: 'Rowan Garcia', university: 'UChicago', year: 'Junior', budgetMin: 750, budgetMax: 1500 },
   ];
 
   // Insert landlords
@@ -291,7 +291,7 @@ async function seed() {
   const listingIds: string[] = [];
 
   for (const l of listingsData) {
-    const id = uuidv4();
+    const id = crypto.randomUUID();
     listingIds.push(id);
 
     const auctionEnd = new Date(now.getTime() + l.daysLeft * 24 * 60 * 60 * 1000);
@@ -348,7 +348,7 @@ async function seed() {
       const bidTime = new Date(now.getTime() - (listing.daysLeft + 14 - j) * 24 * 60 * 60 * 1000 / numBids * (numBids - j));
 
       await db.insert(schema.bids).values({
-        id: uuidv4(),
+        id: crypto.randomUUID(),
         listingId,
         userId: bidder.id,
         amount: currentBid,
@@ -381,7 +381,7 @@ async function seed() {
     const student = students[i % students.length];
     const listingId = listingIds[i % listingIds.length];
     await db.insert(schema.notifications).values({
-      id: uuidv4(),
+      id: crypto.randomUUID(),
       userId: student.id,
       type: i % 2 === 0 ? 'outbid' : 'auction_ending',
       message: i % 2 === 0

@@ -1,5 +1,5 @@
 import { Router, Response } from 'express';
-import { v4 as uuidv4 } from 'uuid';
+import crypto from 'crypto';
 import { db, schema } from '../db';
 import { eq, and, desc } from 'drizzle-orm';
 import { authenticateToken, AuthRequest } from '../middleware/auth';
@@ -75,7 +75,7 @@ router.post('/listing/:listingId', authenticateToken, async (req: AuthRequest, r
       return;
     }
 
-    const bidId = uuidv4();
+    const bidId = crypto.randomUUID();
     const timestamp = new Date().toISOString();
 
     await db.insert(schema.bids).values({
@@ -124,7 +124,7 @@ router.post('/listing/:listingId', authenticateToken, async (req: AuthRequest, r
     const uniqueBidders = [...new Set(previousBidders.map(b => b.userId))].filter(id => id !== req.userId);
 
     for (const bidderId of uniqueBidders) {
-      const notifId = uuidv4();
+      const notifId = crypto.randomUUID();
       await db.insert(schema.notifications).values({
         id: notifId,
         userId: bidderId,
@@ -178,7 +178,7 @@ async function processAutoBids(listingId: string, currentAmount: number, exclude
 
   if (newAmount > topAutoBid.maxAmount) return;
 
-  const bidId = uuidv4();
+  const bidId = crypto.randomUUID();
   const timestamp = new Date().toISOString();
 
   await db.insert(schema.bids).values({
@@ -219,7 +219,7 @@ router.post('/auto/:listingId', authenticateToken, async (req: AuthRequest, res:
         eq(schema.autoBids.userId, req.userId!),
       )).run();
 
-    const id = uuidv4();
+    const id = crypto.randomUUID();
     await db.insert(schema.autoBids).values({
       id,
       listingId,

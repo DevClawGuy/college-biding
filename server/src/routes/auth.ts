@@ -1,6 +1,6 @@
 import { Router, Request, Response } from 'express';
 import bcrypt from 'bcryptjs';
-import { v4 as uuidv4 } from 'uuid';
+import crypto from 'crypto';
 import { db, schema } from '../db';
 import { eq } from 'drizzle-orm';
 import { generateToken, authenticateToken, AuthRequest } from '../middleware/auth';
@@ -24,7 +24,7 @@ router.post('/signup', async (req: Request, res: Response) => {
 
     const hashedPassword = await bcrypt.hash(password, 10);
     const isEduVerified = email.endsWith('.edu');
-    const id = uuidv4();
+    const id = crypto.randomUUID();
 
     await db.insert(schema.users).values({
       id,

@@ -1,5 +1,5 @@
 import { Router, Request, Response } from 'express';
-import { v4 as uuidv4 } from 'uuid';
+import crypto from 'crypto';
 import { db, schema } from '../db';
 import { eq, and, like, gte, lte, asc, desc, sql } from 'drizzle-orm';
 import { authenticateToken, AuthRequest } from '../middleware/auth';
@@ -101,7 +101,7 @@ router.post('/', authenticateToken, async (req: AuthRequest, res: Response) => {
       startingBid, reservePrice, auctionEnd, tags
     } = req.body;
 
-    const id = uuidv4();
+    const id = crypto.randomUUID();
     await db.insert(schema.listings).values({
       id,
       landlordId: req.userId!,
