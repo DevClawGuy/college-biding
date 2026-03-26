@@ -47,7 +47,8 @@ export const useAuthStore = create<AuthState>((set) => ({
       set({ user: data.user, token: data.token, isLoading: false });
     } catch (error: any) {
       set({ isLoading: false });
-      throw new Error(error.response?.data?.error || 'Login failed');
+      const msg = error.response?.data?.error;
+      throw new Error(typeof msg === 'string' ? msg : 'Login failed');
     }
   },
 
@@ -60,7 +61,8 @@ export const useAuthStore = create<AuthState>((set) => ({
       set({ user: data.user, token: data.token, isLoading: false });
     } catch (error: any) {
       set({ isLoading: false });
-      throw new Error(error.response?.data?.error || 'Signup failed');
+      const msg = error.response?.data?.error;
+      throw new Error(typeof msg === 'string' ? msg : 'Signup failed');
     }
   },
 

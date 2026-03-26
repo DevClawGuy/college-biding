@@ -51,7 +51,7 @@ export default function CreateListingPage() {
         photos: [`https://picsum.photos/seed/${Date.now()}1/800/600`, `https://picsum.photos/seed/${Date.now()}2/800/600`, `https://picsum.photos/seed/${Date.now()}3/800/600`],
       });
       navigate(`/listing/${data.id}`);
-    } catch (err: any) { setError(err.response?.data?.error || 'Failed to create listing'); } finally { setLoading(false); }
+    } catch (err: any) { const msg = err.response?.data?.error; setError(typeof msg === 'string' ? msg : 'Failed to create listing'); } finally { setLoading(false); }
   };
 
   if (!user || user.role !== 'landlord') {

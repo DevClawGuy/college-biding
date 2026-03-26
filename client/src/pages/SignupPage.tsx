@@ -33,7 +33,7 @@ export default function SignupPage() {
       await signup(form);
       navigate('/listings');
     } catch (err: any) {
-      setError(err.message);
+      setError(typeof err?.message === 'string' ? err.message : 'Signup failed');
     }
   };
 

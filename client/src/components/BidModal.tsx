@@ -39,7 +39,8 @@ export default function BidModal({ isOpen, onClose, listingId, listingTitle, cur
         onClose();
       }, 1500);
     } catch (err: any) {
-      setError(err.response?.data?.error || 'Failed to place bid');
+      const msg = err.response?.data?.error;
+      setError(typeof msg === 'string' ? msg : 'Failed to place bid');
     } finally {
       setLoading(false);
     }

@@ -18,7 +18,7 @@ export default function LoginPage() {
       await login(email, password);
       navigate('/listings');
     } catch (err: any) {
-      setError(err.message);
+      setError(typeof err?.message === 'string' ? err.message : 'Login failed');
     }
   };
 
