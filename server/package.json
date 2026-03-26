@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "tsx watch src/index.ts",
+    "dev": "ts-node src/index.ts",
     "seed": "tsx src/seed.ts",
     "db:generate": "drizzle-kit generate",
     "db:push": "drizzle-kit push",
