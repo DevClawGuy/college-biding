@@ -6,7 +6,7 @@ import bcrypt from 'bcryptjs';
 import { v4 as uuidv4 } from 'uuid';
 
 const client = createClient({
-  url: process.env.DATABASE_URL || 'file:./dormbid.db',
+  url: process.env.DATABASE_URL || 'file:./houserush.db',
 });
 
 const db = drizzle(client, { schema });

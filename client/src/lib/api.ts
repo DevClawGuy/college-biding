@@ -5,7 +5,7 @@ const api = axios.create({
 });
 
 api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('dormbid_token');
+  const token = localStorage.getItem('houserush_token');
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
@@ -16,8 +16,8 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401 || error.response?.status === 403) {
-      localStorage.removeItem('dormbid_token');
-      localStorage.removeItem('dormbid_user');
+      localStorage.removeItem('houserush_token');
+      localStorage.removeItem('houserush_user');
       if (window.location.pathname !== '/login') {
         window.location.href = '/login';
       }

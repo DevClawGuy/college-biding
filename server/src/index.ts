@@ -67,5 +67,5 @@ io.on('connection', (socket) => {
 
 const PORT = process.env.PORT || 3001;
 server.listen(Number(PORT), '0.0.0.0', () => {
-  console.log(`DormBid server running on http://0.0.0.0:${PORT}`);
+  console.log(`HouseRush server running on http://0.0.0.0:${PORT}`);
 });

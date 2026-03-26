@@ -34,16 +34,16 @@ interface AuthState {
 }
 
 export const useAuthStore = create<AuthState>((set) => ({
-  user: JSON.parse(localStorage.getItem('dormbid_user') || 'null'),
-  token: localStorage.getItem('dormbid_token'),
+  user: JSON.parse(localStorage.getItem('houserush_user') || 'null'),
+  token: localStorage.getItem('houserush_token'),
   isLoading: false,
 
   login: async (email, password) => {
     set({ isLoading: true });
     try {
       const { data } = await api.post('/auth/login', { email, password });
-      localStorage.setItem('dormbid_token', data.token);
-      localStorage.setItem('dormbid_user', JSON.stringify(data.user));
+      localStorage.setItem('houserush_token', data.token);
+      localStorage.setItem('houserush_user', JSON.stringify(data.user));
       set({ user: data.user, token: data.token, isLoading: false });
     } catch (error: any) {
       set({ isLoading: false });
@@ -55,8 +55,8 @@ export const useAuthStore = create<AuthState>((set) => ({
     set({ isLoading: true });
     try {
       const { data } = await api.post('/auth/signup', signupData);
-      localStorage.setItem('dormbid_token', data.token);
-      localStorage.setItem('dormbid_user', JSON.stringify(data.user));
+      localStorage.setItem('houserush_token', data.token);
+      localStorage.setItem('houserush_user', JSON.stringify(data.user));
       set({ user: data.user, token: data.token, isLoading: false });
     } catch (error: any) {
       set({ isLoading: false });
@@ -65,21 +65,21 @@ export const useAuthStore = create<AuthState>((set) => ({
   },
 
   logout: () => {
-    localStorage.removeItem('dormbid_token');
-    localStorage.removeItem('dormbid_user');
+    localStorage.removeItem('houserush_token');
+    localStorage.removeItem('houserush_user');
     set({ user: null, token: null });
   },
 
   loadUser: async () => {
-    const token = localStorage.getItem('dormbid_token');
+    const token = localStorage.getItem('houserush_token');
     if (!token) return;
     try {
       const { data } = await api.get('/auth/me');
-      localStorage.setItem('dormbid_user', JSON.stringify(data));
+      localStorage.setItem('houserush_user', JSON.stringify(data));
       set({ user: data, token });
     } catch {
-      localStorage.removeItem('dormbid_token');
-      localStorage.removeItem('dormbid_user');
+      localStorage.removeItem('houserush_token');
+      localStorage.removeItem('houserush_user');
       set({ user: null, token: null });
     }
   },

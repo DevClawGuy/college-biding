@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'dormbid-secret-key-change-in-production';
+const JWT_SECRET = process.env.JWT_SECRET || 'houserush-secret-key-change-in-production';
 
 export interface AuthRequest extends Request {
   userId?: string;

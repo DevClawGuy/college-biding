@@ -28,7 +28,7 @@ export default function LoginPage() {
         <Link to="/" className="flex items-center justify-center gap-2 mb-8">
           <Home className="w-7 h-7 text-electric-500" />
           <span className="text-2xl font-bold bg-gradient-to-r from-navy-800 to-electric-600 bg-clip-text text-transparent">
-            DormBid
+            HouseRush
           </span>
         </Link>
 

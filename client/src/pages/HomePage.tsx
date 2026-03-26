@@ -30,11 +30,11 @@ export default function HomePage() {
             className="text-center max-w-3xl mx-auto"
           >
             <h1 className="text-4xl md:text-6xl font-bold mb-6 leading-tight">
-              Bid on Your
-              <span className="bg-gradient-to-r from-electric-400 to-electric-300 bg-clip-text text-transparent"> Dream Dorm</span>
+              Find Your
+              <span className="bg-gradient-to-r from-electric-400 to-electric-300 bg-clip-text text-transparent"> Off-Campus Home</span>
             </h1>
             <p className="text-lg md:text-xl text-gray-300 mb-8 max-w-2xl mx-auto">
-              The first real-time auction platform for student housing. Find apartments near campus, place competitive bids, and win your perfect home.
+              The fastest way to secure off-campus student housing. Browse verified homes near your campus, place bids, and move in with confidence.
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
               <Link
@@ -76,7 +76,7 @@ export default function HomePage() {
 
       {/* Features */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 py-20">
-        <h2 className="text-3xl font-bold text-center mb-12 text-gray-900">How DormBid Works</h2>
+        <h2 className="text-3xl font-bold text-center mb-12 text-gray-900">How HouseRush Works</h2>
         <div className="grid md:grid-cols-3 gap-8">
           {[
             { icon: Search, title: 'Browse Listings', desc: 'Find apartments and rooms near your campus. Filter by price, size, distance, and amenities.' },
@@ -129,7 +129,7 @@ export default function HomePage() {
       {/* Footer */}
       <footer className="bg-gray-900 text-gray-400 py-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 text-center text-sm">
-          <p>&copy; 2026 DormBid. The smart way to find student housing.</p>
+          <p>&copy; 2026 HouseRush. The smart way to find student housing.</p>
         </div>
       </footer>
     </div>

@@ -1,5 +1,5 @@
 {
-  "name": "server",
+  "name": "houserush-server",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",

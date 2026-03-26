@@ -1,6 +1,6 @@
-# DormBid - Real-Time Student Housing Auction Platform
+# HouseRush - Off-Campus Student Housing Platform
 
-A full-stack real estate bidding web app for college students. Browse apartments near campus, place competitive bids in real-time, and win your perfect home.
+A full-stack real estate bidding web app for college students. The fastest way to secure off-campus student housing. Browse verified homes near your campus, place bids, and move in with confidence.
 
 ## Tech Stack
 

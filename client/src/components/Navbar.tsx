@@ -31,7 +31,7 @@ export default function Navbar() {
           <Link to="/" className="flex items-center gap-2 font-bold text-xl">
             <Home className="w-6 h-6 text-electric-400" />
             <span className="bg-gradient-to-r from-electric-400 to-electric-300 bg-clip-text text-transparent">
-              DormBid
+              HouseRush
             </span>
           </Link>
 
