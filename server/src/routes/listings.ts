@@ -3,7 +3,6 @@ import crypto from 'crypto';
 import { db, schema } from '../db';
 import { eq, and, like, gte, lte, asc, desc, sql } from 'drizzle-orm';
 import { authenticateToken, AuthRequest } from '../middleware/auth';
-import { getUploadMiddleware } from '../lib/cloudinary';
 
 const router = Router();
 
@@ -85,37 +84,6 @@ router.get('/:id', async (req: Request, res: Response) => {
     }
 
     res.json({ ...parseListing(listing), landlord, winner });
-  } catch (error) {
-    res.status(500).json({ error: 'Internal server error' });
-  }
-});
-
-// Upload images (landlord only)
-router.post('/upload-images', authenticateToken, (req: AuthRequest, res: Response) => {
-  try {
-    const upload = getUploadMiddleware();
-    if (!upload) {
-      res.status(500).json({ error: 'Image upload not configured. Set CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, and CLOUDINARY_API_SECRET.' });
-      return;
-    }
-
-    upload.array('images', 10)(req as any, res as any, (err: any) => {
-      if (err) {
-        console.error('Upload error:', err);
-        res.status(400).json({ error: typeof err?.message === 'string' ? err.message : 'Upload failed' });
-        return;
-      }
-      const files = (req as any).files as any[];
-      if (!files || files.length === 0) {
-        res.status(400).json({ error: 'No images uploaded' });
-        return;
-      }
-      const images = files.map((f: any) => ({
-        url: f.path || f.secure_url || f.url,
-        publicId: f.filename || f.public_id,
-      }));
-      res.json(images);
-    });
   } catch (error) {
     res.status(500).json({ error: 'Internal server error' });
   }

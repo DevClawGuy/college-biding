@@ -176,7 +176,7 @@ export default function DashboardPage() {
                favorites.map(listing => (
                 <Link key={listing.id} to={`/listing/${listing.id}`}
                   className="flex items-center gap-4 bg-white rounded-2xl p-4 card-shadow hover:card-shadow-hover transition-all border border-slate-100 group">
-                  <img src={listing.photos[0]} alt="" className="w-20 h-20 rounded-xl object-cover bg-slate-100" />
+                  <img src={listing.photos?.[0] || 'https://picsum.photos/200/200?grayscale'} alt="" className="w-20 h-20 rounded-xl object-cover bg-slate-100" />
                   <div className="flex-1 min-w-0">
                     <h3 className="font-semibold text-slate-900 truncate group-hover:text-brand-600 transition-colors">{listing.title}</h3>
                     <p className="text-sm text-slate-500 mt-0.5">${listing.currentBid.toLocaleString()}/mo &middot; {listing.bidCount} bids</p>
