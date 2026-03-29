@@ -13,35 +13,45 @@ import favoriteRoutes from './routes/favorites';
 
 const app = express();
 const server = createServer(app);
+
 const allowedOrigins = [
   'http://localhost:5173',
   'http://localhost:3000',
   'https://houserush.vercel.app',
+  'https://college-biding.vercel.app',
   process.env.CLIENT_URL,
 ].filter(Boolean) as string[];
+
+const corsOptions = {
+  origin: allowedOrigins,
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+};
+
+// CORS must be the VERY FIRST middleware
+app.options('*', cors(corsOptions));
+app.use(cors(corsOptions));
+
+// Then everything else
+app.use(express.json());
+
+// Health check (before auth routes)
+app.get('/health', (_req, res) => {
+  res.json({ status: 'ok' });
+});
+
+app.use('/uploads', express.static(path.join(__dirname, '..', 'uploads')));
 
 const io = new SocketServer(server, {
   cors: {
     origin: allowedOrigins,
-    methods: ['GET', 'POST'],
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   },
 });
 
 // Set socket.io instance for bids
 setBidSocket(io);
-
-// Health check (before any auth middleware)
-app.get('/health', (_req, res) => {
-  res.json({ status: 'ok' });
-});
-
-// Middleware
-app.use(cors({
-  origin: allowedOrigins,
-  credentials: true,
-}));
-app.use(express.json());
-app.use('/uploads', express.static(path.join(__dirname, '..', 'uploads')));
 
 // Routes
 app.use('/api/auth', authRoutes);
