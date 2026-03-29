@@ -1,4 +1,5 @@
 import { createClient } from '@libsql/client';
+import { getClientConfig } from './index';
 
 const TABLE_STATEMENTS = [
   `CREATE TABLE IF NOT EXISTS users (
@@ -73,10 +74,10 @@ const TABLE_STATEMENTS = [
 ];
 
 export async function initializeDatabase(): Promise<void> {
-  const url = process.env.DATABASE_URL || 'file:./houserush.db';
-  console.log('Initializing database with URL:', url.startsWith('file:') ? url : url.substring(0, 30) + '...');
+  const config = getClientConfig();
+  console.log('Initializing database with URL:', config.url.substring(0, 45) + '...');
 
-  const client = createClient({ url });
+  const client = createClient(config);
 
   for (const sql of TABLE_STATEMENTS) {
     try {

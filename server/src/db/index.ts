@@ -5,11 +5,21 @@ import * as schema from './schema';
 let client: Client | null = null;
 let database: LibSQLDatabase<typeof schema> | null = null;
 
+export function getClientConfig() {
+  if (process.env.TURSO_DATABASE_URL) {
+    return {
+      url: process.env.TURSO_DATABASE_URL,
+      authToken: process.env.TURSO_AUTH_TOKEN,
+    };
+  }
+  return { url: process.env.DATABASE_URL || 'file:./houserush.db' };
+}
+
 function getClient(): Client {
   if (!client) {
-    const url = process.env.DATABASE_URL || 'file:./houserush.db';
-    console.log('Creating LibSQL client with URL:', url.startsWith('file:') ? url : url.substring(0, 40) + '...');
-    client = createClient({ url });
+    const config = getClientConfig();
+    console.log('Creating LibSQL client with URL:', config.url.substring(0, 45) + '...');
+    client = createClient(config);
   }
   return client;
 }

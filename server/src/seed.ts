@@ -1,14 +1,12 @@
 import { createClient } from '@libsql/client';
 import { drizzle } from 'drizzle-orm/libsql';
 import * as schema from './db/schema';
+import { getClientConfig } from './db/index';
 import { eq } from 'drizzle-orm';
 import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
 
-const client = createClient({
-  url: process.env.DATABASE_URL || 'file:./houserush.db',
-});
-
+const client = createClient(getClientConfig());
 const db = drizzle(client, { schema });
 
 async function seed() {
