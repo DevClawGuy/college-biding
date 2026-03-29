@@ -1,6 +1,7 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { useEffect } from 'react';
 import Navbar from './components/Navbar';
+import Footer from './components/Footer';
 import HomePage from './pages/HomePage';
 import LoginPage from './pages/LoginPage';
 import SignupPage from './pages/SignupPage';
@@ -11,6 +12,10 @@ import CreateListingPage from './pages/CreateListingPage';
 import VerifyEmailPage from './pages/VerifyEmailPage';
 import AdminPage from './pages/AdminPage';
 import ProfilePage from './pages/ProfilePage';
+import TermsPage from './pages/TermsPage';
+import PrivacyPage from './pages/PrivacyPage';
+import HowItWorksPage from './pages/HowItWorksPage';
+import ContactPage from './pages/ContactPage';
 import { useAuthStore } from './store/authStore';
 import { getSocket } from './lib/socket';
 
@@ -45,8 +50,13 @@ function AppContent() {
               <Route path="/create-listing" element={<CreateListingPage />} />
               <Route path="/admin" element={<AdminPage />} />
               <Route path="/profile" element={<ProfilePage />} />
+              <Route path="/terms" element={<TermsPage />} />
+              <Route path="/privacy" element={<PrivacyPage />} />
+              <Route path="/how-it-works" element={<HowItWorksPage />} />
+              <Route path="/contact" element={<ContactPage />} />
             </Routes>
           </main>
+          <Footer />
         </div>
       } />
     </Routes>

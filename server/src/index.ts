@@ -11,6 +11,7 @@ import bidRoutes, { setBidSocket } from './routes/bids';
 import notificationRoutes from './routes/notifications';
 import favoriteRoutes from './routes/favorites';
 import adminRoutes from './routes/admin';
+import contactRoutes from './routes/contact';
 import { setAuctionSocket, startAuctionCloseJob } from './jobs/auctionClose';
 
 // Prevent crashes from killing the process
@@ -68,6 +69,7 @@ app.use('/api/bids', bidRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/favorites', favoriteRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/contact', contactRoutes);
 
 app.get('/api/health', (_req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });

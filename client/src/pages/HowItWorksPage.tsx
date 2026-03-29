@@ -1,0 +1,109 @@
+import { Link } from 'react-router-dom';
+import { UserPlus, Search, TrendingUp, Trophy, FileText, Building, Clock, DollarSign, Shield, Users, Eye, Zap } from 'lucide-react';
+
+const studentSteps = [
+  { icon: UserPlus, title: 'Create Your Free Account', desc: 'Sign up with your .edu email to get a verified student badge. It takes less than a minute.' },
+  { icon: Search, title: 'Browse Verified Listings', desc: 'Explore apartments, houses, and studios near Monmouth University. Filter by price, bedrooms, town, and amenities.' },
+  { icon: TrendingUp, title: 'Place Your Bid', desc: 'Found a place you love? Bid at least $25 above the current highest bid. Set up auto-bid to stay competitive automatically.' },
+  { icon: Trophy, title: 'Win the Auction', desc: 'When the auction closes, the highest bidder wins. You\'ll receive a notification and the landlord\'s contact info.' },
+  { icon: FileText, title: 'Sign Your Lease & Move In', desc: 'Connect with the landlord, finalize your lease, and move into your new off-campus home.' },
+];
+
+const landlordSteps = [
+  { icon: Building, title: 'Post Your Listing', desc: 'Sign up as a landlord, then create a listing with photos, description, amenities, and address.' },
+  { icon: DollarSign, title: 'Set Your Price & Auction Date', desc: 'Choose a starting bid and an auction end date. Students will compete to offer you the best monthly rent.' },
+  { icon: Clock, title: 'Watch Students Compete', desc: 'Bids come in real-time. Our anti-snipe feature extends auctions if last-minute bids arrive.' },
+  { icon: Users, title: 'Receive Winner Details', desc: 'When the auction closes, you get the winner\'s name, email, and phone number to finalize the lease.' },
+  { icon: FileText, title: 'Sign the Lease', desc: 'Contact the winning student, sign the lease agreement, and welcome your new tenant.' },
+];
+
+const whyReasons = [
+  { icon: TrendingUp, title: 'Fair Market Pricing', desc: 'Competitive bidding ensures rent reflects real demand — no overpaying, no guesswork.' },
+  { icon: Shield, title: 'Verified Student Bidders', desc: 'Every .edu email is verified. Landlords can trust that bidders are real students.' },
+  { icon: Eye, title: 'Real-Time Transparency', desc: 'See every bid as it happens. Full bid history is visible to all participants.' },
+  { icon: Zap, title: 'Free for Students', desc: 'Creating an account, browsing listings, and placing bids is completely free for students.' },
+];
+
+export default function HowItWorksPage() {
+  return (
+    <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-16">
+      {/* Header */}
+      <div className="text-center mb-14">
+        <h1 className="text-3xl sm:text-4xl font-bold text-slate-900 tracking-tight">How HouseRush Works</h1>
+        <p className="text-slate-500 mt-3 max-w-xl mx-auto">The fastest way to secure off-campus student housing near Monmouth University.</p>
+      </div>
+
+      {/* For Students */}
+      <section className="mb-16">
+        <div className="flex items-center gap-3 mb-8">
+          <div className="w-10 h-10 bg-brand-50 rounded-xl flex items-center justify-center">
+            <Users className="w-5 h-5 text-brand-600" />
+          </div>
+          <h2 className="text-2xl font-bold text-slate-900">For Students</h2>
+        </div>
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+          {studentSteps.map((step, i) => (
+            <div key={step.title} className="bg-white rounded-2xl p-6 card-shadow border border-slate-100 relative">
+              <div className="absolute top-5 right-5 text-3xl font-black text-slate-100">{String(i + 1).padStart(2, '0')}</div>
+              <div className="w-10 h-10 bg-brand-50 rounded-xl flex items-center justify-center mb-4">
+                <step.icon className="w-5 h-5 text-brand-600" />
+              </div>
+              <h3 className="font-semibold text-slate-900 mb-2">{step.title}</h3>
+              <p className="text-sm text-slate-500 leading-relaxed">{step.desc}</p>
+            </div>
+          ))}
+        </div>
+        <div className="text-center mt-8">
+          <Link to="/signup" className="inline-block bg-brand-600 hover:bg-brand-700 text-white px-8 py-3 rounded-xl font-semibold transition-all hover:shadow-lg hover:shadow-brand-600/20">
+            Create Free Student Account
+          </Link>
+        </div>
+      </section>
+
+      {/* For Landlords */}
+      <section className="mb-16">
+        <div className="flex items-center gap-3 mb-8">
+          <div className="w-10 h-10 bg-slate-100 rounded-xl flex items-center justify-center">
+            <Building className="w-5 h-5 text-slate-600" />
+          </div>
+          <h2 className="text-2xl font-bold text-slate-900">For Landlords</h2>
+        </div>
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+          {landlordSteps.map((step, i) => (
+            <div key={step.title} className="bg-white rounded-2xl p-6 card-shadow border border-slate-100 relative">
+              <div className="absolute top-5 right-5 text-3xl font-black text-slate-100">{String(i + 1).padStart(2, '0')}</div>
+              <div className="w-10 h-10 bg-slate-100 rounded-xl flex items-center justify-center mb-4">
+                <step.icon className="w-5 h-5 text-slate-600" />
+              </div>
+              <h3 className="font-semibold text-slate-900 mb-2">{step.title}</h3>
+              <p className="text-sm text-slate-500 leading-relaxed">{step.desc}</p>
+            </div>
+          ))}
+        </div>
+        <div className="text-center mt-8">
+          <Link to="/signup" className="inline-block bg-slate-900 hover:bg-slate-800 text-white px-8 py-3 rounded-xl font-semibold transition-all">
+            Create Landlord Account
+          </Link>
+        </div>
+      </section>
+
+      {/* Why HouseRush */}
+      <section>
+        <div className="text-center mb-8">
+          <h2 className="text-2xl font-bold text-slate-900">Why HouseRush?</h2>
+        </div>
+        <div className="grid sm:grid-cols-2 gap-5">
+          {whyReasons.map((r) => (
+            <div key={r.title} className="bg-gradient-to-br from-brand-50 to-white rounded-2xl p-6 border border-brand-100">
+              <div className="w-10 h-10 bg-brand-100 rounded-xl flex items-center justify-center mb-4">
+                <r.icon className="w-5 h-5 text-brand-700" />
+              </div>
+              <h3 className="font-semibold text-slate-900 mb-2">{r.title}</h3>
+              <p className="text-sm text-slate-500 leading-relaxed">{r.desc}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+    </div>
+  );
+}

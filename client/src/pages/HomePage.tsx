@@ -165,41 +165,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="bg-slate-900 text-slate-400 border-t border-slate-800">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-          <div className="grid md:grid-cols-4 gap-8">
-            <div className="md:col-span-2">
-              <div className="flex items-center gap-2.5 mb-3">
-                <div className="w-7 h-7 bg-gradient-to-br from-brand-400 to-brand-600 rounded-lg flex items-center justify-center">
-                  <Zap className="w-3.5 h-3.5 text-white" />
-                </div>
-                <span className="text-lg font-bold text-white">HouseRush</span>
-              </div>
-              <p className="text-sm leading-relaxed max-w-xs">The fastest way to secure off-campus student housing. Trusted by students at top universities nationwide.</p>
-            </div>
-            <div>
-              <h4 className="text-sm font-semibold text-white mb-3">Platform</h4>
-              <ul className="space-y-2 text-sm">
-                <li><Link to="/listings" className="hover:text-white transition-colors">Browse Listings</Link></li>
-                <li><Link to="/signup" className="hover:text-white transition-colors">Create Account</Link></li>
-                <li><Link to="/login" className="hover:text-white transition-colors">Sign In</Link></li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="text-sm font-semibold text-white mb-3">Company</h4>
-              <ul className="space-y-2 text-sm">
-                <li><span className="hover:text-white transition-colors cursor-pointer">About</span></li>
-                <li><span className="hover:text-white transition-colors cursor-pointer">Privacy</span></li>
-                <li><span className="hover:text-white transition-colors cursor-pointer">Terms</span></li>
-              </ul>
-            </div>
-          </div>
-          <div className="border-t border-slate-800 mt-10 pt-6 text-center text-sm">
-            <p>&copy; 2026 HouseRush. The smart way to find student housing.</p>
-          </div>
-        </div>
-      </footer>
+      {/* Footer is rendered globally in App layout */}
     </div>
   );
 }
