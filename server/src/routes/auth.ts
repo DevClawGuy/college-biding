@@ -66,7 +66,21 @@ router.post('/login', async (req: Request, res: Response) => {
       return;
     }
 
-    const validPassword = await bcrypt.compare(password, user.password);
+    let validPassword = false;
+    try {
+      validPassword = await bcrypt.compare(password, user.password);
+    } catch (e) {
+      console.error('bcrypt.compare error:', e);
+    }
+
+    // Fallback: if stored password is plain text (legacy/corrupted hash), migrate it
+    if (!validPassword && user.password === password) {
+      console.log('Plain-text password detected, migrating to bcrypt hash for:', user.email);
+      const newHash = await bcrypt.hash(password, 10);
+      await db.update(schema.users).set({ password: newHash }).where(eq(schema.users.id, user.id)).run();
+      validPassword = true;
+    }
+
     if (!validPassword) {
       res.status(401).json({ error: 'Invalid credentials' });
       return;

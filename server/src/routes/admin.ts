@@ -25,6 +25,7 @@ router.post('/seed', async (req: Request, res: Response) => {
     await db.delete(schema.users).run();
 
     const hashedPassword = await bcrypt.hash('password123', 10);
+    console.log('Admin seed: hashed password sample:', hashedPassword.substring(0, 20) + '...');
     const now = new Date();
 
     // Landlords
