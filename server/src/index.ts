@@ -10,6 +10,7 @@ import listingRoutes from './routes/listings';
 import bidRoutes, { setBidSocket } from './routes/bids';
 import notificationRoutes from './routes/notifications';
 import favoriteRoutes from './routes/favorites';
+import adminRoutes from './routes/admin';
 
 // Prevent crashes from killing the process
 process.on('uncaughtException', (err) => {
@@ -64,6 +65,7 @@ app.use('/api/listings', listingRoutes);
 app.use('/api/bids', bidRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/favorites', favoriteRoutes);
+app.use('/api/admin', adminRoutes);
 
 app.get('/api/health', (_req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
