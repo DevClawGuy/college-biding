@@ -1,7 +1,7 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
 import { Search, LayoutDashboard, PlusCircle, Bell, LogOut, Menu, X, Zap } from 'lucide-react';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import api from '../lib/api';
 
 export default function Navbar() {
@@ -17,13 +17,28 @@ export default function Navbar() {
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
-  useEffect(() => {
-    if (user) {
-      api.get('/notifications').then(({ data }) => {
-        setUnreadCount(data.filter((n: any) => !n.read).length);
-      }).catch(() => {});
-    }
+  const fetchUnreadCount = useCallback(() => {
+    if (!user) return;
+    api.get('/notifications/unread-count').then(({ data }) => {
+      setUnreadCount(data.count ?? 0);
+    }).catch(() => {});
   }, [user]);
+
+  // Fetch on mount + poll every 30s
+  useEffect(() => {
+    if (!user) { setUnreadCount(0); return; }
+    fetchUnreadCount();
+    const interval = setInterval(fetchUnreadCount, 30_000);
+    return () => clearInterval(interval);
+  }, [user, fetchUnreadCount]);
+
+  const handleBellClick = () => {
+    navigate('/dashboard?tab=notifications');
+    // Mark all read when navigating to notifications
+    if (unreadCount > 0) {
+      api.put('/notifications/read-all').then(() => setUnreadCount(0)).catch(() => {});
+    }
+  };
 
   const handleLogout = () => {
     logout();
@@ -75,14 +90,14 @@ export default function Navbar() {
           <div className="hidden md:flex items-center gap-3">
             {user ? (
               <>
-                <Link to="/dashboard?tab=notifications" className="relative p-2 text-slate-500 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition-all">
+                <button onClick={handleBellClick} className="relative p-2 text-slate-500 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition-all">
                   <Bell className="w-5 h-5" />
                   {unreadCount > 0 && (
                     <span className="absolute top-1 right-1 w-4 h-4 bg-rose-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center ring-2 ring-white">
                       {unreadCount > 9 ? '9' : unreadCount}
                     </span>
                   )}
-                </Link>
+                </button>
                 <div className="w-px h-6 bg-slate-200" />
                 <div className="flex items-center gap-2.5">
                   <div className="w-8 h-8 rounded-full bg-gradient-to-br from-brand-400 to-brand-600 flex items-center justify-center text-white text-sm font-semibold">

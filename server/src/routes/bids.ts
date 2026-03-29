@@ -158,53 +158,94 @@ router.post('/listing/:listingId', authenticateToken, async (req: AuthRequest, r
   }
 });
 
-async function processAutoBids(listingId: string, currentAmount: number, excludeUserId: string) {
+async function processAutoBids(listingId: string, initialAmount: number, excludeUserId: string) {
+  const MAX_ROUNDS = 20;
+  let currentAmount = initialAmount;
+  let lastBidderId = excludeUserId;
+
   try {
-  const allAutoBids = await db.select()
-    .from(schema.autoBids)
-    .where(and(
-      eq(schema.autoBids.listingId, listingId),
-      eq(schema.autoBids.isActive, true),
-    ));
+    for (let round = 0; round < MAX_ROUNDS; round++) {
+      // Get all active auto-bids for this listing except the last bidder
+      const allAutoBids = await db.select()
+        .from(schema.autoBids)
+        .where(and(
+          eq(schema.autoBids.listingId, listingId),
+          eq(schema.autoBids.isActive, true),
+        ));
 
-  const activeAutoBids = allAutoBids.filter(ab => ab.userId !== excludeUserId && ab.maxAmount > currentAmount);
+      const eligible = allAutoBids
+        .filter(ab => ab.userId !== lastBidderId && ab.maxAmount > currentAmount)
+        .sort((a, b) => b.maxAmount - a.maxAmount);
 
-  if (activeAutoBids.length === 0) return;
+      if (eligible.length === 0) break;
 
-  // Sort by max amount descending
-  activeAutoBids.sort((a, b) => b.maxAmount - a.maxAmount);
+      const topAutoBid = eligible[0];
+      const newAmount = currentAmount + 25;
 
-  const topAutoBid = activeAutoBids[0];
-  const newAmount = currentAmount + 25; // $25 increment
+      if (newAmount > topAutoBid.maxAmount) {
+        // Deactivate this auto-bid — it's exhausted
+        await db.update(schema.autoBids).set({ isActive: false })
+          .where(eq(schema.autoBids.id, topAutoBid.id)).run();
+        break;
+      }
 
-  if (newAmount > topAutoBid.maxAmount) return;
+      // Place the auto-bid
+      const bidId = crypto.randomUUID();
+      const timestamp = new Date().toISOString();
 
-  const bidId = crypto.randomUUID();
-  const timestamp = new Date().toISOString();
+      await db.insert(schema.bids).values({
+        id: bidId,
+        listingId,
+        userId: topAutoBid.userId,
+        amount: newAmount,
+        isAutoBid: true,
+        timestamp,
+      }).run();
 
-  await db.insert(schema.bids).values({
-    id: bidId,
-    listingId,
-    userId: topAutoBid.userId,
-    amount: newAmount,
-    isAutoBid: true,
-    timestamp,
-  }).run();
+      // Update listing
+      const listing = await db.select().from(schema.listings).where(eq(schema.listings.id, listingId)).get();
+      const newBidCount = (listing?.bidCount || 0) + 1;
+      await db.update(schema.listings).set({
+        currentBid: newAmount,
+        bidCount: newBidCount,
+      }).where(eq(schema.listings.id, listingId)).run();
 
-  const listing = await db.select().from(schema.listings).where(eq(schema.listings.id, listingId)).get();
-  await db.update(schema.listings).set({
-    currentBid: newAmount,
-    bidCount: (listing?.bidCount || 0) + 1,
-  }).where(eq(schema.listings.id, listingId)).run();
+      // Emit socket event for real-time update
+      if (io) {
+        io.to(`listing:${listingId}`).emit('bid_update', {
+          listingId,
+          bid: { id: bidId, listingId, userId: topAutoBid.userId, amount: newAmount, isAutoBid: true, timestamp },
+          currentBid: newAmount,
+          bidCount: newBidCount,
+        });
+      }
 
-  if (io) {
-    io.to(`listing:${listingId}`).emit('bid_update', {
-      listingId,
-      bid: { id: bidId, listingId, userId: topAutoBid.userId, amount: newAmount, isAutoBid: true, timestamp },
-      currentBid: newAmount,
-      bidCount: (listing?.bidCount || 0) + 1,
-    });
-  }
+      // Create outbid notification for the person who was just outbid
+      const outbidNotifId = crypto.randomUUID();
+      await db.insert(schema.notifications).values({
+        id: outbidNotifId,
+        userId: lastBidderId,
+        type: 'outbid',
+        message: `You've been outbid on "${listing?.title ?? 'a listing'}". Auto-bid placed: $${newAmount}/mo`,
+        listingId,
+        read: false,
+        createdAt: timestamp,
+      }).run();
+
+      if (io) {
+        io.to(`user:${lastBidderId}`).emit('notification', {
+          id: outbidNotifId, userId: lastBidderId, type: 'outbid',
+          message: `You've been outbid on "${listing?.title ?? 'a listing'}". Auto-bid placed: $${newAmount}/mo`,
+          listingId, read: false, createdAt: timestamp,
+        });
+      }
+
+      // Set up for next round
+      currentAmount = newAmount;
+      lastBidderId = topAutoBid.userId;
+
+      console.log(`  Auto-bid round ${round + 1}: user ${topAutoBid.userId} bid $${newAmount} on ${listingId}`);
+    }
   } catch (error) {
     console.error('processAutoBids error:', error);
   }

@@ -58,7 +58,15 @@ export default function DashboardPage() {
         case 'bids': setBids((await api.get('/bids/my/bids')).data); break;
         case 'listings': setListings((await api.get('/listings/my/listings')).data); break;
         case 'favorites': setFavorites((await api.get('/favorites')).data); break;
-        case 'notifications': setNotifications((await api.get('/notifications')).data); break;
+        case 'notifications': {
+          const notifsData = (await api.get('/notifications')).data;
+          setNotifications(notifsData);
+          // Auto-mark all as read when tab is opened
+          if (notifsData.some((n: any) => !n.read)) {
+            api.put('/notifications/read-all').catch(() => {});
+          }
+          break;
+        }
       }
     } catch { /* */ } finally { setLoading(false); }
   };
