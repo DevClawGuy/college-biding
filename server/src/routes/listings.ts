@@ -18,7 +18,7 @@ function parseListing(l: any) {
 // Get all listings with filters (only approved listings for public browse)
 router.get('/', async (req: Request, res: Response) => {
   try {
-    const { city, university, minPrice, maxPrice, beds, baths, maxDistance, search, sort, status } = req.query;
+    const { city, university, minPrice, maxPrice, beds, baths, maxDistance, search, sort, status, amenities, town, sortBy } = req.query;
     const conditions: any[] = [];
 
     if (status) {
@@ -27,31 +27,45 @@ router.get('/', async (req: Request, res: Response) => {
       conditions.push(eq(schema.listings.status, 'active'));
     }
 
-    // Only show approved listings on public browse
     conditions.push(eq(schema.listings.approvalStatus, 'approved'));
 
-    if (city) conditions.push(like(schema.listings.city, `%${city}%`));
+    // Town filter (alias for city)
+    const townFilter = town || city;
+    if (townFilter) conditions.push(like(schema.listings.city, `%${townFilter}%`));
     if (university) conditions.push(like(schema.listings.nearestUniversity, `%${university}%`));
     if (minPrice) conditions.push(gte(schema.listings.currentBid, Number(minPrice)));
-    if (maxPrice) conditions.push(lte(schema.listings.startingBid, Number(maxPrice)));
+    if (maxPrice) conditions.push(lte(schema.listings.currentBid, Number(maxPrice)));
     if (beds) conditions.push(gte(schema.listings.beds, Number(beds)));
     if (baths) conditions.push(gte(schema.listings.baths, Number(baths)));
     if (maxDistance) conditions.push(lte(schema.listings.distanceToCampus, Number(maxDistance)));
     if (search) {
       conditions.push(
-        sql`(${schema.listings.title} LIKE ${'%' + search + '%'} OR ${schema.listings.address} LIKE ${'%' + search + '%'} OR ${schema.listings.description} LIKE ${'%' + search + '%'})`
+        sql`(LOWER(${schema.listings.title}) LIKE LOWER(${'%' + search + '%'}) OR LOWER(${schema.listings.address}) LIKE LOWER(${'%' + search + '%'}) OR LOWER(${schema.listings.description}) LIKE LOWER(${'%' + search + '%'}))`
       );
+    }
+
+    // Amenities filter: comma-separated, must have ALL specified
+    if (amenities && typeof amenities === 'string') {
+      const requiredAmenities = amenities.split(',').map(a => a.trim()).filter(Boolean);
+      for (const a of requiredAmenities) {
+        conditions.push(like(schema.listings.amenities, `%${a}%`));
+      }
     }
 
     let results;
     const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
+    const sortField = sortBy || sort;
 
-    if (sort === 'ending_soonest') {
+    if (sortField === 'ending_soonest' || sortField === 'ending_soon') {
       results = await db.select().from(schema.listings).where(whereClause).orderBy(asc(schema.listings.auctionEnd));
-    } else if (sort === 'lowest_bid') {
+    } else if (sortField === 'lowest_bid' || sortField === 'price_asc') {
       results = await db.select().from(schema.listings).where(whereClause).orderBy(asc(schema.listings.currentBid));
+    } else if (sortField === 'price_desc') {
+      results = await db.select().from(schema.listings).where(whereClause).orderBy(desc(schema.listings.currentBid));
+    } else if (sortField === 'most_bids') {
+      results = await db.select().from(schema.listings).where(whereClause).orderBy(desc(schema.listings.bidCount));
     } else {
-      results = await db.select().from(schema.listings).where(whereClause).orderBy(desc(schema.listings.createdAt));
+      results = await db.select().from(schema.listings).where(whereClause).orderBy(asc(schema.listings.auctionEnd));
     }
 
     res.json(results.map(parseListing));

@@ -55,7 +55,7 @@ export default function BidModal({ isOpen, onClose, listingId, listingTitle, cur
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+          className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center sm:p-4"
           onClick={onClose}
         >
           <motion.div
@@ -63,7 +63,7 @@ export default function BidModal({ isOpen, onClose, listingId, listingTitle, cur
             animate={{ scale: 1, opacity: 1, y: 0 }}
             exit={{ scale: 0.95, opacity: 0, y: 10 }}
             transition={{ type: 'spring', damping: 25, stiffness: 350 }}
-            className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 border border-slate-100"
+            className="bg-white rounded-t-2xl sm:rounded-2xl shadow-2xl max-w-md w-full p-5 sm:p-6 border border-slate-100 max-h-[90vh] overflow-y-auto"
             onClick={(e) => e.stopPropagation()}
           >
             {success ? (
@@ -98,7 +98,7 @@ export default function BidModal({ isOpen, onClose, listingId, listingTitle, cur
                       type="number"
                       value={bidAmount}
                       onChange={(e) => { setBidAmount(Number(e.target.value)); setError(''); }}
-                      className="w-full pl-10 pr-16 py-3.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 text-lg font-semibold transition-all"
+                      className="w-full pl-10 pr-16 py-4 border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 text-lg font-semibold transition-all min-h-[48px]"
                       min={currentBid + 1}
                     />
                     <span className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 text-sm">/mo</span>

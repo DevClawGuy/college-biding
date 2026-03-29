@@ -100,10 +100,10 @@ export default function Navbar() {
                 </button>
                 <div className="w-px h-6 bg-slate-200" />
                 <Link to="/profile" className="flex items-center gap-2.5 hover:opacity-80 transition-opacity">
-                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-brand-400 to-brand-600 flex items-center justify-center text-white text-sm font-semibold">
+                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-brand-400 to-brand-600 flex items-center justify-center text-white text-sm font-semibold flex-shrink-0">
                     {user.name.charAt(0)}
                   </div>
-                  <div className="text-sm leading-tight">
+                  <div className="text-sm leading-tight hidden lg:block">
                     <p className="font-medium text-slate-900">{user.name.split(' ')[0]}</p>
                     {user.isEduVerified && (
                       <span className="text-[10px] font-semibold text-brand-600 bg-brand-50 px-1.5 py-0.5 rounded-full">.edu verified</span>
