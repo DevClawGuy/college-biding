@@ -99,7 +99,7 @@ export default function LoginPage() {
 
           <div className="mt-5 p-4 bg-slate-50 rounded-xl border border-slate-100 text-xs text-slate-500">
             <p className="font-semibold text-slate-600 mb-1.5">Demo accounts</p>
-            <p>Student: alex.m@bu.edu / password123</p>
+            <p>Student: alex.m@monmouth.edu / password123</p>
             <p>Landlord: sarah.chen@realty.com / password123</p>
           </div>
 
