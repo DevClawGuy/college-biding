@@ -11,6 +11,7 @@ export const users = sqliteTable('users', {
   budgetMin: integer('budget_min'),
   budgetMax: integer('budget_max'),
   avatar: text('avatar'),
+  phone: text('phone'),
   isEduVerified: integer('is_edu_verified', { mode: 'boolean' }).notNull().default(false),
   emailVerificationToken: text('email_verification_token'),
   verificationTokenExpires: integer('verification_token_expires'),

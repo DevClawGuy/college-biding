@@ -10,6 +10,7 @@ import DashboardPage from './pages/DashboardPage';
 import CreateListingPage from './pages/CreateListingPage';
 import VerifyEmailPage from './pages/VerifyEmailPage';
 import AdminPage from './pages/AdminPage';
+import ProfilePage from './pages/ProfilePage';
 import { useAuthStore } from './store/authStore';
 import { getSocket } from './lib/socket';
 
@@ -43,6 +44,7 @@ function AppContent() {
               <Route path="/dashboard" element={<DashboardPage />} />
               <Route path="/create-listing" element={<CreateListingPage />} />
               <Route path="/admin" element={<AdminPage />} />
+              <Route path="/profile" element={<ProfilePage />} />
             </Routes>
           </main>
         </div>

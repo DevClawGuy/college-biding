@@ -200,13 +200,26 @@ router.delete('/:id', authenticateToken, async (req: AuthRequest, res: Response)
   }
 });
 
-// Get landlord's listings (all approval statuses)
+// Get landlord's listings with winner details
 router.get('/my/listings', authenticateToken, async (req: AuthRequest, res: Response) => {
   try {
     const results = await db.select().from(schema.listings)
       .where(eq(schema.listings.landlordId, req.userId!))
       .orderBy(desc(schema.listings.createdAt));
-    res.json(results.map(parseListing));
+
+    const enriched = [];
+    for (const l of results) {
+      let winner = null;
+      if (l.status === 'ended' && l.winnerId) {
+        winner = await db.select({
+          id: schema.users.id, name: schema.users.name,
+          email: schema.users.email, phone: schema.users.phone,
+          university: schema.users.university,
+        }).from(schema.users).where(eq(schema.users.id, l.winnerId)).get();
+      }
+      enriched.push({ ...parseListing(l), winner });
+    }
+    res.json(enriched);
   } catch (error) {
     res.status(500).json({ error: 'Internal server error' });
   }

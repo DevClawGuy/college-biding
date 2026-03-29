@@ -169,7 +169,7 @@ router.get('/me', authenticateToken, async (req: AuthRequest, res: Response) => 
 
 router.put('/me', authenticateToken, async (req: AuthRequest, res: Response) => {
   try {
-    const { name, university, year, budgetMin, budgetMax } = req.body;
+    const { name, university, year, budgetMin, budgetMax, phone } = req.body;
     await db.update(schema.users)
       .set({
         ...(name && { name }),
@@ -177,6 +177,7 @@ router.put('/me', authenticateToken, async (req: AuthRequest, res: Response) => 
         ...(year !== undefined && { year }),
         ...(budgetMin !== undefined && { budgetMin }),
         ...(budgetMax !== undefined && { budgetMax }),
+        ...(phone !== undefined && { phone }),
       })
       .where(eq(schema.users.id, req.userId!))
       .run();

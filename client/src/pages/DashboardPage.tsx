@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useSearchParams, Link, useNavigate } from 'react-router-dom';
-import { Gavel, Home, Heart, Bell, Clock, Trophy, XCircle, Check, ChevronRight } from 'lucide-react';
+import { Gavel, Home, Heart, Bell, Clock, Trophy, XCircle, Check, ChevronRight, Phone, Mail, Trash2 } from 'lucide-react';
 import { useAuthStore } from '../store/authStore';
 import { useCountdown } from '../hooks/useCountdown';
 import api from '../lib/api';
@@ -18,13 +18,11 @@ function BidStatusBadge({ bid, userId }: { bid: any; userId?: string }) {
   const ended = bid.listingStatus === 'ended' || countdown.isExpired;
 
   if (ended) {
-    // If the listing has a winnerId, use it for definitive won/lost
     if (bid.winnerId && userId) {
       return bid.winnerId === userId
         ? <span className="flex items-center gap-1 text-xs font-semibold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-100"><Trophy className="w-3 h-3" /> Won</span>
         : <span className="flex items-center gap-1 text-xs font-semibold text-rose-700 bg-rose-50 px-2.5 py-1 rounded-lg border border-rose-100"><XCircle className="w-3 h-3" /> Lost</span>;
     }
-    // Fallback: compare bid amount
     return isHighestBidder
       ? <span className="flex items-center gap-1 text-xs font-semibold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-100"><Trophy className="w-3 h-3" /> Won</span>
       : <span className="flex items-center gap-1 text-xs font-semibold text-rose-700 bg-rose-50 px-2.5 py-1 rounded-lg border border-rose-100"><XCircle className="w-3 h-3" /> Lost</span>;
@@ -32,6 +30,21 @@ function BidStatusBadge({ bid, userId }: { bid: any; userId?: string }) {
   return isHighestBidder
     ? <span className="flex items-center gap-1 text-xs font-semibold text-brand-700 bg-brand-50 px-2.5 py-1 rounded-lg border border-brand-100"><Clock className="w-3 h-3" /> Winning</span>
     : <span className="flex items-center gap-1 text-xs font-semibold text-amber-700 bg-amber-50 px-2.5 py-1 rounded-lg border border-amber-100"><Clock className="w-3 h-3" /> Outbid</span>;
+}
+
+function ListingStatusBadge({ listing }: { listing: any }) {
+  const countdown = useCountdown(listing.auctionEnd || '');
+  if (listing.status === 'ended') return <span className="text-xs font-medium px-2 py-0.5 rounded-md bg-slate-100 text-slate-600">Closed</span>;
+  if (listing.approvalStatus === 'pending') return <span className="text-xs font-medium px-2 py-0.5 rounded-md bg-amber-50 text-amber-700">Pending Approval</span>;
+  if (listing.approvalStatus === 'rejected') return <span className="text-xs font-medium px-2 py-0.5 rounded-md bg-rose-50 text-rose-700">Rejected</span>;
+  if (countdown.isUrgent) return <span className="text-xs font-medium px-2 py-0.5 rounded-md bg-orange-50 text-orange-700">Ending Soon</span>;
+  return <span className="text-xs font-medium px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-700">Active</span>;
+}
+
+function CountdownText({ endDate }: { endDate: string }) {
+  const countdown = useCountdown(endDate);
+  if (countdown.isExpired) return <span className="text-xs text-slate-400">Ended</span>;
+  return <span className="text-xs text-slate-500"><Clock className="w-3 h-3 inline mr-1" />{countdown.display} left</span>;
 }
 
 export default function DashboardPage() {
@@ -61,14 +74,18 @@ export default function DashboardPage() {
         case 'notifications': {
           const notifsData = (await api.get('/notifications')).data;
           setNotifications(notifsData);
-          // Auto-mark all as read when tab is opened
-          if (notifsData.some((n: any) => !n.read)) {
-            api.put('/notifications/read-all').catch(() => {});
-          }
+          if (notifsData.some((n: any) => !n.read)) api.put('/notifications/read-all').catch(() => {});
           break;
         }
       }
     } catch { /* */ } finally { setLoading(false); }
+  };
+
+  const removeFavorite = async (listingId: string) => {
+    try {
+      await api.delete(`/favorites/${listingId}`);
+      setFavorites(prev => prev.filter(l => l.id !== listingId));
+    } catch { /* */ }
   };
 
   const markAllRead = async () => { await api.put('/notifications/read-all'); setNotifications(p => p.map(n => ({ ...n, read: true }))); };
@@ -91,9 +108,6 @@ export default function DashboardPage() {
               activeTab === id ? 'bg-white shadow-sm text-slate-900' : 'text-slate-500 hover:text-slate-700'
             }`}>
             <Icon className="w-4 h-4" />{label}
-            {id === 'notifications' && notifications.filter(n => !n.read).length > 0 && activeTab !== 'notifications' && (
-              <span className="bg-rose-500 text-white text-[10px] font-bold rounded-full w-5 h-5 flex items-center justify-center">{notifications.filter(n => !n.read).length}</span>
-            )}
           </button>
         ))}
       </div>
@@ -102,18 +116,13 @@ export default function DashboardPage() {
         <div className="space-y-3">
           {[...Array(4)].map((_, i) => (
             <div key={i} className="bg-white rounded-2xl p-5 card-shadow border border-slate-100">
-              <div className="flex gap-4">
-                <div className="w-20 h-20 skeleton rounded-xl" />
-                <div className="flex-1 space-y-2.5">
-                  <div className="h-5 skeleton rounded-lg w-1/3" />
-                  <div className="h-4 skeleton rounded-lg w-1/4" />
-                </div>
-              </div>
+              <div className="flex gap-4"><div className="w-20 h-20 skeleton rounded-xl" /><div className="flex-1 space-y-2.5"><div className="h-5 skeleton rounded-lg w-1/3" /><div className="h-4 skeleton rounded-lg w-1/4" /></div></div>
             </div>
           ))}
         </div>
       ) : (
         <>
+          {/* MY BIDS */}
           {activeTab === 'bids' && (
             <div className="space-y-3">
               {bids.length === 0 ? <EmptyState icon={Gavel} title="No bids yet" desc="Start browsing listings and place your first bid!" /> : bids.map(bid => (
@@ -127,66 +136,95 @@ export default function DashboardPage() {
                   </div>
                   <div className="flex flex-col items-end gap-2.5">
                     <BidStatusBadge bid={bid} userId={user?.id} />
-                    <ChevronRight className="w-4 h-4 text-slate-300 group-hover:text-slate-500 transition-colors" />
+                    <ChevronRight className="w-4 h-4 text-slate-300" />
                   </div>
                 </Link>
               ))}
             </div>
           )}
 
+          {/* MY LISTINGS (Landlord) */}
           {activeTab === 'listings' && (
-            <div className="space-y-3">
+            <div className="space-y-4">
               {user.role !== 'landlord' ? <EmptyState icon={Home} title="Student Account" desc="Switch to a landlord account to create listings." /> :
                listings.length === 0 ? (
                 <EmptyState icon={Home} title="No listings yet" desc="Create your first listing to start receiving bids!">
                   <Link to="/create-listing" className="mt-5 inline-block bg-brand-600 text-white px-6 py-2.5 rounded-xl font-semibold hover:bg-brand-700 transition-all">Create Listing</Link>
                 </EmptyState>
               ) : listings.map(listing => (
+                <div key={listing.id} className="bg-white rounded-2xl card-shadow border border-slate-200 overflow-hidden">
+                  <Link to={`/listing/${listing.id}`} className="flex items-center gap-4 p-4 hover:bg-slate-50/50 transition-colors">
+                    <img src={listing.photos?.[0] || ''} alt="" className="w-24 h-20 rounded-xl object-cover bg-slate-100 flex-shrink-0" />
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-semibold text-slate-900 truncate">{listing.title}</h3>
+                      <p className="text-sm text-slate-500 mt-0.5">{listing.address}, {listing.city}</p>
+                      <div className="flex items-center gap-3 mt-1.5 flex-wrap">
+                        <span className="text-sm font-semibold text-slate-900">${listing.currentBid?.toLocaleString()}/mo</span>
+                        <span className="text-xs text-slate-400">{listing.bidCount} bid{listing.bidCount !== 1 ? 's' : ''}</span>
+                        <ListingStatusBadge listing={listing} />
+                        <CountdownText endDate={listing.auctionEnd} />
+                      </div>
+                    </div>
+                    <ChevronRight className="w-4 h-4 text-slate-300 flex-shrink-0" />
+                  </Link>
+
+                  {/* Winner info for closed auctions */}
+                  {listing.status === 'ended' && listing.winner && (
+                    <div className="px-4 pb-4 pt-0">
+                      <div className="bg-emerald-50 border border-emerald-100 rounded-xl p-3.5">
+                        <p className="text-xs font-semibold text-emerald-700 mb-2 flex items-center gap-1"><Trophy className="w-3.5 h-3.5" /> Auction Winner</p>
+                        <p className="text-sm font-medium text-slate-900">{listing.winner.name}</p>
+                        <div className="flex flex-wrap items-center gap-3 mt-1 text-xs text-slate-600">
+                          <a href={`mailto:${listing.winner.email}`} className="flex items-center gap-1 text-brand-600 hover:underline"><Mail className="w-3 h-3" />{listing.winner.email}</a>
+                          {listing.winner.phone && <span className="flex items-center gap-1"><Phone className="w-3 h-3" />{listing.winner.phone}</span>}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Delete button for listings with no bids */}
+                  {listing.status === 'active' && listing.bidCount === 0 && (
+                    <div className="px-4 pb-3 pt-0">
+                      <button onClick={async () => { if (confirm('Delete this listing?')) { try { await api.delete(`/listings/${listing.id}`); fetchTabData(); } catch {} } }}
+                        className="text-xs text-rose-400 hover:text-rose-600 font-medium transition-colors flex items-center gap-1">
+                        <Trash2 className="w-3 h-3" /> Delete listing
+                      </button>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* FAVORITES */}
+          {activeTab === 'favorites' && (
+            <div className="space-y-3">
+              {favorites.length === 0 ? <EmptyState icon={Heart} title="No saved listings" desc="Heart listings to save them here for later." /> :
+               favorites.map(listing => (
                 <div key={listing.id} className="flex items-center gap-4 bg-white rounded-2xl p-4 card-shadow hover:card-shadow-hover transition-all border border-slate-100 group">
                   <Link to={`/listing/${listing.id}`} className="flex items-center gap-4 flex-1 min-w-0">
-                    <img src={listing.photos?.[0] || ''} alt="" className="w-20 h-20 rounded-xl object-cover bg-slate-100" />
+                    <img src={listing.photos?.[0] || 'https://picsum.photos/200/200?grayscale'} alt="" className="w-20 h-20 rounded-xl object-cover bg-slate-100" />
                     <div className="flex-1 min-w-0">
                       <h3 className="font-semibold text-slate-900 truncate group-hover:text-brand-600 transition-colors">{listing.title}</h3>
-                      <p className="text-sm text-slate-500 mt-0.5">{listing.bidCount} bids &middot; ${listing.currentBid?.toLocaleString()}/mo</p>
-                      <div className="flex items-center gap-2 mt-1">
-                        <span className={`text-xs font-medium px-2 py-0.5 rounded-md ${listing.status === 'active' ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-500'}`}>
-                          {listing.status === 'active' ? 'Active' : 'Ended'}
-                        </span>
-                        <span className={`text-xs font-medium px-2 py-0.5 rounded-md ${listing.approvalStatus === 'approved' ? 'bg-blue-50 text-blue-700' : listing.approvalStatus === 'rejected' ? 'bg-rose-50 text-rose-700' : 'bg-amber-50 text-amber-700'}`}>
-                          {listing.approvalStatus === 'approved' ? 'Approved' : listing.approvalStatus === 'rejected' ? 'Rejected' : 'Pending Review'}
-                        </span>
+                      <p className="text-sm text-slate-500 mt-0.5">{listing.address}, {listing.city}</p>
+                      <div className="flex items-center gap-3 mt-1">
+                        <span className="text-sm font-semibold text-slate-900">${(listing.currentBid ?? 0).toLocaleString()}/mo</span>
+                        <CountdownText endDate={listing.auctionEnd} />
                       </div>
                     </div>
                   </Link>
-                  <div className="flex flex-col gap-1.5">
-                    <Link to={`/listing/${listing.id}`} className="text-xs text-slate-400 hover:text-brand-600 font-medium transition-colors">View</Link>
-                    {listing.status === 'active' && listing.bidCount === 0 && (
-                      <button onClick={async () => { if (confirm('Delete this listing?')) { try { await api.delete(`/listings/${listing.id}`); fetchTabData(); } catch {} } }}
-                        className="text-xs text-rose-400 hover:text-rose-600 font-medium transition-colors">Delete</button>
-                    )}
+                  <div className="flex flex-col items-center gap-2 flex-shrink-0">
+                    <Link to={`/listing/${listing.id}`} className="text-sm font-semibold text-brand-600 bg-brand-50 hover:bg-brand-100 px-4 py-2 rounded-xl transition-colors">Bid Now</Link>
+                    <button onClick={() => removeFavorite(listing.id)} className="p-1.5 text-slate-300 hover:text-rose-500 transition-colors">
+                      <Heart className="w-4 h-4 fill-current" />
+                    </button>
                   </div>
                 </div>
               ))}
             </div>
           )}
 
-          {activeTab === 'favorites' && (
-            <div className="space-y-3">
-              {favorites.length === 0 ? <EmptyState icon={Heart} title="No saved listings" desc="Heart listings to save them here for later." /> :
-               favorites.map(listing => (
-                <Link key={listing.id} to={`/listing/${listing.id}`}
-                  className="flex items-center gap-4 bg-white rounded-2xl p-4 card-shadow hover:card-shadow-hover transition-all border border-slate-100 group">
-                  <img src={listing.photos?.[0] || 'https://picsum.photos/200/200?grayscale'} alt="" className="w-20 h-20 rounded-xl object-cover bg-slate-100" />
-                  <div className="flex-1 min-w-0">
-                    <h3 className="font-semibold text-slate-900 truncate group-hover:text-brand-600 transition-colors">{listing.title}</h3>
-                    <p className="text-sm text-slate-500 mt-0.5">${listing.currentBid.toLocaleString()}/mo &middot; {listing.bidCount} bids</p>
-                  </div>
-                  <ChevronRight className="w-4 h-4 text-slate-300 group-hover:text-slate-500 transition-colors" />
-                </Link>
-              ))}
-            </div>
-          )}
-
+          {/* NOTIFICATIONS */}
           {activeTab === 'notifications' && (
             <div>
               {notifications.length > 0 && (

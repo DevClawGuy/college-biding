@@ -99,7 +99,7 @@ export default function Navbar() {
                   )}
                 </button>
                 <div className="w-px h-6 bg-slate-200" />
-                <div className="flex items-center gap-2.5">
+                <Link to="/profile" className="flex items-center gap-2.5 hover:opacity-80 transition-opacity">
                   <div className="w-8 h-8 rounded-full bg-gradient-to-br from-brand-400 to-brand-600 flex items-center justify-center text-white text-sm font-semibold">
                     {user.name.charAt(0)}
                   </div>
@@ -109,10 +109,10 @@ export default function Navbar() {
                       <span className="text-[10px] font-semibold text-brand-600 bg-brand-50 px-1.5 py-0.5 rounded-full">.edu verified</span>
                     )}
                   </div>
+                </Link>
                   <button onClick={handleLogout} className="p-1.5 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-all">
                     <LogOut className="w-4 h-4" />
                   </button>
-                </div>
               </>
             ) : (
               <>
