@@ -16,7 +16,13 @@ export default function SignupPage() {
   const { signup, isLoading } = useAuthStore();
   const navigate = useNavigate();
 
-  const update = (field: string, value: any) => setForm(prev => ({ ...prev, [field]: value }));
+  const update = (field: string, value: any) => {
+    if (field === 'role') {
+      setForm(prev => ({ ...prev, role: value, university: value === 'student' ? UNIVERSITY : '' }));
+      return;
+    }
+    setForm(prev => ({ ...prev, [field]: value }));
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -104,7 +110,7 @@ export default function SignupPage() {
               <div className="relative">
                 <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
                 <input type="email" value={form.email} onChange={(e) => update('email', e.target.value)}
-                  className={inputClass} placeholder="you@university.edu" required />
+                  className={inputClass} placeholder={form.role === 'landlord' ? 'you@example.com' : 'you@university.edu'} required />
               </div>
               {form.email.endsWith('.edu') && (
                 <p className="text-emerald-600 text-xs mt-1.5 flex items-center gap-1 font-medium">
