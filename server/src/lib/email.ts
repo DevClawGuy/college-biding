@@ -1,28 +1,34 @@
+import { Resend } from 'resend';
+
+let resend: Resend | null = null;
+
+function getResend(): Resend | null {
+  if (!process.env.RESEND_API_KEY) {
+    return null;
+  }
+  if (!resend) {
+    resend = new Resend(process.env.RESEND_API_KEY);
+  }
+  return resend;
+}
+
 export async function sendEmail(to: string, subject: string, html: string): Promise<boolean> {
-  const apiKey = process.env.RESEND_API_KEY;
-  if (!apiKey) {
+  const client = getResend();
+  if (!client) {
     console.warn('sendEmail: RESEND_API_KEY not set, skipping email to', to);
     return false;
   }
 
   try {
-    const res = await fetch('https://api.resend.com/emails', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${apiKey}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        from: 'HouseRush <onboarding@resend.dev>',
-        to,
-        subject,
-        html,
-      }),
+    const { error } = await client.emails.send({
+      from: 'HouseRush <onboarding@resend.dev>',
+      to,
+      subject,
+      html,
     });
 
-    if (!res.ok) {
-      const body = await res.text();
-      console.error(`sendEmail failed (${res.status}):`, body);
+    if (error) {
+      console.error('sendEmail failed:', error);
       return false;
     }
 
@@ -38,7 +44,7 @@ export function winnerEmailHtml(opts: { address: string; amount: number; listing
   return `
     <div style="font-family: 'Inter', system-ui, sans-serif; max-width: 560px; margin: 0 auto; padding: 40px 24px;">
       <div style="text-align: center; margin-bottom: 32px;">
-        <span style="font-size: 48px;">🎉</span>
+        <span style="font-size: 48px;">&#127881;</span>
         <h1 style="font-size: 24px; font-weight: 700; color: #0f172a; margin: 16px 0 8px;">You Won the Auction!</h1>
         <p style="color: #64748b; font-size: 16px; margin: 0;">Congratulations on securing your new home.</p>
       </div>
