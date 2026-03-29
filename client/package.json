@@ -10,7 +10,9 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@types/canvas-confetti": "^1.9.0",
     "axios": "^1.13.6",
+    "canvas-confetti": "^1.9.4",
     "date-fns": "^4.1.0",
     "framer-motion": "^12.38.0",
     "leaflet": "^1.9.4",

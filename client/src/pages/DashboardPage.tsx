@@ -1,6 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useSearchParams, Link, useNavigate } from 'react-router-dom';
 import { Gavel, Home, Heart, Bell, Clock, Trophy, XCircle, Check, ChevronRight, Phone, Mail, Trash2 } from 'lucide-react';
+import confetti from 'canvas-confetti';
 import { useAuthStore } from '../store/authStore';
 import { useCountdown } from '../hooks/useCountdown';
 import api from '../lib/api';
@@ -58,6 +59,7 @@ export default function DashboardPage() {
   const [favorites, setFavorites] = useState<any[]>([]);
   const [notifications, setNotifications] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const winConfettiFired = useRef(false);
 
   useEffect(() => {
     if (!user) { navigate('/login'); return; }
@@ -68,7 +70,15 @@ export default function DashboardPage() {
     setLoading(true);
     try {
       switch (activeTab) {
-        case 'bids': setBids((await api.get('/bids/my/bids')).data); break;
+        case 'bids': {
+          const bidsData = (await api.get('/bids/my/bids')).data;
+          setBids(bidsData);
+          if (!winConfettiFired.current && user) {
+            const hasWon = bidsData.some((b: any) => (b.listingStatus === 'ended' && b.winnerId === user.id) || (b.listingStatus === 'ended' && b.amount >= (b.currentBid || 0)));
+            if (hasWon) { winConfettiFired.current = true; setTimeout(() => confetti({ particleCount: 80, spread: 60, origin: { y: 0.7 } }), 500); }
+          }
+          break;
+        }
         case 'listings': setListings((await api.get('/listings/my/listings')).data); break;
         case 'favorites': setFavorites((await api.get('/favorites')).data); break;
         case 'notifications': {

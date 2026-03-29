@@ -1,8 +1,9 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { MapPin, Bed, Bath, Ruler, Clock, Heart, ChevronLeft, ChevronRight, GraduationCap, Check } from 'lucide-react';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import { motion } from 'framer-motion';
+import confetti from 'canvas-confetti';
 import { useCountdown } from '../hooks/useCountdown';
 import { useAuthStore } from '../store/authStore';
 import { getSocket } from '../lib/socket';
@@ -29,9 +30,33 @@ export default function ListingDetailPage() {
   const [bidPulse, setBidPulse] = useState(false);
   const [extensionToast, setExtensionToast] = useState(false);
   const { user } = useAuthStore();
+  const confettiFired = useRef(false);
 
   // ALL hooks must be called before any early return
   const countdown = useCountdown(listing?.auctionEnd ?? '');
+
+  // Dynamic page title and OG meta
+  useEffect(() => {
+    if (!listing) return;
+    document.title = `${listing.title} — HouseRush`;
+    const setMeta = (prop: string, content: string) => {
+      let el = document.querySelector(`meta[property="${prop}"]`);
+      if (!el) { el = document.createElement('meta'); (el as HTMLMetaElement).setAttribute('property', prop); document.head.appendChild(el); }
+      (el as HTMLMetaElement).setAttribute('content', content);
+    };
+    setMeta('og:title', `${listing.title} — HouseRush`);
+    setMeta('og:description', `${listing.beds === 0 ? 'Studio' : listing.beds + 'BR'} at ${listing.address}, ${listing.city}. Current bid: $${(listing.currentBid ?? 0).toLocaleString()}/mo`);
+    return () => { document.title = 'HouseRush - Off-Campus Student Housing'; };
+  }, [listing?.title, listing?.currentBid]);
+
+  // Confetti on win (socket event or page load)
+  useEffect(() => {
+    if (!listing || !user || confettiFired.current) return;
+    if (listing.status === 'ended' && listing.winnerId === user.id) {
+      confettiFired.current = true;
+      setTimeout(() => confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } }), 300);
+    }
+  }, [listing?.status, listing?.winnerId, user?.id]);
 
   const fetchData = useCallback(async () => {
     if (!id) return;
@@ -67,6 +92,10 @@ export default function ListingDetailPage() {
     socket.on('auction_ended', (data) => {
       if (data.listingId === id) {
         setListing((prev: any) => prev ? { ...prev, status: 'ended', winnerId: data.winnerId, winner: data.winnerName ? { name: data.winnerName } : null } : prev);
+        if (user && data.winnerId === user.id && !confettiFired.current) {
+          confettiFired.current = true;
+          setTimeout(() => confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } }), 300);
+        }
       }
     });
     socket.on('auction_extended', (data) => {
@@ -122,6 +151,18 @@ export default function ListingDetailPage() {
       {extensionToast && (
         <div className="mb-4 bg-amber-50 border border-amber-200 text-amber-800 px-4 py-3 rounded-xl text-sm font-medium flex items-center gap-2 animate-pulse">
           <span>⏱</span> Auction extended by 5 minutes due to a last-minute bid!
+        </div>
+      )}
+
+      {/* Ending soon banners */}
+      {listing.status !== 'ended' && !countdown.isExpired && countdown.isUrgent && (
+        <div className="mb-4 bg-rose-50 border border-rose-200 text-rose-700 px-4 py-3 rounded-xl text-sm font-medium flex items-center gap-2 animate-pulse">
+          <span>🔥</span> Auction ending soon! Less than {countdown.minutes > 0 ? `${countdown.minutes} minutes` : `${countdown.seconds} seconds`} remaining — place your bid now!
+        </div>
+      )}
+      {listing.status !== 'ended' && !countdown.isExpired && !countdown.isUrgent && countdown.days === 0 && countdown.hours < 24 && (
+        <div className="mb-4 bg-amber-50 border border-amber-200 text-amber-700 px-4 py-3 rounded-xl text-sm font-medium flex items-center gap-2">
+          <span>⏰</span> Auction ends in {countdown.hours > 0 ? `${countdown.hours} hours` : `${countdown.minutes} minutes`} — don't miss out!
         </div>
       )}
 
@@ -245,24 +286,32 @@ export default function ListingDetailPage() {
             <div className="space-y-2 max-h-80 overflow-y-auto">
               {safeBids.length === 0 ? (
                 <p className="text-slate-500 text-sm">No bids yet. Be the first!</p>
-              ) : safeBids.map((bid: any, i: number) => (
+              ) : safeBids.map((bid: any, i: number) => {
+                const isYou = user && bid.userId === user.id;
+                return (
                 <motion.div key={bid.id ?? i} initial={i === 0 ? { opacity: 0, x: -20 } : false} animate={{ opacity: 1, x: 0 }}
-                  className={`flex items-center justify-between py-3 px-4 rounded-xl ${i === 0 ? 'bg-brand-50 border border-brand-100' : 'bg-white border border-slate-100'}`}>
+                  className={`flex items-center justify-between py-3 px-4 rounded-xl ${isYou ? 'bg-brand-50 border border-brand-200' : i === 0 ? 'bg-brand-50/50 border border-brand-100' : 'bg-white border border-slate-100'}`}>
                   <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 bg-slate-100 rounded-full flex items-center justify-center">
-                      <GraduationCap className="w-4 h-4 text-slate-500" />
+                    <div className={`w-8 h-8 rounded-full flex items-center justify-center ${isYou ? 'bg-brand-100' : 'bg-slate-100'}`}>
+                      {isYou
+                        ? <span className="text-brand-600 text-xs font-bold">You</span>
+                        : <GraduationCap className="w-4 h-4 text-slate-500" />
+                      }
                     </div>
                     <div>
-                      <p className="text-sm font-medium text-slate-900">{bid.userUniversity ? `Student from ${bid.userUniversity}` : (bid.userName ?? 'Anonymous')}</p>
+                      <p className={`text-sm font-medium ${isYou ? 'text-brand-700' : 'text-slate-900'}`}>
+                        {isYou ? (bid.isAutoBid ? 'You (auto-bid)' : 'You') : (bid.userUniversity ? `Student from ${bid.userUniversity}` : (bid.userName ?? 'Anonymous'))}
+                      </p>
                       <p className="text-xs text-slate-400">
                         {bid.timestamp ? new Date(bid.timestamp).toLocaleString() : ''}
-                        {bid.isAutoBid && <span className="ml-1 text-brand-500 font-medium">(auto-bid)</span>}
+                        {!isYou && bid.isAutoBid && <span className="ml-1 text-brand-500 font-medium">(auto-bid)</span>}
                       </p>
                     </div>
                   </div>
-                  <span className="font-bold text-slate-900">${(bid.amount ?? 0).toLocaleString()}</span>
+                  <span className={`font-bold ${isYou ? 'text-brand-700' : 'text-slate-900'}`}>${(bid.amount ?? 0).toLocaleString()}</span>
                 </motion.div>
-              ))}
+                );
+              })}
             </div>
           </div>
         </div>
