@@ -90,6 +90,8 @@ export async function initializeDatabase(): Promise<void> {
   // Migrations: add columns that may not exist on older databases
   const migrations = [
     `ALTER TABLE listings ADD COLUMN winner_id TEXT`,
+    `ALTER TABLE users ADD COLUMN email_verification_token TEXT`,
+    `ALTER TABLE users ADD COLUMN verification_token_expires INTEGER`,
   ];
   for (const sql of migrations) {
     try {

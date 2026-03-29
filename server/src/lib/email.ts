@@ -40,6 +40,26 @@ export async function sendEmail(to: string, subject: string, html: string): Prom
   }
 }
 
+export async function sendVerificationEmail(to: string, token: string): Promise<boolean> {
+  const verifyUrl = `https://houserush.vercel.app/verify-email?token=${token}`;
+  const html = `
+    <div style="font-family: 'Inter', system-ui, sans-serif; max-width: 560px; margin: 0 auto; padding: 40px 24px;">
+      <div style="text-align: center; margin-bottom: 32px;">
+        <span style="font-size: 48px;">&#127891;</span>
+        <h1 style="font-size: 24px; font-weight: 700; color: #0f172a; margin: 16px 0 8px;">Verify Your Student Email</h1>
+        <p style="color: #64748b; font-size: 16px; margin: 0;">Click the button below to verify your .edu email and unlock your verified badge on HouseRush.</p>
+      </div>
+      <div style="text-align: center; margin-bottom: 24px;">
+        <a href="${verifyUrl}" style="display: inline-block; background: #4f46e5; color: white; text-decoration: none; padding: 14px 32px; border-radius: 12px; font-weight: 600; font-size: 15px;">Verify Email</a>
+      </div>
+      <p style="color: #94a3b8; font-size: 13px; text-align: center;">This link expires in 24 hours. If you didn't create a HouseRush account, you can ignore this email.</p>
+      <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 32px 0 16px;" />
+      <p style="color: #94a3b8; font-size: 12px; text-align: center;">HouseRush — The fastest way to find off-campus housing.</p>
+    </div>
+  `;
+  return sendEmail(to, 'Verify your student email for HouseRush', html);
+}
+
 export function winnerEmailHtml(opts: { address: string; amount: number; listingId: string }): string {
   return `
     <div style="font-family: 'Inter', system-ui, sans-serif; max-width: 560px; margin: 0 auto; padding: 40px 24px;">

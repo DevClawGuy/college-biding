@@ -4,6 +4,7 @@ import crypto from 'crypto';
 import { db, schema } from '../db';
 import { eq } from 'drizzle-orm';
 import { generateToken, authenticateToken, AuthRequest } from '../middleware/auth';
+import { sendVerificationEmail } from '../lib/email';
 
 const router = Router();
 
@@ -23,8 +24,17 @@ router.post('/signup', async (req: Request, res: Response) => {
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
-    const isEduVerified = email.endsWith('.edu');
+    const isEdu = email.endsWith('.edu');
     const id = crypto.randomUUID();
+
+    // For .edu emails: generate verification token, don't verify yet
+    // For non-.edu emails: no verification needed
+    let verificationToken: string | null = null;
+    let tokenExpires: number | null = null;
+    if (isEdu) {
+      verificationToken = crypto.randomUUID();
+      tokenExpires = Date.now() + 24 * 60 * 60 * 1000; // 24 hours
+    }
 
     await db.insert(schema.users).values({
       id,
@@ -36,17 +46,65 @@ router.post('/signup', async (req: Request, res: Response) => {
       role: role || 'student',
       budgetMin: budgetMin || null,
       budgetMax: budgetMax || null,
-      isEduVerified,
+      isEduVerified: false,
+      emailVerificationToken: verificationToken,
+      verificationTokenExpires: tokenExpires,
       createdAt: new Date().toISOString(),
     }).run();
+
+    // Send verification email in background (don't block signup)
+    if (isEdu && verificationToken) {
+      sendVerificationEmail(email, verificationToken).catch(err => {
+        console.error('Failed to send verification email:', err);
+      });
+    }
 
     const user = await db.select().from(schema.users).where(eq(schema.users.id, id)).get();
     const token = generateToken(id);
 
-    const { password: _, ...userWithoutPassword } = user!;
-    res.status(201).json({ token, user: userWithoutPassword });
+    const { password: _, emailVerificationToken: _t, verificationTokenExpires: _e, ...userWithoutSensitive } = user!;
+    res.status(201).json({
+      token,
+      user: userWithoutSensitive,
+      ...(isEdu ? { message: 'Verification email sent! Check your inbox to verify your .edu email.' } : {}),
+    });
   } catch (error) {
     console.error('Signup error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Verify .edu email
+router.get('/verify-email', async (req: Request, res: Response) => {
+  try {
+    const token = String(req.query.token ?? '');
+    if (!token) {
+      res.status(400).json({ error: 'Missing verification token' });
+      return;
+    }
+
+    const user = await db.select().from(schema.users)
+      .where(eq(schema.users.emailVerificationToken, token)).get();
+
+    if (!user) {
+      res.status(400).json({ error: 'Invalid verification token' });
+      return;
+    }
+
+    if (user.verificationTokenExpires && user.verificationTokenExpires < Date.now()) {
+      res.status(400).json({ error: 'Verification token has expired. Please sign up again.' });
+      return;
+    }
+
+    await db.update(schema.users).set({
+      isEduVerified: true,
+      emailVerificationToken: null,
+      verificationTokenExpires: null,
+    }).where(eq(schema.users.id, user.id)).run();
+
+    res.json({ success: true, message: 'Your .edu email has been verified!' });
+  } catch (error) {
+    console.error('Verify email error:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
@@ -73,7 +131,6 @@ router.post('/login', async (req: Request, res: Response) => {
       console.error('bcrypt.compare error:', e);
     }
 
-    // Fallback: if stored password is plain text (legacy/corrupted hash), migrate it
     if (!validPassword && user.password === password) {
       console.log('Plain-text password detected, migrating to bcrypt hash for:', user.email);
       const newHash = await bcrypt.hash(password, 10);
@@ -87,8 +144,8 @@ router.post('/login', async (req: Request, res: Response) => {
     }
 
     const token = generateToken(user.id);
-    const { password: _, ...userWithoutPassword } = user;
-    res.json({ token, user: userWithoutPassword });
+    const { password: _, emailVerificationToken: _t, verificationTokenExpires: _e, ...userWithoutSensitive } = user;
+    res.json({ token, user: userWithoutSensitive });
   } catch (error) {
     console.error('Login error:', error);
     res.status(500).json({ error: 'Internal server error' });
@@ -102,8 +159,8 @@ router.get('/me', authenticateToken, async (req: AuthRequest, res: Response) => 
       res.status(404).json({ error: 'User not found' });
       return;
     }
-    const { password: _, ...userWithoutPassword } = user;
-    res.json(userWithoutPassword);
+    const { password: _, emailVerificationToken: _t, verificationTokenExpires: _e, ...userWithoutSensitive } = user;
+    res.json(userWithoutSensitive);
   } catch (error) {
     console.error('Get me error:', error);
     res.status(500).json({ error: 'Internal server error' });
@@ -125,8 +182,8 @@ router.put('/me', authenticateToken, async (req: AuthRequest, res: Response) => 
       .run();
 
     const user = await db.select().from(schema.users).where(eq(schema.users.id, req.userId!)).get();
-    const { password: _, ...userWithoutPassword } = user!;
-    res.json(userWithoutPassword);
+    const { password: _, emailVerificationToken: _t, verificationTokenExpires: _e, ...userWithoutSensitive } = user!;
+    res.json(userWithoutSensitive);
   } catch (error) {
     res.status(500).json({ error: 'Internal server error' });
   }

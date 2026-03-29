@@ -1,7 +1,7 @@
 import { Router, Response } from 'express';
 import crypto from 'crypto';
 import { db, schema } from '../db';
-import { eq, and, desc } from 'drizzle-orm';
+import { eq, and, desc, gte } from 'drizzle-orm';
 import { authenticateToken, AuthRequest } from '../middleware/auth';
 import { Server as SocketServer } from 'socket.io';
 
@@ -65,13 +65,30 @@ router.post('/listing/:listingId', authenticateToken, async (req: AuthRequest, r
       return;
     }
 
+    // Block bidding on own listing
     if (listing.landlordId === req.userId) {
-      res.status(400).json({ error: 'Cannot bid on your own listing' });
+      res.status(403).json({ error: 'You cannot bid on your own listing.' });
       return;
     }
 
-    if (amount <= listing.currentBid) {
-      res.status(400).json({ error: `Bid must be higher than current bid of $${listing.currentBid}` });
+    // Enforce minimum bid increment ($25)
+    const minBid = listing.currentBid + 25;
+    if (amount < minBid) {
+      res.status(400).json({ error: `Bid must be at least $${minBid}/mo` });
+      return;
+    }
+
+    // Rate limit: max 3 bids per user per listing in 60 seconds
+    const oneMinuteAgo = new Date(Date.now() - 60_000).toISOString();
+    const recentBids = await db.select({ id: schema.bids.id })
+      .from(schema.bids)
+      .where(and(
+        eq(schema.bids.listingId, listingId),
+        eq(schema.bids.userId, req.userId!),
+        gte(schema.bids.timestamp, oneMinuteAgo),
+      ));
+    if (recentBids.length >= 3) {
+      res.status(429).json({ error: 'Too many bids. Please wait before bidding again.' });
       return;
     }
 

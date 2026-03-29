@@ -8,6 +8,7 @@ import ListingsPage from './pages/ListingsPage';
 import ListingDetailPage from './pages/ListingDetailPage';
 import DashboardPage from './pages/DashboardPage';
 import CreateListingPage from './pages/CreateListingPage';
+import VerifyEmailPage from './pages/VerifyEmailPage';
 import { useAuthStore } from './store/authStore';
 import { getSocket } from './lib/socket';
 
@@ -29,6 +30,7 @@ function AppContent() {
     <Routes>
       <Route path="/login" element={<LoginPage />} />
       <Route path="/signup" element={<SignupPage />} />
+      <Route path="/verify-email" element={<VerifyEmailPage />} />
       <Route path="*" element={
         <div className="min-h-screen flex flex-col">
           <Navbar />
