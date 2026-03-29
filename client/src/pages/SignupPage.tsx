@@ -3,15 +3,11 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
 import { Mail, Lock, User, GraduationCap, Eye, EyeOff, Zap } from 'lucide-react';
 
-const universities = [
-  'Boston University', 'MIT', 'Harvard', 'UT Austin', 'UCLA', 'USC',
-  'NYU', 'Columbia', 'UChicago', 'Northwestern', 'Stanford', 'UC Berkeley',
-  'University of Michigan', 'Georgia Tech', 'Duke', 'Other'
-];
+const UNIVERSITY = 'Monmouth University';
 
 export default function SignupPage() {
   const [form, setForm] = useState({
-    email: '', password: '', name: '', university: '',
+    email: '', password: '', name: '', university: UNIVERSITY,
     year: '', role: 'student' as 'student' | 'landlord',
     budgetMin: 500, budgetMax: 2000,
   });
@@ -136,10 +132,10 @@ export default function SignupPage() {
                 {form.role === 'student' ? 'University' : 'Company Name'}
               </label>
               {form.role === 'student' ? (
-                <select value={form.university} onChange={(e) => update('university', e.target.value)} className={selectClass} required>
-                  <option value="">Select university</option>
-                  {universities.map((u) => <option key={u} value={u}>{u}</option>)}
-                </select>
+                <div className="w-full px-3 py-3 border border-slate-200 rounded-xl bg-slate-50 text-sm text-slate-700 font-medium flex items-center gap-2">
+                  <GraduationCap className="w-4 h-4 text-brand-500" />
+                  {UNIVERSITY}
+                </div>
               ) : (
                 <input type="text" value={form.university} onChange={(e) => update('university', e.target.value)}
                   className="w-full px-3 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all text-sm"

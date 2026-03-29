@@ -15,11 +15,7 @@ const amenityOptions = [
 const tagOptions = ['Pet Friendly', 'Utilities Included', 'Furnished', 'Parking Included'];
 
 const universityCoords: Record<string, { lat: number; lng: number }> = {
-  'Boston University': { lat: 42.3505, lng: -71.1054 }, 'MIT': { lat: 42.3601, lng: -71.0942 },
-  'Harvard': { lat: 42.3770, lng: -71.1167 }, 'UT Austin': { lat: 30.2849, lng: -97.7341 },
-  'UCLA': { lat: 34.0689, lng: -118.4452 }, 'USC': { lat: 34.0224, lng: -118.2851 },
-  'NYU': { lat: 40.7291, lng: -73.9965 }, 'Columbia': { lat: 40.8075, lng: -73.9626 },
-  'UChicago': { lat: 41.7886, lng: -87.5987 }, 'Northwestern': { lat: 42.0565, lng: -87.6753 },
+  'Monmouth University': { lat: 40.2773, lng: -74.0048 },
 };
 
 export default function CreateListingPage() {

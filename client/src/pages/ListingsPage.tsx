@@ -6,7 +6,7 @@ import api from '../lib/api';
 import ListingCard from '../components/ListingCard';
 import { useAuthStore } from '../store/authStore';
 
-const cities = ['All Cities', 'Boston', 'Cambridge', 'Austin', 'Los Angeles', 'New York', 'Chicago', 'Evanston'];
+const cities = ['All Cities', 'West Long Branch', 'Long Branch', 'Eatontown', 'Ocean Township', 'Asbury Park'];
 const sortOptions = [
   { value: 'newest', label: 'Newest First' },
   { value: 'ending_soonest', label: 'Ending Soon' },
