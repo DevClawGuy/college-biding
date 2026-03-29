@@ -82,13 +82,18 @@ router.post('/login', async (req: Request, res: Response) => {
 });
 
 router.get('/me', authenticateToken, async (req: AuthRequest, res: Response) => {
-  const user = await db.select().from(schema.users).where(eq(schema.users.id, req.userId!)).get();
-  if (!user) {
-    res.status(404).json({ error: 'User not found' });
-    return;
+  try {
+    const user = await db.select().from(schema.users).where(eq(schema.users.id, req.userId!)).get();
+    if (!user) {
+      res.status(404).json({ error: 'User not found' });
+      return;
+    }
+    const { password: _, ...userWithoutPassword } = user;
+    res.json(userWithoutPassword);
+  } catch (error) {
+    console.error('Get me error:', error);
+    res.status(500).json({ error: 'Internal server error' });
   }
-  const { password: _, ...userWithoutPassword } = user;
-  res.json(userWithoutPassword);
 });
 
 router.put('/me', authenticateToken, async (req: AuthRequest, res: Response) => {

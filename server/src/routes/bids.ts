@@ -159,6 +159,7 @@ router.post('/listing/:listingId', authenticateToken, async (req: AuthRequest, r
 });
 
 async function processAutoBids(listingId: string, currentAmount: number, excludeUserId: string) {
+  try {
   const allAutoBids = await db.select()
     .from(schema.autoBids)
     .where(and(
@@ -203,6 +204,9 @@ async function processAutoBids(listingId: string, currentAmount: number, exclude
       currentBid: newAmount,
       bidCount: (listing?.bidCount || 0) + 1,
     });
+  }
+  } catch (error) {
+    console.error('processAutoBids error:', error);
   }
 }
 

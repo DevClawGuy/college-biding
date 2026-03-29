@@ -66,13 +66,18 @@ router.delete('/:listingId', authenticateToken, async (req: AuthRequest, res: Re
 });
 
 router.get('/check/:listingId', authenticateToken, async (req: AuthRequest, res: Response) => {
-  const fav = await db.select().from(schema.favorites)
-    .where(and(
-      eq(schema.favorites.userId, req.userId!),
-      eq(schema.favorites.listingId, String(req.params.listingId)),
-    )).get();
+  try {
+    const fav = await db.select().from(schema.favorites)
+      .where(and(
+        eq(schema.favorites.userId, req.userId!),
+        eq(schema.favorites.listingId, String(req.params.listingId)),
+      )).get();
 
-  res.json({ isFavorited: !!fav });
+    res.json({ isFavorited: !!fav });
+  } catch (error) {
+    console.error('Check favorite error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
 });
 
 export default router;
