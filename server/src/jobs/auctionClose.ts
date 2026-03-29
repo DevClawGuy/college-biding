@@ -2,6 +2,7 @@ import crypto from 'crypto';
 import { db, schema } from '../db';
 import { eq, and, lt, desc } from 'drizzle-orm';
 import { Server as SocketServer } from 'socket.io';
+import { sendEmail, winnerEmailHtml, landlordEmailHtml } from '../lib/email';
 
 let io: SocketServer | null = null;
 
@@ -129,6 +130,26 @@ export async function checkExpiredAuctions() {
               winningBid: topBid.amount,
               winnerName,
             });
+          }
+
+          // Send emails
+          if (winnerEmail) {
+            sendEmail(
+              winnerEmail,
+              `🎉 You won the auction for ${listing.address}!`,
+              winnerEmailHtml({ address: listing.address, amount: topBid.amount, listingId: listing.id }),
+            ).catch(err => console.error('Winner email failed:', err));
+          }
+
+          // Get landlord email for landlord notification
+          const landlord = await db.select({ email: schema.users.email })
+            .from(schema.users).where(eq(schema.users.id, listing.landlordId)).get();
+          if (landlord?.email) {
+            sendEmail(
+              landlord.email,
+              `Auction closed: ${listing.address} — Winner details inside`,
+              landlordEmailHtml({ address: listing.address, amount: topBid.amount, winnerName, winnerEmail, listingId: listing.id }),
+            ).catch(err => console.error('Landlord email failed:', err));
           }
 
           console.log(`  Auction closed: "${listing.title}" — winner: ${winnerName} at $${topBid.amount}/mo`);

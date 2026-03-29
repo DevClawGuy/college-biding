@@ -88,10 +88,23 @@ router.post('/listing/:listingId', authenticateToken, async (req: AuthRequest, r
     }).run();
 
     // Update listing
-    await db.update(schema.listings).set({
+    const updateFields: any = {
       currentBid: amount,
       bidCount: listing.bidCount + 1,
-    }).where(eq(schema.listings.id, listingId)).run();
+    };
+
+    // Anti-snipe: extend auction by 5 minutes if ending within 5 minutes
+    const fiveMinutes = 5 * 60 * 1000;
+    const auctionEnd = new Date(listing.auctionEnd).getTime();
+    const now = Date.now();
+    let newAuctionEnd: string | null = null;
+    if (auctionEnd - now < fiveMinutes && auctionEnd > now) {
+      newAuctionEnd = new Date(auctionEnd + fiveMinutes).toISOString();
+      updateFields.auctionEnd = newAuctionEnd;
+      console.log(`Anti-snipe: extending auction ${listingId} to ${newAuctionEnd}`);
+    }
+
+    await db.update(schema.listings).set(updateFields).where(eq(schema.listings.id, listingId)).run();
 
     const bidder = await db.select().from(schema.users).where(eq(schema.users.id, req.userId!)).get();
 
@@ -114,6 +127,14 @@ router.post('/listing/:listingId', authenticateToken, async (req: AuthRequest, r
         currentBid: amount,
         bidCount: listing.bidCount + 1,
       });
+
+      // Emit auction extension event
+      if (newAuctionEnd) {
+        io.to(`listing:${listingId}`).emit('auction_extended', {
+          listingId,
+          newAuctionEnd,
+        });
+      }
     }
 
     // Create outbid notifications for previous bidders

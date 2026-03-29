@@ -27,6 +27,7 @@ export default function ListingDetailPage() {
   const [showBidModal, setShowBidModal] = useState(false);
   const [isFavorited, setIsFavorited] = useState(false);
   const [bidPulse, setBidPulse] = useState(false);
+  const [extensionToast, setExtensionToast] = useState(false);
   const { user } = useAuthStore();
 
   // ALL hooks must be called before any early return
@@ -68,7 +69,14 @@ export default function ListingDetailPage() {
         setListing((prev: any) => prev ? { ...prev, status: 'ended', winnerId: data.winnerId, winner: data.winnerName ? { name: data.winnerName } : null } : prev);
       }
     });
-    return () => { socket.emit('leave_listing', id); socket.off('bid_update'); socket.off('auction_ended'); };
+    socket.on('auction_extended', (data) => {
+      if (data.listingId === id) {
+        setListing((prev: any) => prev ? { ...prev, auctionEnd: data.newAuctionEnd } : prev);
+        setExtensionToast(true);
+        setTimeout(() => setExtensionToast(false), 6000);
+      }
+    });
+    return () => { socket.emit('leave_listing', id); socket.off('bid_update'); socket.off('auction_ended'); socket.off('auction_extended'); };
   }, [id]);
 
   const toggleFavorite = async () => {
@@ -110,6 +118,13 @@ export default function ListingDetailPage() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      {/* Auction extension toast */}
+      {extensionToast && (
+        <div className="mb-4 bg-amber-50 border border-amber-200 text-amber-800 px-4 py-3 rounded-xl text-sm font-medium flex items-center gap-2 animate-pulse">
+          <span>⏱</span> Auction extended by 5 minutes due to a last-minute bid!
+        </div>
+      )}
+
       <Link to="/listings" className="text-slate-500 hover:text-slate-700 text-sm mb-6 inline-flex items-center gap-1 font-medium">
         <ChevronLeft className="w-4 h-4" /> Back to listings
       </Link>
