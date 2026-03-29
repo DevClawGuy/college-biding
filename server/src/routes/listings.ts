@@ -74,12 +74,24 @@ router.get('/:id', async (req: Request, res: Response) => {
       avatar: schema.users.avatar,
     }).from(schema.users).where(eq(schema.users.id, listing.landlordId)).get();
 
+    // Include winner info if auction is closed
+    let winner = null;
+    if (listing.status === 'ended' && listing.winnerId) {
+      winner = await db.select({
+        id: schema.users.id,
+        name: schema.users.name,
+        email: schema.users.email,
+        university: schema.users.university,
+      }).from(schema.users).where(eq(schema.users.id, listing.winnerId)).get();
+    }
+
     res.json({
       ...listing,
       photos: JSON.parse(listing.photos),
       amenities: JSON.parse(listing.amenities),
       tags: JSON.parse(listing.tags),
       landlord,
+      winner,
     });
   } catch (error) {
     res.status(500).json({ error: 'Internal server error' });

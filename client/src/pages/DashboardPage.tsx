@@ -12,17 +12,24 @@ const tabs = [
   { id: 'notifications', label: 'Notifications', icon: Bell },
 ];
 
-function BidStatusBadge({ bid }: { bid: any }) {
+function BidStatusBadge({ bid, userId }: { bid: any; userId?: string }) {
   const countdown = useCountdown(bid.auctionEnd || '');
-  const isWinning = bid.amount >= (bid.currentBid || 0);
+  const isHighestBidder = bid.amount >= (bid.currentBid || 0);
   const ended = bid.listingStatus === 'ended' || countdown.isExpired;
 
   if (ended) {
-    return isWinning
+    // If the listing has a winnerId, use it for definitive won/lost
+    if (bid.winnerId && userId) {
+      return bid.winnerId === userId
+        ? <span className="flex items-center gap-1 text-xs font-semibold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-100"><Trophy className="w-3 h-3" /> Won</span>
+        : <span className="flex items-center gap-1 text-xs font-semibold text-rose-700 bg-rose-50 px-2.5 py-1 rounded-lg border border-rose-100"><XCircle className="w-3 h-3" /> Lost</span>;
+    }
+    // Fallback: compare bid amount
+    return isHighestBidder
       ? <span className="flex items-center gap-1 text-xs font-semibold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-100"><Trophy className="w-3 h-3" /> Won</span>
       : <span className="flex items-center gap-1 text-xs font-semibold text-rose-700 bg-rose-50 px-2.5 py-1 rounded-lg border border-rose-100"><XCircle className="w-3 h-3" /> Lost</span>;
   }
-  return isWinning
+  return isHighestBidder
     ? <span className="flex items-center gap-1 text-xs font-semibold text-brand-700 bg-brand-50 px-2.5 py-1 rounded-lg border border-brand-100"><Clock className="w-3 h-3" /> Winning</span>
     : <span className="flex items-center gap-1 text-xs font-semibold text-amber-700 bg-amber-50 px-2.5 py-1 rounded-lg border border-amber-100"><Clock className="w-3 h-3" /> Outbid</span>;
 }
@@ -111,7 +118,7 @@ export default function DashboardPage() {
                     <p className="text-xs text-slate-400 mt-0.5">Current: ${bid.currentBid?.toLocaleString()}/mo</p>
                   </div>
                   <div className="flex flex-col items-end gap-2.5">
-                    <BidStatusBadge bid={bid} />
+                    <BidStatusBadge bid={bid} userId={user?.id} />
                     <ChevronRight className="w-4 h-4 text-slate-300 group-hover:text-slate-500 transition-colors" />
                   </div>
                 </Link>

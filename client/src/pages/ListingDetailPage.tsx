@@ -63,7 +63,12 @@ export default function ListingDetailPage() {
         setTimeout(() => setBidPulse(false), 1000);
       }
     });
-    return () => { socket.emit('leave_listing', id); socket.off('bid_update'); };
+    socket.on('auction_ended', (data) => {
+      if (data.listingId === id) {
+        setListing((prev: any) => prev ? { ...prev, status: 'ended', winnerId: data.winnerId, winner: data.winnerName ? { name: data.winnerName } : null } : prev);
+      }
+    });
+    return () => { socket.emit('leave_listing', id); socket.off('bid_update'); socket.off('auction_ended'); };
   }, [id]);
 
   const toggleFavorite = async () => {
@@ -251,13 +256,34 @@ export default function ListingDetailPage() {
         <div className="lg:col-span-1">
           <div className="sticky top-20">
             <div className={`bg-white rounded-2xl card-shadow border border-slate-200 p-6 ${bidPulse ? 'bid-pulse' : ''}`}>
-              <div className={`flex items-center gap-2 mb-5 ${countdown.isUrgent ? 'countdown-urgent' : 'text-slate-600'}`}>
-                <Clock className="w-5 h-5" />
-                <span className="font-semibold text-sm">{countdown.isExpired ? 'Auction Ended' : `${countdown.display} left`}</span>
-              </div>
+              {/* Auction Closed Banner */}
+              {(listing.status === 'ended' || countdown.isExpired) ? (
+                <>
+                  {user && listing.winnerId === user.id ? (
+                    <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-4 mb-5 text-center">
+                      <p className="text-lg font-bold text-emerald-700 mb-1">You Won!</p>
+                      <p className="text-sm text-emerald-600">Your agent will be in touch to finalize your lease.</p>
+                    </div>
+                  ) : (
+                    <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 mb-5 text-center">
+                      <p className="text-base font-semibold text-slate-700 mb-1">Auction Closed</p>
+                      {(listing.currentBid ?? 0) > 0 && (
+                        <p className="text-sm text-slate-500">Winning bid: ${(listing.currentBid ?? 0).toLocaleString()}/mo</p>
+                      )}
+                    </div>
+                  )}
+                </>
+              ) : (
+                <div className={`flex items-center gap-2 mb-5 ${countdown.isUrgent ? 'countdown-urgent' : 'text-slate-600'}`}>
+                  <Clock className="w-5 h-5" />
+                  <span className="font-semibold text-sm">{countdown.display} left</span>
+                </div>
+              )}
 
               <div className="bg-slate-50 rounded-xl p-5 mb-5 border border-slate-100">
-                <p className="text-xs font-medium text-slate-400 uppercase tracking-wider">Current Highest Bid</p>
+                <p className="text-xs font-medium text-slate-400 uppercase tracking-wider">
+                  {listing.status === 'ended' ? 'Final Bid' : 'Current Highest Bid'}
+                </p>
                 <motion.div key={listing.currentBid} initial={{ scale: 1.05 }} animate={{ scale: 1 }}
                   className="text-3xl font-bold text-slate-900 mt-1 tracking-tight">
                   ${(listing.currentBid ?? 0).toLocaleString()}<span className="text-lg font-normal text-slate-400">/mo</span>
@@ -270,7 +296,8 @@ export default function ListingDetailPage() {
                 <span className="font-medium text-slate-700">${(listing.startingBid ?? 0).toLocaleString()}/mo</span>
               </div>
 
-              {!countdown.isExpired ? (
+              {/* Only show bid actions if auction is still active */}
+              {listing.status !== 'ended' && !countdown.isExpired ? (
                 user ? (
                   user.role !== 'landlord' ? (
                     <button onClick={() => setShowBidModal(true)}
@@ -283,11 +310,9 @@ export default function ListingDetailPage() {
                     Sign in to Bid
                   </Link>
                 )
-              ) : (
-                <div className="text-center bg-slate-50 py-3.5 rounded-xl text-slate-600 font-medium border border-slate-100">Auction has ended</div>
+              ) : listing.status !== 'ended' && (
+                <p className="text-xs text-slate-400 mt-1 text-center">Minimum bid: ${((listing.currentBid ?? 0) + 25).toLocaleString()}/mo</p>
               )}
-
-              <p className="text-xs text-slate-400 mt-3 text-center">Minimum bid: ${((listing.currentBid ?? 0) + 25).toLocaleString()}/mo</p>
             </div>
           </div>
         </div>

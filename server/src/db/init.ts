@@ -86,5 +86,18 @@ export async function initializeDatabase(): Promise<void> {
     }
   }
 
+  // Migrations: add columns that may not exist on older databases
+  const migrations = [
+    `ALTER TABLE listings ADD COLUMN winner_id TEXT`,
+  ];
+  for (const sql of migrations) {
+    try {
+      await client.execute(sql);
+      console.log('Migration applied:', sql.substring(0, 60));
+    } catch {
+      // Column already exists — safe to ignore
+    }
+  }
+
   console.log('Database tables initialized');
 }

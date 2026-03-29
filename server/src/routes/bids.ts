@@ -252,6 +252,7 @@ router.get('/my/bids', authenticateToken, async (req: AuthRequest, res: Response
       currentBid: schema.listings.currentBid,
       auctionEnd: schema.listings.auctionEnd,
       listingStatus: schema.listings.status,
+      winnerId: schema.listings.winnerId,
     })
       .from(schema.bids)
       .leftJoin(schema.listings, eq(schema.bids.listingId, schema.listings.id))

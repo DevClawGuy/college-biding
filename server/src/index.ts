@@ -11,6 +11,7 @@ import bidRoutes, { setBidSocket } from './routes/bids';
 import notificationRoutes from './routes/notifications';
 import favoriteRoutes from './routes/favorites';
 import adminRoutes from './routes/admin';
+import { setAuctionSocket, startAuctionCloseJob } from './jobs/auctionClose';
 
 // Prevent crashes from killing the process
 process.on('uncaughtException', (err) => {
@@ -58,6 +59,7 @@ const io = new SocketServer(server, {
 });
 
 setBidSocket(io);
+setAuctionSocket(io);
 
 // Routes
 app.use('/api/auth', authRoutes);
@@ -86,7 +88,13 @@ server.listen(Number(PORT), '0.0.0.0', () => {
   console.log(`HouseRush server running on http://0.0.0.0:${PORT}`);
 });
 
-// Initialize DB in background — don't block or crash if it fails
-initializeDatabase().catch((err) => {
-  console.error('Database initialization failed (server still running):', err);
-});
+// Initialize DB in background, then start auction close job
+initializeDatabase()
+  .then(() => {
+    startAuctionCloseJob();
+  })
+  .catch((err) => {
+    console.error('Database initialization failed (server still running):', err);
+    // Start auction job anyway — it has its own error handling
+    startAuctionCloseJob();
+  });
