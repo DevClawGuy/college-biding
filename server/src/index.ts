@@ -12,9 +12,16 @@ import favoriteRoutes from './routes/favorites';
 
 const app = express();
 const server = createServer(app);
+const allowedOrigins = [
+  'http://localhost:5173',
+  'http://localhost:3000',
+  'https://houserush.vercel.app',
+  process.env.CLIENT_URL,
+].filter(Boolean) as string[];
+
 const io = new SocketServer(server, {
   cors: {
-    origin: ['http://localhost:5173', 'http://localhost:3000'],
+    origin: allowedOrigins,
     methods: ['GET', 'POST'],
   },
 });
@@ -28,7 +35,10 @@ app.get('/health', (_req, res) => {
 });
 
 // Middleware
-app.use(cors());
+app.use(cors({
+  origin: allowedOrigins,
+  credentials: true,
+}));
 app.use(express.json());
 app.use('/uploads', express.static(path.join(__dirname, '..', 'uploads')));
 
