@@ -4,6 +4,7 @@ import { createServer } from 'http';
 import { Server as SocketServer } from 'socket.io';
 import path from 'path';
 
+import { initializeDatabase } from './db/init';
 import authRoutes from './routes/auth';
 import listingRoutes from './routes/listings';
 import bidRoutes, { setBidSocket } from './routes/bids';
@@ -76,6 +77,15 @@ io.on('connection', (socket) => {
 });
 
 const PORT = process.env.PORT || 3001;
-server.listen(Number(PORT), '0.0.0.0', () => {
-  console.log(`HouseRush server running on http://0.0.0.0:${PORT}`);
-});
+
+// Initialize database tables, then start server
+initializeDatabase()
+  .then(() => {
+    server.listen(Number(PORT), '0.0.0.0', () => {
+      console.log(`HouseRush server running on http://0.0.0.0:${PORT}`);
+    });
+  })
+  .catch((err) => {
+    console.error('Failed to initialize database:', err);
+    process.exit(1);
+  });
