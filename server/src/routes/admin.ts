@@ -142,7 +142,7 @@ router.post('/seed', async (req: Request, res: Response) => {
         distanceToCampus: l.distance, nearestUniversity: l.university,
         startingBid: l.startingBid, reservePrice: l.reservePrice, currentBid: l.startingBid,
         bidCount: 0, auctionStart: auctionStart.toISOString(), auctionEnd: auctionEnd.toISOString(),
-        status: 'active', tags: JSON.stringify(l.tags), createdAt: auctionStart.toISOString(),
+        status: 'active', approvalStatus: 'approved', tags: JSON.stringify(l.tags), createdAt: auctionStart.toISOString(),
       }).run();
       listingsInserted++;
       console.log(`  insert listing: "${l.title}"`);
@@ -246,7 +246,7 @@ router.post('/reset', async (req: Request, res: Response) => {
         distanceToCampus: l.distance, nearestUniversity: l.university,
         startingBid: l.startingBid, reservePrice: l.reservePrice, currentBid: l.startingBid,
         bidCount: 0, auctionStart: auctionStart.toISOString(), auctionEnd: auctionEnd.toISOString(),
-        status: 'active', tags: JSON.stringify(l.tags), createdAt: auctionStart.toISOString(),
+        status: 'active', approvalStatus: 'approved', tags: JSON.stringify(l.tags), createdAt: auctionStart.toISOString(),
       }).run();
     }
 
@@ -281,6 +281,59 @@ router.post('/reset', async (req: Request, res: Response) => {
   } catch (error) {
     console.error('Admin reset error:', error);
     res.status(500).json({ error: 'Reset failed', details: String(error) });
+  }
+});
+
+// ============================================================
+// Admin Listing Approval
+// ============================================================
+
+// Get pending listings
+router.get('/listings/pending', async (req: Request, res: Response) => {
+  try {
+    if (!checkAdminKey(req, res)) return;
+    const results = await db.select({
+      id: schema.listings.id,
+      title: schema.listings.title,
+      address: schema.listings.address,
+      city: schema.listings.city,
+      startingBid: schema.listings.startingBid,
+      auctionEnd: schema.listings.auctionEnd,
+      landlordId: schema.listings.landlordId,
+      createdAt: schema.listings.createdAt,
+    }).from(schema.listings).where(eq(schema.listings.approvalStatus, 'pending'));
+
+    // Attach landlord name
+    const enriched = [];
+    for (const l of results) {
+      const landlord = await db.select({ name: schema.users.name }).from(schema.users).where(eq(schema.users.id, l.landlordId)).get();
+      enriched.push({ ...l, landlordName: landlord?.name ?? 'Unknown' });
+    }
+    res.json(enriched);
+  } catch (error) {
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Approve listing
+router.post('/listings/:id/approve', async (req: Request, res: Response) => {
+  try {
+    if (!checkAdminKey(req, res)) return;
+    await db.update(schema.listings).set({ approvalStatus: 'approved' }).where(eq(schema.listings.id, String(req.params.id))).run();
+    res.json({ success: true });
+  } catch (error) {
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Reject listing
+router.post('/listings/:id/reject', async (req: Request, res: Response) => {
+  try {
+    if (!checkAdminKey(req, res)) return;
+    await db.update(schema.listings).set({ approvalStatus: 'rejected' }).where(eq(schema.listings.id, String(req.params.id))).run();
+    res.json({ success: true });
+  } catch (error) {
+    res.status(500).json({ error: 'Internal server error' });
   }
 });
 

@@ -41,6 +41,7 @@ export const listings = sqliteTable('listings', {
   auctionStart: text('auction_start').notNull(),
   auctionEnd: text('auction_end').notNull(),
   status: text('status', { enum: ['active', 'ended', 'cancelled'] }).notNull().default('active'),
+  approvalStatus: text('approval_status').notNull().default('pending'),
   winnerId: text('winner_id'),
   tags: text('tags').notNull().default('[]'), // JSON array
   createdAt: text('created_at').notNull().default(''),

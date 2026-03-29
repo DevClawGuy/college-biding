@@ -9,6 +9,7 @@ import ListingDetailPage from './pages/ListingDetailPage';
 import DashboardPage from './pages/DashboardPage';
 import CreateListingPage from './pages/CreateListingPage';
 import VerifyEmailPage from './pages/VerifyEmailPage';
+import AdminPage from './pages/AdminPage';
 import { useAuthStore } from './store/authStore';
 import { getSocket } from './lib/socket';
 
@@ -41,6 +42,7 @@ function AppContent() {
               <Route path="/listing/:id" element={<ListingDetailPage />} />
               <Route path="/dashboard" element={<DashboardPage />} />
               <Route path="/create-listing" element={<CreateListingPage />} />
+              <Route path="/admin" element={<AdminPage />} />
             </Routes>
           </main>
         </div>

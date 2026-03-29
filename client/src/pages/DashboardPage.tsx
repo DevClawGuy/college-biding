@@ -142,18 +142,30 @@ export default function DashboardPage() {
                   <Link to="/create-listing" className="mt-5 inline-block bg-brand-600 text-white px-6 py-2.5 rounded-xl font-semibold hover:bg-brand-700 transition-all">Create Listing</Link>
                 </EmptyState>
               ) : listings.map(listing => (
-                <Link key={listing.id} to={`/listing/${listing.id}`}
-                  className="flex items-center gap-4 bg-white rounded-2xl p-4 card-shadow hover:card-shadow-hover transition-all border border-slate-100 group">
-                  <img src={listing.photos[0]} alt="" className="w-20 h-20 rounded-xl object-cover bg-slate-100" />
-                  <div className="flex-1 min-w-0">
-                    <h3 className="font-semibold text-slate-900 truncate group-hover:text-brand-600 transition-colors">{listing.title}</h3>
-                    <p className="text-sm text-slate-500 mt-0.5">{listing.bidCount} bids &middot; ${listing.currentBid.toLocaleString()}/mo</p>
-                    <span className={`text-xs font-medium mt-1 inline-block px-2 py-0.5 rounded-md ${listing.status === 'active' ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-500'}`}>
-                      {listing.status === 'active' ? 'Active' : 'Ended'}
-                    </span>
+                <div key={listing.id} className="flex items-center gap-4 bg-white rounded-2xl p-4 card-shadow hover:card-shadow-hover transition-all border border-slate-100 group">
+                  <Link to={`/listing/${listing.id}`} className="flex items-center gap-4 flex-1 min-w-0">
+                    <img src={listing.photos?.[0] || ''} alt="" className="w-20 h-20 rounded-xl object-cover bg-slate-100" />
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-semibold text-slate-900 truncate group-hover:text-brand-600 transition-colors">{listing.title}</h3>
+                      <p className="text-sm text-slate-500 mt-0.5">{listing.bidCount} bids &middot; ${listing.currentBid?.toLocaleString()}/mo</p>
+                      <div className="flex items-center gap-2 mt-1">
+                        <span className={`text-xs font-medium px-2 py-0.5 rounded-md ${listing.status === 'active' ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-500'}`}>
+                          {listing.status === 'active' ? 'Active' : 'Ended'}
+                        </span>
+                        <span className={`text-xs font-medium px-2 py-0.5 rounded-md ${listing.approvalStatus === 'approved' ? 'bg-blue-50 text-blue-700' : listing.approvalStatus === 'rejected' ? 'bg-rose-50 text-rose-700' : 'bg-amber-50 text-amber-700'}`}>
+                          {listing.approvalStatus === 'approved' ? 'Approved' : listing.approvalStatus === 'rejected' ? 'Rejected' : 'Pending Review'}
+                        </span>
+                      </div>
+                    </div>
+                  </Link>
+                  <div className="flex flex-col gap-1.5">
+                    <Link to={`/listing/${listing.id}`} className="text-xs text-slate-400 hover:text-brand-600 font-medium transition-colors">View</Link>
+                    {listing.status === 'active' && listing.bidCount === 0 && (
+                      <button onClick={async () => { if (confirm('Delete this listing?')) { try { await api.delete(`/listings/${listing.id}`); fetchTabData(); } catch {} } }}
+                        className="text-xs text-rose-400 hover:text-rose-600 font-medium transition-colors">Delete</button>
+                    )}
                   </div>
-                  <ChevronRight className="w-4 h-4 text-slate-300 group-hover:text-slate-500 transition-colors" />
-                </Link>
+                </div>
               ))}
             </div>
           )}
