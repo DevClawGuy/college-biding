@@ -1,0 +1,70 @@
+{
+  "collectionName": "HouseRush — Secure Lease Now",
+  "requests": [
+    {
+      "name": "Secure Lease Now",
+      "method": "POST",
+      "url": "{{baseUrl}}/api/bids/secure-lease/:listingId",
+      "headers": [
+        { "name": "Authorization", "value": "Bearer {{token}}" },
+        { "name": "Content-Type", "value": "application/json" }
+      ],
+      "body": {},
+      "params": [
+        { "name": "listingId", "value": "<listing-id-here>" }
+      ],
+      "notes": "Secure Lease Now — student pays the fixed bypass price to skip auction. Requires auth token from a student account. Listing must have secure_lease_price set and be active."
+    },
+    {
+      "name": "Create Listing with Secure Lease Price",
+      "method": "POST",
+      "url": "{{baseUrl}}/api/listings",
+      "headers": [
+        { "name": "Authorization", "value": "Bearer {{token}}" },
+        { "name": "Content-Type", "value": "application/json" }
+      ],
+      "body": {
+        "title": "2BR Test Listing with Secure Lease",
+        "description": "Test listing with Secure Lease Now option",
+        "address": "123 Test St",
+        "city": "West Long Branch",
+        "state": "NJ",
+        "lat": 40.2904,
+        "lng": -74.0165,
+        "beds": 2,
+        "baths": 1,
+        "sqft": 900,
+        "distanceToCampus": 1.0,
+        "nearestUniversity": "Monmouth University",
+        "startingBid": 1500,
+        "reservePrice": 2000,
+        "secureLeasePrice": 2500,
+        "auctionEnd": "2026-04-15T12:00:00.000Z",
+        "amenities": ["Parking", "Laundry"],
+        "tags": ["Parking Included"],
+        "photos": ["https://images.unsplash.com/photo-1570129477492-45c003edd2be?w=800"]
+      },
+      "notes": "Create a listing with secureLeasePrice. Requires landlord auth token. secureLeasePrice must be > startingBid."
+    },
+    {
+      "name": "Update Listing Secure Lease Price",
+      "method": "PUT",
+      "url": "{{baseUrl}}/api/listings/:id",
+      "headers": [
+        { "name": "Authorization", "value": "Bearer {{token}}" },
+        { "name": "Content-Type", "value": "application/json" }
+      ],
+      "body": {
+        "secureLeasePrice": 3000
+      },
+      "params": [
+        { "name": "id", "value": "<listing-id-here>" }
+      ],
+      "notes": "Update the secure lease price on an existing listing. Only works if no bids have been placed yet. Set to null to remove."
+    }
+  ],
+  "variables": [
+    { "name": "baseUrl", "value": "http://localhost:3001" },
+    { "name": "token", "value": "<paste-jwt-token-here>" }
+  ]
+}

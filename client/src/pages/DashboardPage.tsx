@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useSearchParams, Link, useNavigate } from 'react-router-dom';
-import { Gavel, Home, Heart, Bell, Clock, Trophy, XCircle, Check, ChevronRight, Phone, Mail, Trash2 } from 'lucide-react';
+import { Gavel, Home, Heart, Bell, Clock, Trophy, XCircle, Check, ChevronRight, Phone, Mail, Trash2, Lock } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { useAuthStore } from '../store/authStore';
 import { useCountdown } from '../hooks/useCountdown';
@@ -20,9 +20,12 @@ function BidStatusBadge({ bid, userId }: { bid: any; userId?: string }) {
 
   if (ended) {
     if (bid.winnerId && userId) {
-      return bid.winnerId === userId
-        ? <span className="flex items-center gap-1 text-xs font-semibold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-100"><Trophy className="w-3 h-3" /> Won</span>
-        : <span className="flex items-center gap-1 text-xs font-semibold text-rose-700 bg-rose-50 px-2.5 py-1 rounded-lg border border-rose-100"><XCircle className="w-3 h-3" /> Lost</span>;
+      if (bid.winnerId === userId) {
+        return bid.isSecureLease
+          ? <span className="flex items-center gap-1 text-xs font-semibold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-100"><Lock className="w-3 h-3" /> Secured</span>
+          : <span className="flex items-center gap-1 text-xs font-semibold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-100"><Trophy className="w-3 h-3" /> Won</span>;
+      }
+      return <span className="flex items-center gap-1 text-xs font-semibold text-rose-700 bg-rose-50 px-2.5 py-1 rounded-lg border border-rose-100"><XCircle className="w-3 h-3" /> Lost</span>;
     }
     return isHighestBidder
       ? <span className="flex items-center gap-1 text-xs font-semibold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-100"><Trophy className="w-3 h-3" /> Won</span>

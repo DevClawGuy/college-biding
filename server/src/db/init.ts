@@ -95,6 +95,8 @@ export async function initializeDatabase(): Promise<void> {
     `ALTER TABLE users ADD COLUMN email_verification_token TEXT`,
     `ALTER TABLE users ADD COLUMN verification_token_expires INTEGER`,
     `CREATE UNIQUE INDEX IF NOT EXISTS favorites_unique ON favorites (user_id, listing_id)`,
+    `ALTER TABLE listings ADD COLUMN secure_lease_price INTEGER`,
+    `ALTER TABLE bids ADD COLUMN is_secure_lease INTEGER NOT NULL DEFAULT 0`,
   ];
   for (const sql of migrations) {
     try {

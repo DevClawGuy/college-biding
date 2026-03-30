@@ -35,6 +35,7 @@ export default function CreateListingPage() {
   const [form, setForm] = useState({
     title: '', description: '', address: '', city: '', state: '', nearestUniversity: '',
     beds: 1, baths: 1, sqft: 500, distanceToCampus: 0.5, startingBid: 500, reservePrice: 800,
+    secureLeasePrice: '' as string | number,
     auctionEnd: getDefaultAuctionEnd(),
     amenities: [] as string[], tags: [] as string[],
   });
@@ -70,9 +71,17 @@ export default function CreateListingPage() {
       photos.push(`https://picsum.photos/seed/${Date.now()}/800/600`);
     }
 
+    // Validate secure lease price
+    const slp = form.secureLeasePrice !== '' ? Number(form.secureLeasePrice) : null;
+    if (slp !== null && slp <= form.startingBid) {
+      setError('Secure lease price must be higher than the starting bid');
+      setLoading(false);
+      return;
+    }
+
     try {
       const { data } = await api.post('/listings', {
-        ...form, lat: coords.lat + offset, lng: coords.lng + offset, auctionEnd, photos,
+        ...form, secureLeasePrice: slp, lat: coords.lat + offset, lng: coords.lng + offset, auctionEnd, photos,
       });
       navigate(`/listing/${data.id}`);
     } catch (err: any) {
@@ -174,6 +183,11 @@ export default function CreateListingPage() {
               <input type="datetime-local" value={form.auctionEnd} onChange={(e) => update('auctionEnd', e.target.value)} className={inputClass} min={getMinAuctionEnd()} required />
               <p className="text-xs text-slate-400 mt-1">Must be at least 24 hours from now</p>
             </div>
+          </div>
+          <div className="mt-5 pt-5 border-t border-slate-100">
+            <label className={labelClass}>Secure Lease Now Price (optional)</label>
+            <input type="number" value={form.secureLeasePrice} onChange={(e) => update('secureLeasePrice', e.target.value === '' ? '' : Number(e.target.value))} className={inputClass} min={form.startingBid + 1} step={25} placeholder="e.g. 2000" />
+            <p className="text-xs text-slate-400 mt-1">Set a premium price students can pay to skip the auction and lock in the lease immediately. Must be higher than your starting bid.</p>
           </div>
         </section>
 

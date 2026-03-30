@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback, useRef } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { MapPin, Bed, Bath, Ruler, Clock, Heart, ChevronLeft, ChevronRight, GraduationCap, Check } from 'lucide-react';
+import { MapPin, Bed, Bath, Ruler, Clock, Heart, ChevronLeft, ChevronRight, GraduationCap, Check, Lock } from 'lucide-react';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import { motion } from 'framer-motion';
 import confetti from 'canvas-confetti';
@@ -35,6 +35,7 @@ interface Listing {
   auctionEnd: string;
   status: 'active' | 'ended' | 'cancelled';
   winnerId: string | null;
+  secureLeasePrice: number | null;
   landlordId: string;
   landlord?: { id: string; name: string; university: string; avatar: string | null };
   winner?: { id: string; name: string; email: string; university: string } | null;
@@ -46,6 +47,7 @@ interface Bid {
   userId: string;
   amount: number;
   isAutoBid: boolean;
+  isSecureLease: boolean;
   timestamp: string;
   userName: string;
   userUniversity: string;
@@ -68,6 +70,9 @@ export default function ListingDetailPage() {
   const [isFavorited, setIsFavorited] = useState(false);
   const [bidPulse, setBidPulse] = useState(false);
   const [extensionToast, setExtensionToast] = useState(false);
+  const [showSecureLeaseConfirm, setShowSecureLeaseConfirm] = useState(false);
+  const [secureLeaseLoading, setSecureLeaseLoading] = useState(false);
+  const [secureLeaseError, setSecureLeaseError] = useState('');
   const { user } = useAuthStore();
   const confettiFired = useRef(false);
 
@@ -154,6 +159,24 @@ export default function ListingDetailPage() {
       else await api.post(`/favorites/${id}`);
       setIsFavorited(!isFavorited);
     } catch { /* */ }
+  };
+
+  const handleSecureLease = async () => {
+    if (!id) return;
+    setSecureLeaseLoading(true);
+    setSecureLeaseError('');
+    try {
+      await api.post(`/bids/secure-lease/${id}`);
+      setShowSecureLeaseConfirm(false);
+      confettiFired.current = true;
+      confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
+      fetchData();
+    } catch (err: unknown) {
+      const msg = (err as { response?: { data?: { error?: string } } })?.response?.data?.error;
+      setSecureLeaseError(typeof msg === 'string' ? msg : 'Failed to secure lease');
+    } finally {
+      setSecureLeaseLoading(false);
+    }
   };
 
   // Loading state
@@ -403,15 +426,39 @@ export default function ListingDetailPage() {
               {listing.status !== 'ended' && !countdown.isExpired ? (
                 user ? (
                   user.role !== 'landlord' ? (
-                    <button onClick={() => setShowBidModal(true)}
-                      className="w-full bg-brand-600 hover:bg-brand-700 text-white py-4 rounded-xl font-semibold text-lg transition-all hover:shadow-xl hover:shadow-brand-600/20 active:scale-[0.98]">
-                      Place a Bid
-                    </button>
+                    <>
+                      <button onClick={() => setShowBidModal(true)}
+                        className="w-full bg-brand-600 hover:bg-brand-700 text-white py-4 rounded-xl font-semibold text-lg transition-all hover:shadow-xl hover:shadow-brand-600/20 active:scale-[0.98]">
+                        Place a Bid
+                      </button>
+
+                      {/* Secure Lease Now */}
+                      {listing.secureLeasePrice && (
+                        <div className="mt-4">
+                          <div className="relative">
+                            <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-slate-200" /></div>
+                            <div className="relative flex justify-center"><span className="bg-white px-3 text-xs text-slate-400 uppercase tracking-wider">or</span></div>
+                          </div>
+                          <button onClick={() => setShowSecureLeaseConfirm(true)}
+                            className="w-full mt-4 bg-emerald-600 hover:bg-emerald-700 text-white py-4 rounded-xl font-semibold text-base transition-all hover:shadow-xl hover:shadow-emerald-600/20 active:scale-[0.98] flex items-center justify-center gap-2">
+                            <Lock className="w-4 h-4" /> Secure Lease Now — ${listing.secureLeasePrice.toLocaleString()}/mo
+                          </button>
+                          <p className="text-xs text-slate-400 mt-2 text-center">Skip the auction. Pay ${listing.secureLeasePrice.toLocaleString()}/mo and the lease is yours immediately.</p>
+                        </div>
+                      )}
+                    </>
                   ) : <p className="text-center text-slate-500 text-sm bg-slate-50 py-3.5 rounded-xl border border-slate-100">Landlords cannot bid</p>
                 ) : (
-                  <Link to="/login" className="block text-center w-full bg-brand-600 hover:bg-brand-700 text-white py-4 rounded-xl font-semibold text-lg transition-all">
-                    Sign in to Bid
-                  </Link>
+                  <>
+                    <Link to="/login" className="block text-center w-full bg-brand-600 hover:bg-brand-700 text-white py-4 rounded-xl font-semibold text-lg transition-all">
+                      Sign in to Bid
+                    </Link>
+                    {listing.secureLeasePrice && (
+                      <Link to="/login" className="block text-center w-full mt-3 bg-emerald-600 hover:bg-emerald-700 text-white py-3.5 rounded-xl font-semibold text-sm transition-all flex items-center justify-center gap-2">
+                        <Lock className="w-4 h-4" /> Log in to Secure Lease — ${listing.secureLeasePrice.toLocaleString()}/mo
+                      </Link>
+                    )}
+                  </>
                 )
               ) : listing.status !== 'ended' && (
                 <p className="text-xs text-slate-400 mt-1 text-center">Minimum bid: ${((listing.currentBid ?? 0) + 25).toLocaleString()}/mo</p>
@@ -424,6 +471,53 @@ export default function ListingDetailPage() {
       {showBidModal && (
         <BidModal isOpen={showBidModal} onClose={() => setShowBidModal(false)} listingId={listing.id}
           listingTitle={listing.title} currentBid={listing.currentBid ?? 0} onBidPlaced={fetchData} />
+      )}
+
+      {/* Secure Lease Confirmation Modal */}
+      {showSecureLeaseConfirm && listing.secureLeasePrice && (
+        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center sm:p-4" onClick={() => setShowSecureLeaseConfirm(false)}>
+          <motion.div
+            initial={{ scale: 0.95, opacity: 0, y: 10 }}
+            animate={{ scale: 1, opacity: 1, y: 0 }}
+            className="bg-white rounded-t-2xl sm:rounded-2xl shadow-2xl max-w-md w-full p-6 border border-slate-100"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="text-center mb-6">
+              <div className="w-14 h-14 bg-emerald-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Lock className="w-7 h-7 text-emerald-600" />
+              </div>
+              <h3 className="text-xl font-bold text-slate-900">Secure This Lease?</h3>
+              <p className="text-slate-500 mt-2 text-sm leading-relaxed">
+                You are committing to pay <span className="font-semibold text-slate-900">${listing.secureLeasePrice.toLocaleString()}/mo</span>. This will end the auction immediately and you will be the winner.
+              </p>
+            </div>
+
+            <div className="bg-emerald-50 border border-emerald-100 rounded-xl p-4 mb-5">
+              <div className="flex justify-between items-center">
+                <span className="text-sm text-emerald-700 font-medium">Lease Price</span>
+                <span className="text-lg font-bold text-emerald-800">${listing.secureLeasePrice.toLocaleString()}/mo</span>
+              </div>
+              <p className="text-xs text-emerald-600 mt-1">{listing.title}</p>
+            </div>
+
+            {secureLeaseError && (
+              <div className="text-rose-600 text-sm mb-4 bg-rose-50 px-3 py-2 rounded-lg border border-rose-100">{secureLeaseError}</div>
+            )}
+
+            <div className="flex gap-3">
+              <button onClick={() => setShowSecureLeaseConfirm(false)}
+                className="flex-1 py-3.5 rounded-xl font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-all">
+                Cancel
+              </button>
+              <button onClick={handleSecureLease} disabled={secureLeaseLoading}
+                className="flex-1 py-3.5 rounded-xl font-semibold text-white bg-emerald-600 hover:bg-emerald-700 transition-all disabled:opacity-50 active:scale-[0.98]">
+                {secureLeaseLoading ? 'Securing...' : 'Confirm & Secure'}
+              </button>
+            </div>
+
+            <p className="text-xs text-slate-400 mt-4 text-center">By confirming, you agree to commit to this monthly rent.</p>
+          </motion.div>
+        </div>
       )}
     </div>
   );

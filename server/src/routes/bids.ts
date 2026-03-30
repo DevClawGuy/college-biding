@@ -4,6 +4,7 @@ import { db, schema } from '../db';
 import { eq, and, desc, gte, lt, sql } from 'drizzle-orm';
 import { authenticateToken, AuthRequest } from '../middleware/auth';
 import { Server as SocketServer } from 'socket.io';
+import { sendEmail, winnerEmailHtml, landlordEmailHtml } from '../lib/email';
 
 let io: SocketServer;
 
@@ -22,6 +23,7 @@ router.get('/listing/:listingId', async (req, res: Response) => {
       userId: schema.bids.userId,
       amount: schema.bids.amount,
       isAutoBid: schema.bids.isAutoBid,
+      isSecureLease: schema.bids.isSecureLease,
       timestamp: schema.bids.timestamp,
       userName: schema.users.name,
       userUniversity: schema.users.university,
@@ -317,6 +319,179 @@ async function processAutoBids(listingId: string, initialAmount: number, exclude
   }
 }
 
+// Secure Lease Now — skip auction by paying the fixed bypass price
+router.post('/secure-lease/:listingId', authenticateToken, async (req: AuthRequest, res: Response) => {
+  try {
+    const listingId = String(req.params.listingId);
+
+    // Verify student role
+    const user = await db.select().from(schema.users).where(eq(schema.users.id, req.userId!)).get();
+    if (!user || user.role === 'landlord') {
+      res.status(403).json({ error: 'Only students can secure a lease' });
+      return;
+    }
+
+    const listing = await db.select().from(schema.listings).where(eq(schema.listings.id, listingId)).get();
+    if (!listing) {
+      res.status(404).json({ error: 'Listing not found' });
+      return;
+    }
+
+    if (listing.status !== 'active') {
+      res.status(400).json({ error: 'Auction has already ended' });
+      return;
+    }
+
+    if (new Date(listing.auctionEnd) < new Date()) {
+      res.status(400).json({ error: 'Auction has already ended' });
+      return;
+    }
+
+    if (!listing.secureLeasePrice) {
+      res.status(400).json({ error: 'This listing does not offer Secure Lease Now' });
+      return;
+    }
+
+    if (listing.landlordId === req.userId) {
+      res.status(403).json({ error: 'You cannot secure your own listing' });
+      return;
+    }
+
+    // Atomically end the auction and set the winner
+    const updateResult = await db.update(schema.listings).set({
+      currentBid: listing.secureLeasePrice,
+      status: 'ended',
+      winnerId: req.userId!,
+      bidCount: sql`${schema.listings.bidCount} + 1`,
+    }).where(
+      and(
+        eq(schema.listings.id, listingId),
+        eq(schema.listings.status, 'active'),
+      )
+    ).run();
+
+    if (updateResult.rowsAffected === 0) {
+      res.status(409).json({ error: 'Auction was already ended or another action occurred. Please refresh.' });
+      return;
+    }
+
+    // Insert the secure lease bid record
+    const bidId = crypto.randomUUID();
+    const timestamp = new Date().toISOString();
+    await db.insert(schema.bids).values({
+      id: bidId,
+      listingId,
+      userId: req.userId!,
+      amount: listing.secureLeasePrice,
+      isAutoBid: false,
+      isSecureLease: true,
+      timestamp,
+    }).run();
+
+    // Winner notification
+    const winNotifId = crypto.randomUUID();
+    await db.insert(schema.notifications).values({
+      id: winNotifId,
+      userId: req.userId!,
+      type: 'won',
+      message: `You secured the lease for ${listing.address} at $${listing.secureLeasePrice}/mo! Your agent will contact you shortly.`,
+      listingId,
+      read: false,
+      createdAt: timestamp,
+    }).run();
+
+    if (io) {
+      io.to(`user:${req.userId}`).emit('notification', {
+        id: winNotifId, userId: req.userId, type: 'won',
+        message: `You secured the lease for ${listing.address} at $${listing.secureLeasePrice}/mo!`,
+        listingId, read: false, createdAt: timestamp,
+      });
+    }
+
+    // Landlord notification
+    const landlordNotifId = crypto.randomUUID();
+    await db.insert(schema.notifications).values({
+      id: landlordNotifId,
+      userId: listing.landlordId,
+      type: 'won',
+      message: `Lease secured for ${listing.address}! ${user.name} (${user.email}) locked in at $${listing.secureLeasePrice}/mo. Please reach out to finalize.`,
+      listingId,
+      read: false,
+      createdAt: timestamp,
+    }).run();
+
+    if (io) {
+      io.to(`user:${listing.landlordId}`).emit('notification', {
+        id: landlordNotifId, userId: listing.landlordId, type: 'won',
+        message: `Lease secured for ${listing.address}! ${user.name} locked in at $${listing.secureLeasePrice}/mo.`,
+        listingId, read: false, createdAt: timestamp,
+      });
+    }
+
+    // Notify all other bidders they lost
+    const allBidders = await db.select({ userId: schema.bids.userId })
+      .from(schema.bids)
+      .where(eq(schema.bids.listingId, listingId));
+    const loserIds = [...new Set(allBidders.map(b => b.userId))].filter(id => id !== req.userId);
+    for (const loserId of loserIds) {
+      const lostNotifId = crypto.randomUUID();
+      await db.insert(schema.notifications).values({
+        id: lostNotifId, userId: loserId, type: 'lost',
+        message: `Auction ended for ${listing.address}. A student secured the lease early at $${listing.secureLeasePrice}/mo.`,
+        listingId, read: false, createdAt: timestamp,
+      }).run();
+      if (io) {
+        io.to(`user:${loserId}`).emit('notification', {
+          id: lostNotifId, userId: loserId, type: 'lost',
+          message: `Auction ended for ${listing.address}. A student secured the lease early.`,
+          listingId, read: false, createdAt: timestamp,
+        });
+      }
+    }
+
+    // Socket events
+    if (io) {
+      io.to(`listing:${listingId}`).emit('bid_update', {
+        listingId,
+        bid: { id: bidId, listingId, userId: req.userId, amount: listing.secureLeasePrice, isAutoBid: false, isSecureLease: true, timestamp },
+        currentBid: listing.secureLeasePrice,
+        bidCount: (listing.bidCount ?? 0) + 1,
+      });
+      io.to(`listing:${listingId}`).emit('auction_ended', {
+        listingId,
+        winnerId: req.userId,
+        winningBid: listing.secureLeasePrice,
+        winnerName: user.name,
+      });
+    }
+
+    // Send emails
+    sendEmail(
+      user.email,
+      `You secured the lease for ${listing.address}!`,
+      winnerEmailHtml({ address: listing.address, amount: listing.secureLeasePrice, listingId }),
+    ).catch(err => console.error('Secure lease winner email failed:', err));
+
+    const landlord = await db.select({ email: schema.users.email })
+      .from(schema.users).where(eq(schema.users.id, listing.landlordId)).get();
+    if (landlord?.email) {
+      sendEmail(
+        landlord.email,
+        `Lease secured: ${listing.address} — Winner details inside`,
+        landlordEmailHtml({ address: listing.address, amount: listing.secureLeasePrice, winnerName: user.name, winnerEmail: user.email, listingId }),
+      ).catch(err => console.error('Secure lease landlord email failed:', err));
+    }
+
+    // TODO: deactivate all auto-bids for this listing when secure lease is used
+    console.log(`Secure Lease: "${listing.title}" — ${user.name} at $${listing.secureLeasePrice}/mo`);
+
+    res.json({ success: true, message: 'Lease secured!' });
+  } catch (error) {
+    console.error('Secure lease error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 // Set auto-bid
 router.post('/auto/:listingId', authenticateToken, async (req: AuthRequest, res: Response) => {
   try {
@@ -353,6 +528,7 @@ router.get('/my/bids', authenticateToken, async (req: AuthRequest, res: Response
       listingId: schema.bids.listingId,
       amount: schema.bids.amount,
       isAutoBid: schema.bids.isAutoBid,
+      isSecureLease: schema.bids.isSecureLease,
       timestamp: schema.bids.timestamp,
       listingTitle: schema.listings.title,
       listingPhoto: schema.listings.photos,

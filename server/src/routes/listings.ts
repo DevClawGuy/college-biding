@@ -115,8 +115,16 @@ router.post('/', authenticateToken, async (req: AuthRequest, res: Response) => {
     const {
       title, description, address, city, state, lat, lng,
       amenities, beds, baths, sqft, distanceToCampus, nearestUniversity,
-      startingBid, reservePrice, auctionEnd, tags
+      startingBid, reservePrice, auctionEnd, tags, secureLeasePrice
     } = req.body;
+
+    // Validate secure lease price if provided
+    if (secureLeasePrice !== undefined && secureLeasePrice !== null) {
+      if (typeof secureLeasePrice !== 'number' || secureLeasePrice <= startingBid) {
+        res.status(400).json({ error: 'Secure lease price must be higher than the starting bid' });
+        return;
+      }
+    }
 
     // Validate auction end date — at least 24 hours from now
     const auctionEndDate = new Date(auctionEnd);
@@ -141,6 +149,7 @@ router.post('/', authenticateToken, async (req: AuthRequest, res: Response) => {
       auctionEnd: auctionEndDate.toISOString(),
       status: 'active',
       approvalStatus: 'pending',
+      secureLeasePrice: secureLeasePrice ?? null,
       tags: JSON.stringify(tags || []),
       createdAt: new Date().toISOString(),
     }).run();
@@ -168,6 +177,23 @@ router.put('/:id', authenticateToken, async (req: AuthRequest, res: Response) =>
     if (req.body.amenities) updates.amenities = JSON.stringify(req.body.amenities);
     if (req.body.tags) updates.tags = JSON.stringify(req.body.tags);
     if (req.body.photos) updates.photos = JSON.stringify(req.body.photos);
+
+    // Secure lease price — only updatable if no bids yet
+    if (req.body.secureLeasePrice !== undefined) {
+      if (listing.bidCount > 0) {
+        res.status(400).json({ error: 'Cannot change secure lease price after bidding has started' });
+        return;
+      }
+      const slp = req.body.secureLeasePrice;
+      if (slp === null) {
+        updates.secureLeasePrice = null;
+      } else if (typeof slp === 'number' && slp > (req.body.startingBid ?? listing.startingBid)) {
+        updates.secureLeasePrice = slp;
+      } else {
+        res.status(400).json({ error: 'Secure lease price must be higher than the starting bid' });
+        return;
+      }
+    }
 
     // Cannot change auctionEnd if bidding has started
     if (req.body.auctionEnd !== undefined) {

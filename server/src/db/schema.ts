@@ -44,6 +44,7 @@ export const listings = sqliteTable('listings', {
   status: text('status', { enum: ['active', 'ended', 'cancelled'] }).notNull().default('active'),
   approvalStatus: text('approval_status').notNull().default('pending'),
   winnerId: text('winner_id'),
+  secureLeasePrice: integer('secure_lease_price'),
   tags: text('tags').notNull().default('[]'), // JSON array
   createdAt: text('created_at').notNull().default(''),
 });
@@ -54,6 +55,7 @@ export const bids = sqliteTable('bids', {
   userId: text('user_id').notNull().references(() => users.id),
   amount: integer('amount').notNull(),
   isAutoBid: integer('is_auto_bid', { mode: 'boolean' }).notNull().default(false),
+  isSecureLease: integer('is_secure_lease', { mode: 'boolean' }).notNull().default(false),
   timestamp: text('timestamp').notNull(),
 });
 
