@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { Search, Shield, TrendingUp, ArrowRight, Zap, Star, Users, Building } from 'lucide-react';
+import { Search, Shield, TrendingUp, ArrowRight, Zap, Star, Users, Building, CheckSquare, AlertTriangle, ShieldAlert } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useEffect, useState } from 'react';
 import api from '../lib/api';
@@ -143,6 +143,34 @@ export default function HomePage() {
           </Link>
         </section>
       )}
+
+      {/* Free Resources */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-24">
+        <div className="text-center mb-10">
+          <h2 className="text-2xl md:text-3xl font-bold text-slate-900 tracking-tight">Free Student Resources</h2>
+          <p className="text-slate-500 mt-2 max-w-lg mx-auto">Guides and checklists to help you navigate off-campus housing like a pro.</p>
+        </div>
+        <div className="grid md:grid-cols-3 gap-6">
+          {[
+            { icon: CheckSquare, title: 'Move-In Essentials', desc: 'Everything you need to buy and bring when moving into your first apartment.' },
+            { icon: AlertTriangle, title: 'Lease Red Flags', desc: 'Common lease clauses that have cost students thousands of dollars.' },
+            { icon: ShieldAlert, title: 'Rental Scam Signs', desc: 'Protect yourself from fake listings and fraudulent landlords.' },
+          ].map(({ icon: Icon, title, desc }) => (
+            <Link key={title} to="/guides" className="bg-white rounded-2xl p-6 card-shadow hover:card-shadow-hover transition-all duration-300 group border border-slate-100">
+              <div className="w-10 h-10 bg-brand-50 rounded-xl flex items-center justify-center mb-4 group-hover:bg-brand-100 transition-colors">
+                <Icon className="w-5 h-5 text-brand-600" />
+              </div>
+              <h3 className="font-semibold text-slate-900 mb-1.5">{title}</h3>
+              <p className="text-sm text-slate-500 leading-relaxed">{desc}</p>
+            </Link>
+          ))}
+        </div>
+        <div className="text-center mt-8">
+          <Link to="/guides" className="inline-flex items-center gap-1.5 text-brand-600 hover:text-brand-700 font-semibold text-sm transition-colors">
+            View All Guides <ArrowRight className="w-4 h-4" />
+          </Link>
+        </div>
+      </section>
 
       {/* CTA */}
       <section className="relative overflow-hidden">

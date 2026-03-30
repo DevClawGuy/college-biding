@@ -18,6 +18,7 @@ import HowItWorksPage from './pages/HowItWorksPage';
 import ContactPage from './pages/ContactPage';
 import AdminDashboardPage from './pages/AdminDashboardPage';
 import ParentViewPage from './pages/ParentViewPage';
+import GuidesPage from './pages/GuidesPage';
 import { useAuthStore } from './store/authStore';
 import { getSocket } from './lib/socket';
 
@@ -62,6 +63,7 @@ function AppContent() {
               <Route path="/privacy" element={<PrivacyPage />} />
               <Route path="/how-it-works" element={<HowItWorksPage />} />
               <Route path="/contact" element={<ContactPage />} />
+              <Route path="/guides" element={<GuidesPage />} />
             </Routes>
           </main>
           <Footer />
@@ -90,6 +92,7 @@ function shouldBypassMaintenance(): boolean {
   const path = window.location.pathname;
   if (path.startsWith('/admin')) return true;
   if (path.startsWith('/parent-view')) return true;
+  if (path.startsWith('/guides')) return true;
 
   // Check for ?preview=houserush2024 and persist in sessionStorage
   const params = new URLSearchParams(window.location.search);
