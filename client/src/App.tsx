@@ -79,8 +79,26 @@ function MaintenancePage() {
   );
 }
 
+function shouldBypassMaintenance(): boolean {
+  // Admin routes always bypass
+  const path = window.location.pathname;
+  if (path.startsWith('/admin')) return true;
+
+  // Check for ?preview=houserush2024 and persist in sessionStorage
+  const params = new URLSearchParams(window.location.search);
+  if (params.get('preview') === 'houserush2024') {
+    sessionStorage.setItem('houserush_preview', 'true');
+    return true;
+  }
+
+  // Check sessionStorage for previous bypass
+  if (sessionStorage.getItem('houserush_preview') === 'true') return true;
+
+  return false;
+}
+
 export default function App() {
-  if (import.meta.env.VITE_MAINTENANCE_MODE === 'true') {
+  if (import.meta.env.VITE_MAINTENANCE_MODE === 'true' && !shouldBypassMaintenance()) {
     return <MaintenancePage />;
   }
 
