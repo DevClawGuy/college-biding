@@ -1,0 +1,44 @@
+{
+  "collectionName": "HouseRush — Parent Access",
+  "requests": [
+    {
+      "name": "Set Parent Email (invite parent)",
+      "method": "PUT",
+      "url": "{{baseUrl}}/api/auth/me",
+      "headers": [
+        { "name": "Authorization", "value": "Bearer {{token}}" },
+        { "name": "Content-Type", "value": "application/json" }
+      ],
+      "body": {
+        "parentEmail": "parent@example.com"
+      },
+      "notes": "Set or update parent email. Generates a parent_access_token and sends invitation email. Use parentEmail: null to remove."
+    },
+    {
+      "name": "Remove Parent Access",
+      "method": "PUT",
+      "url": "{{baseUrl}}/api/auth/me",
+      "headers": [
+        { "name": "Authorization", "value": "Bearer {{token}}" },
+        { "name": "Content-Type", "value": "application/json" }
+      ],
+      "body": {
+        "parentEmail": null
+      },
+      "notes": "Remove parent access by clearing the email and token."
+    },
+    {
+      "name": "Parent View (public, no auth)",
+      "method": "GET",
+      "url": "{{baseUrl}}/api/parent-access/:token",
+      "params": [
+        { "name": "token", "value": "<parent-access-token-here>" }
+      ],
+      "notes": "Public endpoint — no auth required. Returns student's first name, saved listings, and bid status. Returns 404 if token is invalid."
+    }
+  ],
+  "variables": [
+    { "name": "baseUrl", "value": "http://localhost:3001" },
+    { "name": "token", "value": "<paste-student-jwt-token-here>" }
+  ]
+}

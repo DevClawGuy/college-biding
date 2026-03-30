@@ -13,6 +13,7 @@ import favoriteRoutes from './routes/favorites';
 import adminRoutes from './routes/admin';
 import contactRoutes from './routes/contact';
 import bidGroupRoutes, { setGroupBidSocket } from './routes/bidGroups';
+import parentAccessRoutes from './routes/parentAccess';
 import { setAuctionSocket, startAuctionCloseJob } from './jobs/auctionClose';
 
 // Prevent crashes from killing the process
@@ -73,6 +74,7 @@ app.use('/api/favorites', favoriteRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/contact', contactRoutes);
 app.use('/api/bid-groups', bidGroupRoutes);
+app.use('/api/parent-access', parentAccessRoutes);
 
 app.get('/api/health', (_req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });

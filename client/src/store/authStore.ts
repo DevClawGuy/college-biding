@@ -11,7 +11,9 @@ interface User {
   budgetMin?: number;
   budgetMax?: number;
   avatar?: string;
+  phone?: string;
   isEduVerified: boolean;
+  parentEmail?: string | null;
 }
 
 interface AuthState {

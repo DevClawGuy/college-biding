@@ -116,6 +116,8 @@ export async function initializeDatabase(): Promise<void> {
       joined_at INTEGER
     )`,
     `ALTER TABLE bids ADD COLUMN group_id TEXT`,
+    `ALTER TABLE users ADD COLUMN parent_email TEXT`,
+    `ALTER TABLE users ADD COLUMN parent_access_token TEXT`,
   ];
   for (const sql of migrations) {
     try {

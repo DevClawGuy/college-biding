@@ -17,6 +17,7 @@ import PrivacyPage from './pages/PrivacyPage';
 import HowItWorksPage from './pages/HowItWorksPage';
 import ContactPage from './pages/ContactPage';
 import AdminDashboardPage from './pages/AdminDashboardPage';
+import ParentViewPage from './pages/ParentViewPage';
 import { useAuthStore } from './store/authStore';
 import { getSocket } from './lib/socket';
 
@@ -44,6 +45,7 @@ function AppContent() {
       <Route path="/signup" element={<SignupPage />} />
       <Route path="/verify-email" element={<VerifyEmailPage />} />
       <Route path="/admin/dashboard" element={<AdminDashboardPage />} />
+      <Route path="/parent-view" element={<ParentViewPage />} />
       <Route path="*" element={
         <div className="min-h-screen flex flex-col">
           <Navbar />
@@ -84,9 +86,10 @@ function MaintenancePage() {
 }
 
 function shouldBypassMaintenance(): boolean {
-  // Admin routes always bypass
+  // Admin and parent-view routes always bypass
   const path = window.location.pathname;
   if (path.startsWith('/admin')) return true;
+  if (path.startsWith('/parent-view')) return true;
 
   // Check for ?preview=houserush2024 and persist in sessionStorage
   const params = new URLSearchParams(window.location.search);

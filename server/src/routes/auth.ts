@@ -4,7 +4,7 @@ import crypto from 'crypto';
 import { db, schema } from '../db';
 import { eq } from 'drizzle-orm';
 import { generateToken, authenticateToken, AuthRequest } from '../middleware/auth';
-import { sendVerificationEmail } from '../lib/email';
+import { sendVerificationEmail, sendEmail } from '../lib/email';
 
 const router = Router();
 
@@ -62,7 +62,7 @@ router.post('/signup', async (req: Request, res: Response) => {
     const user = await db.select().from(schema.users).where(eq(schema.users.id, id)).get();
     const token = generateToken(id);
 
-    const { password: _, emailVerificationToken: _t, verificationTokenExpires: _e, ...userWithoutSensitive } = user!;
+    const { password: _, emailVerificationToken: _t, verificationTokenExpires: _e, parentAccessToken: _p, ...userWithoutSensitive } = user!;
     res.status(201).json({
       token,
       user: userWithoutSensitive,
@@ -144,7 +144,7 @@ router.post('/login', async (req: Request, res: Response) => {
     }
 
     const token = generateToken(user.id);
-    const { password: _, emailVerificationToken: _t, verificationTokenExpires: _e, ...userWithoutSensitive } = user;
+    const { password: _, emailVerificationToken: _t, verificationTokenExpires: _e, parentAccessToken: _p, ...userWithoutSensitive } = user;
     res.json({ token, user: userWithoutSensitive });
   } catch (error) {
     console.error('Login error:', error);
@@ -159,7 +159,7 @@ router.get('/me', authenticateToken, async (req: AuthRequest, res: Response) => 
       res.status(404).json({ error: 'User not found' });
       return;
     }
-    const { password: _, emailVerificationToken: _t, verificationTokenExpires: _e, ...userWithoutSensitive } = user;
+    const { password: _, emailVerificationToken: _t, verificationTokenExpires: _e, parentAccessToken: _p, ...userWithoutSensitive } = user;
     res.json(userWithoutSensitive);
   } catch (error) {
     console.error('Get me error:', error);
@@ -169,25 +169,77 @@ router.get('/me', authenticateToken, async (req: AuthRequest, res: Response) => 
 
 router.put('/me', authenticateToken, async (req: AuthRequest, res: Response) => {
   try {
-    const { name, university, year, budgetMin, budgetMax, phone } = req.body;
-    await db.update(schema.users)
-      .set({
-        ...(name && { name }),
-        ...(university && { university }),
-        ...(year !== undefined && { year }),
-        ...(budgetMin !== undefined && { budgetMin }),
-        ...(budgetMax !== undefined && { budgetMax }),
-        ...(phone !== undefined && { phone }),
-      })
-      .where(eq(schema.users.id, req.userId!))
-      .run();
+    const { name, university, year, budgetMin, budgetMax, phone, parentEmail } = req.body;
+
+    const updates: Record<string, unknown> = {};
+    if (name) updates.name = name;
+    if (university) updates.university = university;
+    if (year !== undefined) updates.year = year;
+    if (budgetMin !== undefined) updates.budgetMin = budgetMin;
+    if (budgetMax !== undefined) updates.budgetMax = budgetMax;
+    if (phone !== undefined) updates.phone = phone;
+
+    // Parent access handling
+    if (parentEmail !== undefined) {
+      if (parentEmail === null || parentEmail === '') {
+        // Remove parent access
+        updates.parentEmail = null;
+        updates.parentAccessToken = null;
+      } else {
+        // Set/update parent email and generate token
+        const token = crypto.randomUUID();
+        updates.parentEmail = parentEmail;
+        updates.parentAccessToken = token;
+
+        // Get student name for the email
+        const currentUser = await db.select({ name: schema.users.name }).from(schema.users).where(eq(schema.users.id, req.userId!)).get();
+        const studentName = currentUser?.name ?? 'Your student';
+
+        // Send parent invitation email
+        const parentViewUrl = `https://houserush.vercel.app/parent-view?token=${token}`;
+        sendEmail(
+          parentEmail,
+          `${studentName} invited you to follow their HouseRush housing search`,
+          parentInviteEmailHtml({ studentName, parentViewUrl }),
+        ).catch(err => console.error('Parent invite email failed:', err));
+      }
+    }
+
+    await db.update(schema.users).set(updates).where(eq(schema.users.id, req.userId!)).run();
 
     const user = await db.select().from(schema.users).where(eq(schema.users.id, req.userId!)).get();
-    const { password: _, emailVerificationToken: _t, verificationTokenExpires: _e, ...userWithoutSensitive } = user!;
+    const { password: _, emailVerificationToken: _t, verificationTokenExpires: _e, parentAccessToken: _p, ...userWithoutSensitive } = user!;
     res.json(userWithoutSensitive);
   } catch (error) {
     res.status(500).json({ error: 'Internal server error' });
   }
 });
+
+function parentInviteEmailHtml(opts: { studentName: string; parentViewUrl: string }): string {
+  return `
+    <div style="font-family: 'Inter', system-ui, sans-serif; max-width: 560px; margin: 0 auto; padding: 40px 24px;">
+      <div style="text-align: center; margin-bottom: 32px;">
+        <span style="font-size: 48px;">&#127968;</span>
+        <h1 style="font-size: 24px; font-weight: 700; color: #0f172a; margin: 16px 0 8px;">You've Been Invited!</h1>
+        <p style="color: #64748b; font-size: 16px; margin: 0;">${opts.studentName} wants you to follow their housing search.</p>
+      </div>
+      <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 24px; margin-bottom: 24px;">
+        <p style="margin: 0 0 8px; color: #64748b; font-size: 13px; text-transform: uppercase; letter-spacing: 0.05em;">What is HouseRush?</p>
+        <p style="margin: 0; font-size: 15px; color: #334155; line-height: 1.6;">HouseRush is a student housing platform where students find and bid on off-campus housing near Monmouth University. ${opts.studentName} has invited you to view their saved listings and bid activity.</p>
+      </div>
+      <p style="color: #475569; font-size: 15px; line-height: 1.6; margin-bottom: 8px;">
+        <strong>Your access is read-only.</strong> You can see which listings they're interested in and how their bids are going, but you cannot place bids or make any changes.
+      </p>
+      <p style="color: #475569; font-size: 15px; line-height: 1.6; margin-bottom: 24px;">
+        Click below to view their housing search anytime — no account needed.
+      </p>
+      <div style="text-align: center;">
+        <a href="${opts.parentViewUrl}" style="display: inline-block; background: #4f46e5; color: white; text-decoration: none; padding: 14px 32px; border-radius: 12px; font-weight: 600; font-size: 15px;">View Housing Search</a>
+      </div>
+      <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 32px 0 16px;" />
+      <p style="color: #94a3b8; font-size: 12px; text-align: center;">HouseRush — The fastest way to find off-campus housing.</p>
+    </div>
+  `;
+}
 
 export default router;

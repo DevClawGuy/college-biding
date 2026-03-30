@@ -15,6 +15,8 @@ export const users = sqliteTable('users', {
   isEduVerified: integer('is_edu_verified', { mode: 'boolean' }).notNull().default(false),
   emailVerificationToken: text('email_verification_token'),
   verificationTokenExpires: integer('verification_token_expires'),
+  parentEmail: text('parent_email'),
+  parentAccessToken: text('parent_access_token'),
   createdAt: text('created_at').notNull().default(''),
 });
 
