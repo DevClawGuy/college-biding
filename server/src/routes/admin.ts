@@ -350,6 +350,7 @@ router.post('/listings/:id/reject', async (req: Request, res: Response) => {
 // ============================================================
 router.get('/analytics', async (req: Request, res: Response) => {
   try {
+    console.log('Admin analytics: request received');
     if (!checkAdminKey(req, res)) return;
 
     const now = new Date();

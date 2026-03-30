@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
-import { Shield, Users, Building, TrendingUp, Activity, Loader2, RefreshCw } from 'lucide-react';
-import api from '../lib/api';
+import { Shield, Users, Building, TrendingUp, Activity, Loader2, RefreshCw, AlertCircle } from 'lucide-react';
 
 const ADMIN_KEY = 'houserush2024';
+const SESSION_KEY = 'admin_authenticated';
 
 function StatCard({ label, value, sub }: { label: string; value: string | number; sub?: string }) {
   return (
@@ -15,24 +15,50 @@ function StatCard({ label, value, sub }: { label: string; value: string | number
 }
 
 export default function AdminDashboardPage() {
-  const [authenticated, setAuthenticated] = useState(false);
+  const [authenticated, setAuthenticated] = useState(() => sessionStorage.getItem(SESSION_KEY) === 'true');
   const [password, setPassword] = useState('');
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
   const [lastRefresh, setLastRefresh] = useState<Date | null>(null);
 
   const handleAuth = (e: React.FormEvent) => {
     e.preventDefault();
-    if (password === ADMIN_KEY) setAuthenticated(true);
+    if (password === ADMIN_KEY) {
+      sessionStorage.setItem(SESSION_KEY, 'true');
+      setAuthenticated(true);
+    }
   };
 
   const fetchAnalytics = async () => {
     setLoading(true);
+    setError('');
     try {
-      const { data: d } = await api.get('/admin/analytics', { headers: { 'x-admin-key': ADMIN_KEY } });
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 10000);
+
+      const baseUrl = import.meta.env.VITE_API_URL || '/api';
+      const res = await fetch(`${baseUrl}/admin/analytics`, {
+        headers: { 'x-admin-key': ADMIN_KEY, 'Content-Type': 'application/json' },
+        signal: controller.signal,
+      });
+      clearTimeout(timeout);
+
+      if (!res.ok) {
+        const body = await res.text().catch(() => '');
+        throw new Error(`${res.status}: ${body || res.statusText}`);
+      }
+
+      const d = await res.json();
       setData(d);
       setLastRefresh(new Date());
-    } catch { /* */ }
+    } catch (err: any) {
+      const msg = err.name === 'AbortError'
+        ? 'Request timed out. Check that the backend is running.'
+        : `Failed to load analytics: ${err.message}`;
+      console.error('Admin analytics fetch error:', err);
+      setError(msg);
+    }
     setLoading(false);
   };
 
@@ -61,10 +87,30 @@ export default function AdminDashboardPage() {
     );
   }
 
+  // Error state
+  if (error && !data) {
+    return (
+      <div className="min-h-screen flex items-center justify-center px-4">
+        <div className="text-center max-w-md">
+          <AlertCircle className="w-12 h-12 text-rose-400 mx-auto mb-4" />
+          <h2 className="text-lg font-bold text-slate-900 mb-2">Unable to load analytics</h2>
+          <p className="text-sm text-slate-500 mb-4">{error}</p>
+          <button onClick={fetchAnalytics} className="bg-brand-600 hover:bg-brand-700 text-white px-6 py-2.5 rounded-xl font-semibold transition-all">
+            Retry
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // Initial loading
   if (!data) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <Loader2 className="w-8 h-8 text-brand-500 animate-spin" />
+        <div className="text-center">
+          <Loader2 className="w-8 h-8 text-brand-500 animate-spin mx-auto mb-3" />
+          <p className="text-sm text-slate-500">Loading analytics...</p>
+        </div>
       </div>
     );
   }
@@ -85,6 +131,10 @@ export default function AdminDashboardPage() {
           <RefreshCw className={`w-5 h-5 ${loading ? 'animate-spin' : ''}`} />
         </button>
       </div>
+
+      {error && (
+        <div className="mb-6 bg-rose-50 border border-rose-200 text-rose-700 px-4 py-3 rounded-xl text-sm">{error}</div>
+      )}
 
       {/* User Stats */}
       <div className="mb-8">
