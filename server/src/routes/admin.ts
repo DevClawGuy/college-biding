@@ -8,6 +8,7 @@ const router = Router();
 
 function checkAdminKey(req: Request, res: Response): boolean {
   const adminKey = req.headers['x-admin-key'];
+  console.log('Received admin key:', adminKey, '| Expected:', process.env.ADMIN_KEY ? '(set)' : '(NOT SET)');
   if (!process.env.ADMIN_KEY || adminKey !== process.env.ADMIN_KEY) {
     res.status(403).json({ error: 'Unauthorized' });
     return false;

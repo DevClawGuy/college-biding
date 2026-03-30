@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { Shield, Users, Building, TrendingUp, Activity, Loader2, RefreshCw, AlertCircle } from 'lucide-react';
 
-const ADMIN_KEY = 'creiguide2026';
+const ADMIN_PASSWORD = 'creiguide2026';
+const API_ADMIN_KEY = 'houserush2024';
 const SESSION_KEY = 'admin_authenticated';
 
 function StatCard({ label, value, sub }: { label: string; value: string | number; sub?: string }) {
@@ -24,7 +25,7 @@ export default function AdminDashboardPage() {
 
   const handleAuth = (e: React.FormEvent) => {
     e.preventDefault();
-    if (password === ADMIN_KEY) {
+    if (password === ADMIN_PASSWORD) {
       sessionStorage.setItem(SESSION_KEY, 'true');
       setAuthenticated(true);
     }
@@ -39,7 +40,7 @@ export default function AdminDashboardPage() {
 
       const baseUrl = import.meta.env.VITE_API_URL || '/api';
       const res = await fetch(`${baseUrl}/admin/analytics`, {
-        headers: { 'x-admin-key': ADMIN_KEY, 'Content-Type': 'application/json' },
+        headers: { 'x-admin-key': API_ADMIN_KEY, 'Content-Type': 'application/json' },
         signal: controller.signal,
       });
       clearTimeout(timeout);
