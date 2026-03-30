@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback, useRef } from 'react';
 import { useParams, Link, useSearchParams } from 'react-router-dom';
-import { MapPin, Bed, Bath, Ruler, Clock, Heart, ChevronLeft, ChevronRight, GraduationCap, Check, Lock, Users } from 'lucide-react';
+import { MapPin, Bed, Bath, Ruler, Clock, Heart, ChevronLeft, ChevronRight, GraduationCap, Check, Lock, Users, MessageCircle, Send } from 'lucide-react';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import { motion } from 'framer-motion';
 import confetti from 'canvas-confetti';
@@ -54,6 +54,16 @@ interface Bid {
   userUniversity: string;
 }
 
+interface Message {
+  id: string;
+  senderId: string;
+  recipientId: string;
+  senderName: string;
+  body: string;
+  isRead: boolean;
+  createdAt: number;
+}
+
 interface BidGroupMember {
   id: string;
   groupId: string;
@@ -96,6 +106,10 @@ export default function ListingDetailPage() {
   const [showSecureLeaseConfirm, setShowSecureLeaseConfirm] = useState(false);
   const [secureLeaseLoading, setSecureLeaseLoading] = useState(false);
   const [secureLeaseError, setSecureLeaseError] = useState('');
+  const [threadMessages, setThreadMessages] = useState<Message[]>([]);
+  const [msgInput, setMsgInput] = useState('');
+  const [msgSending, setMsgSending] = useState(false);
+  const msgEndRef = useRef<HTMLDivElement>(null);
   const [showCreateGroupModal, setShowCreateGroupModal] = useState(false);
   const [bidGroup, setBidGroup] = useState<BidGroup | null>(null);
   const [groupJoinToast, setGroupJoinToast] = useState('');
@@ -159,6 +173,33 @@ export default function ListingDetailPage() {
 
   useEffect(() => { fetchGroup(); }, [fetchGroup]);
 
+  // Fetch messages for this listing (student sees thread with landlord)
+  const fetchMessages = useCallback(async () => {
+    if (!user || !id) return;
+    try {
+      const { data } = await api.get(`/messages/${id}`);
+      setThreadMessages(data);
+    } catch { /* no messages yet */ }
+  }, [user, id]);
+
+  useEffect(() => { fetchMessages(); }, [fetchMessages]);
+
+  // Auto-scroll messages to bottom
+  useEffect(() => {
+    msgEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [threadMessages.length]);
+
+  const handleSendMessage = async () => {
+    if (!id || !msgInput.trim() || msgSending) return;
+    setMsgSending(true);
+    try {
+      const { data } = await api.post(`/messages/${id}`, { body: msgInput.trim() });
+      setThreadMessages(prev => [...prev, data.message]);
+      setMsgInput('');
+    } catch { /* */ }
+    setMsgSending(false);
+  };
+
   // Auto-join group via URL param
   useEffect(() => {
     const joinGroupId = searchParams.get('join_group');
@@ -201,7 +242,20 @@ export default function ListingDetailPage() {
         setTimeout(() => setExtensionToast(false), 6000);
       }
     });
-    return () => { socket.emit('leave_listing', id); socket.off('bid_update'); socket.off('auction_ended'); socket.off('auction_extended'); };
+    socket.on('new_message', (data) => {
+      if (data.listingId === id) {
+        setThreadMessages(prev => [...prev, {
+          id: data.messageId,
+          senderId: data.senderId,
+          recipientId: '',
+          senderName: data.senderName,
+          body: data.body,
+          isRead: true,
+          createdAt: data.createdAt,
+        }]);
+      }
+    });
+    return () => { socket.emit('leave_listing', id); socket.off('bid_update'); socket.off('auction_ended'); socket.off('auction_extended'); socket.off('new_message'); };
   }, [id]);
 
   const toggleFavorite = async () => {
@@ -567,6 +621,68 @@ export default function ListingDetailPage() {
                     </button>
                   </div>
                 )}
+              </div>
+            )}
+            {/* Message Landlord Section */}
+            {user && user.role !== 'landlord' && listing.landlordId !== user.id && (
+              <div className="bg-white rounded-2xl card-shadow border border-slate-200 p-5 mt-4">
+                <div className="flex items-center gap-2 mb-3">
+                  <MessageCircle className="w-4 h-4 text-brand-600" />
+                  <h3 className="text-sm font-semibold text-slate-900">Message Landlord</h3>
+                </div>
+
+                {/* Thread */}
+                {threadMessages.length > 0 && (
+                  <div className="max-h-60 overflow-y-auto space-y-2 mb-3 px-1">
+                    {threadMessages.map(msg => {
+                      const isOwn = msg.senderId === user.id;
+                      return (
+                        <div key={msg.id} className={`flex ${isOwn ? 'justify-end' : 'justify-start'}`}>
+                          <div className={`max-w-[85%] px-3 py-2 rounded-xl text-sm ${isOwn ? 'bg-brand-600 text-white' : 'bg-slate-100 text-slate-800'}`}>
+                            {!isOwn && <p className="text-xs font-semibold mb-0.5 opacity-70">{msg.senderName}</p>}
+                            <p className="leading-relaxed">{msg.body}</p>
+                            <p className={`text-[10px] mt-1 ${isOwn ? 'text-white/60' : 'text-slate-400'}`}>
+                              {new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                            </p>
+                          </div>
+                        </div>
+                      );
+                    })}
+                    <div ref={msgEndRef} />
+                  </div>
+                )}
+
+                {/* Input */}
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={msgInput}
+                    onChange={(e) => setMsgInput(e.target.value)}
+                    onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSendMessage(); } }}
+                    placeholder="Type a message..."
+                    maxLength={1000}
+                    className="flex-1 px-3 py-2.5 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all"
+                  />
+                  <button
+                    onClick={handleSendMessage}
+                    disabled={msgSending || !msgInput.trim()}
+                    className="px-3 py-2.5 bg-brand-600 hover:bg-brand-700 text-white rounded-xl transition-all disabled:opacity-50 active:scale-95"
+                  >
+                    <Send className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {!user && (
+              <div className="bg-white rounded-2xl card-shadow border border-slate-200 p-5 mt-4">
+                <div className="flex items-center gap-2 mb-3">
+                  <MessageCircle className="w-4 h-4 text-slate-400" />
+                  <h3 className="text-sm font-semibold text-slate-900">Message Landlord</h3>
+                </div>
+                <Link to="/login" className="block text-center w-full bg-slate-100 hover:bg-slate-200 text-slate-700 py-3 rounded-xl font-semibold text-sm transition-all">
+                  Log in to message the landlord
+                </Link>
               </div>
             )}
           </div>

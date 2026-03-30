@@ -100,6 +100,16 @@ export const bidGroupMembers = sqliteTable('bid_group_members', {
   joinedAt: integer('joined_at'),
 });
 
+export const messages = sqliteTable('messages', {
+  id: text('id').primaryKey(),
+  listingId: text('listing_id').notNull().references(() => listings.id),
+  senderId: text('sender_id').notNull().references(() => users.id),
+  recipientId: text('recipient_id').notNull().references(() => users.id),
+  body: text('body').notNull(),
+  isRead: integer('is_read', { mode: 'boolean' }).notNull().default(false),
+  createdAt: integer('created_at').notNull(),
+});
+
 export const favorites = sqliteTable('favorites', {
   userId: text('user_id').notNull().references(() => users.id),
   listingId: text('listing_id').notNull().references(() => listings.id),

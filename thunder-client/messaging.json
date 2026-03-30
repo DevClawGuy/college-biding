@@ -1,0 +1,72 @@
+{
+  "collectionName": "HouseRush — Messaging",
+  "requests": [
+    {
+      "name": "Get Message Thread",
+      "method": "GET",
+      "url": "{{baseUrl}}/api/messages/:listingId",
+      "headers": [
+        { "name": "Authorization", "value": "Bearer {{token}}" }
+      ],
+      "params": [
+        { "name": "listingId", "value": "<listing-id-here>" }
+      ],
+      "notes": "Get messages between logged-in user and the other party for this listing. For landlords, add ?with=studentId. Marks incoming messages as read."
+    },
+    {
+      "name": "Send Message (Student to Landlord)",
+      "method": "POST",
+      "url": "{{baseUrl}}/api/messages/:listingId",
+      "headers": [
+        { "name": "Authorization", "value": "Bearer {{token}}" },
+        { "name": "Content-Type", "value": "application/json" }
+      ],
+      "body": {
+        "body": "Hi, is this property still available for the fall semester?"
+      },
+      "params": [
+        { "name": "listingId", "value": "<listing-id-here>" }
+      ],
+      "notes": "Student sends message — recipient is automatically the landlord. Max 1000 chars."
+    },
+    {
+      "name": "Send Message (Landlord to Student)",
+      "method": "POST",
+      "url": "{{baseUrl}}/api/messages/:listingId",
+      "headers": [
+        { "name": "Authorization", "value": "Bearer {{token}}" },
+        { "name": "Content-Type", "value": "application/json" }
+      ],
+      "body": {
+        "body": "Yes, it is! Would you like to schedule a tour?",
+        "recipientId": "<student-user-id>"
+      },
+      "params": [
+        { "name": "listingId", "value": "<listing-id-here>" }
+      ],
+      "notes": "Landlord sends message — must specify recipientId."
+    },
+    {
+      "name": "Get Unread Message Count",
+      "method": "GET",
+      "url": "{{baseUrl}}/api/messages/unread-count",
+      "headers": [
+        { "name": "Authorization", "value": "Bearer {{token}}" }
+      ],
+      "notes": "Returns { count: number } of unread messages for the logged-in user."
+    },
+    {
+      "name": "Get All Conversations",
+      "method": "GET",
+      "url": "{{baseUrl}}/api/messages/conversations",
+      "headers": [
+        { "name": "Authorization", "value": "Bearer {{token}}" }
+      ],
+      "notes": "Returns all conversations grouped by listing + other party, sorted by most recent. Used for dashboard Messages tab."
+    }
+  ],
+  "variables": [
+    { "name": "baseUrl", "value": "http://localhost:3001" },
+    { "name": "token", "value": "<paste-jwt-token-here>" }
+  ]
+}

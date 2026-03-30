@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useSearchParams, Link, useNavigate } from 'react-router-dom';
-import { Gavel, Home, Heart, Bell, Clock, Trophy, XCircle, Check, ChevronRight, Phone, Mail, Trash2, Lock, Users } from 'lucide-react';
+import { Gavel, Home, Heart, Bell, Clock, Trophy, XCircle, Check, ChevronRight, Phone, Mail, Trash2, Lock, Users, MessageCircle, Send } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { useAuthStore } from '../store/authStore';
 import { useCountdown } from '../hooks/useCountdown';
@@ -9,6 +9,7 @@ import api from '../lib/api';
 const tabs = [
   { id: 'bids', label: 'My Bids', icon: Gavel },
   { id: 'listings', label: 'My Listings', icon: Home },
+  { id: 'messages', label: 'Messages', icon: MessageCircle },
   { id: 'favorites', label: 'Saved', icon: Heart },
   { id: 'notifications', label: 'Notifications', icon: Bell },
 ];
@@ -61,12 +62,20 @@ export default function DashboardPage() {
   const [listings, setListings] = useState<any[]>([]);
   const [favorites, setFavorites] = useState<any[]>([]);
   const [notifications, setNotifications] = useState<any[]>([]);
+  const [conversations, setConversations] = useState<any[]>([]);
+  const [expandedConv, setExpandedConv] = useState<string | null>(null);
+  const [convMessages, setConvMessages] = useState<any[]>([]);
+  const [convMsgInput, setConvMsgInput] = useState('');
+  const [convMsgSending, setConvMsgSending] = useState(false);
+  const [unreadMsgCount, setUnreadMsgCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const winConfettiFired = useRef(false);
 
   useEffect(() => {
     if (!user) { navigate('/login'); return; }
     fetchTabData();
+    // Fetch unread message count for badge
+    api.get('/messages/unread-count').then(({ data }) => setUnreadMsgCount(data.count ?? 0)).catch(() => {});
   }, [activeTab, user]);
 
   const fetchTabData = async () => {
@@ -83,6 +92,12 @@ export default function DashboardPage() {
           break;
         }
         case 'listings': setListings((await api.get('/listings/my/listings')).data); break;
+        case 'messages': {
+          const convData = (await api.get('/messages/conversations')).data;
+          setConversations(convData);
+          setUnreadMsgCount(0);
+          break;
+        }
         case 'favorites': setFavorites((await api.get('/favorites')).data); break;
         case 'notifications': {
           const notifsData = (await api.get('/notifications')).data;
@@ -121,6 +136,9 @@ export default function DashboardPage() {
               activeTab === id ? 'bg-white shadow-sm text-slate-900' : 'text-slate-500 hover:text-slate-700'
             }`}>
             <Icon className="w-4 h-4" />{label}
+            {id === 'messages' && unreadMsgCount > 0 && (
+              <span className="w-5 h-5 bg-rose-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center">{unreadMsgCount > 9 ? '9+' : unreadMsgCount}</span>
+            )}
           </button>
         ))}
       </div>
@@ -208,6 +226,107 @@ export default function DashboardPage() {
                   )}
                 </div>
               ))}
+            </div>
+          )}
+
+          {/* MESSAGES */}
+          {activeTab === 'messages' && (
+            <div className="space-y-3">
+              {conversations.length === 0 ? <EmptyState icon={MessageCircle} title="No messages yet" desc="Message a landlord from any listing page to start a conversation." /> :
+               conversations.map(conv => {
+                const key = `${conv.listingId}:${conv.otherUserId}`;
+                const isExpanded = expandedConv === key;
+                return (
+                  <div key={key} className="bg-white rounded-2xl card-shadow border border-slate-200 overflow-hidden">
+                    <button
+                      onClick={async () => {
+                        if (isExpanded) { setExpandedConv(null); return; }
+                        setExpandedConv(key);
+                        try {
+                          const withParam = user?.role === 'landlord' ? `?with=${conv.otherUserId}` : '';
+                          const { data } = await api.get(`/messages/${conv.listingId}${withParam}`);
+                          setConvMessages(data);
+                        } catch { /* */ }
+                      }}
+                      className="w-full flex items-center gap-4 p-4 hover:bg-slate-50/50 transition-colors text-left"
+                    >
+                      <img src={conv.listingPhoto || ''} alt="" className="w-14 h-14 rounded-xl object-cover bg-slate-100 flex-shrink-0" />
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <h3 className="font-semibold text-slate-900 truncate text-sm">{conv.otherUserName}</h3>
+                          {conv.unreadCount > 0 && (
+                            <span className="w-5 h-5 bg-brand-600 text-white text-[10px] font-bold rounded-full flex items-center justify-center flex-shrink-0">{conv.unreadCount}</span>
+                          )}
+                        </div>
+                        <p className="text-xs text-slate-500 truncate">{conv.listingTitle}</p>
+                        <p className="text-xs text-slate-400 truncate mt-0.5">{conv.lastMessage}</p>
+                      </div>
+                      <div className="flex flex-col items-end gap-1 flex-shrink-0">
+                        <span className="text-[10px] text-slate-400">{new Date(conv.lastMessageAt).toLocaleDateString()}</span>
+                        <ChevronRight className={`w-4 h-4 text-slate-300 transition-transform ${isExpanded ? 'rotate-90' : ''}`} />
+                      </div>
+                    </button>
+
+                    {isExpanded && (
+                      <div className="border-t border-slate-100 p-4">
+                        <div className="max-h-64 overflow-y-auto space-y-2 mb-3">
+                          {convMessages.map((msg: { id: string; senderId: string; senderName: string; body: string; createdAt: number }) => {
+                            const isOwn = msg.senderId === user?.id;
+                            return (
+                              <div key={msg.id} className={`flex ${isOwn ? 'justify-end' : 'justify-start'}`}>
+                                <div className={`max-w-[80%] px-3 py-2 rounded-xl text-sm ${isOwn ? 'bg-brand-600 text-white' : 'bg-slate-100 text-slate-800'}`}>
+                                  {!isOwn && <p className="text-xs font-semibold mb-0.5 opacity-70">{msg.senderName}</p>}
+                                  <p className="leading-relaxed">{msg.body}</p>
+                                  <p className={`text-[10px] mt-1 ${isOwn ? 'text-white/60' : 'text-slate-400'}`}>
+                                    {new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                  </p>
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                        <div className="flex gap-2">
+                          <input
+                            type="text"
+                            value={convMsgInput}
+                            onChange={(e) => setConvMsgInput(e.target.value)}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter' && !e.shiftKey) {
+                                e.preventDefault();
+                                if (!convMsgInput.trim() || convMsgSending) return;
+                                setConvMsgSending(true);
+                                const recipientId = user?.role === 'landlord' ? conv.otherUserId : undefined;
+                                api.post(`/messages/${conv.listingId}`, { body: convMsgInput.trim(), recipientId }).then(({ data }) => {
+                                  setConvMessages(prev => [...prev, data.message]);
+                                  setConvMsgInput('');
+                                }).catch(() => {}).finally(() => setConvMsgSending(false));
+                              }
+                            }}
+                            placeholder="Type a reply..."
+                            maxLength={1000}
+                            className="flex-1 px-3 py-2.5 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all"
+                          />
+                          <button
+                            onClick={() => {
+                              if (!convMsgInput.trim() || convMsgSending) return;
+                              setConvMsgSending(true);
+                              const recipientId = user?.role === 'landlord' ? conv.otherUserId : undefined;
+                              api.post(`/messages/${conv.listingId}`, { body: convMsgInput.trim(), recipientId }).then(({ data }) => {
+                                setConvMessages(prev => [...prev, data.message]);
+                                setConvMsgInput('');
+                              }).catch(() => {}).finally(() => setConvMsgSending(false));
+                            }}
+                            disabled={convMsgSending || !convMsgInput.trim()}
+                            className="px-3 py-2.5 bg-brand-600 hover:bg-brand-700 text-white rounded-xl transition-all disabled:opacity-50 active:scale-95"
+                          >
+                            <Send className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
             </div>
           )}
 

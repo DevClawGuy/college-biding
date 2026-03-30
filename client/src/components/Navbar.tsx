@@ -1,6 +1,6 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
-import { Search, LayoutDashboard, PlusCircle, Bell, LogOut, Menu, X, Zap } from 'lucide-react';
+import { Search, LayoutDashboard, PlusCircle, Bell, LogOut, Menu, X, Zap, MessageCircle } from 'lucide-react';
 import { useState, useEffect, useCallback } from 'react';
 import api from '../lib/api';
 
@@ -9,6 +9,7 @@ export default function Navbar() {
   const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
+  const [unreadMsgCount, setUnreadMsgCount] = useState(0);
   const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
@@ -22,11 +23,14 @@ export default function Navbar() {
     api.get('/notifications/unread-count').then(({ data }) => {
       setUnreadCount(data.count ?? 0);
     }).catch(() => {});
+    api.get('/messages/unread-count').then(({ data }) => {
+      setUnreadMsgCount(data.count ?? 0);
+    }).catch(() => {});
   }, [user]);
 
   // Fetch on mount + poll every 30s
   useEffect(() => {
-    if (!user) { setUnreadCount(0); return; }
+    if (!user) { setUnreadCount(0); setUnreadMsgCount(0); return; }
     fetchUnreadCount();
     const interval = setInterval(fetchUnreadCount, 30_000);
     return () => clearInterval(interval);
@@ -90,6 +94,14 @@ export default function Navbar() {
           <div className="hidden md:flex items-center gap-3">
             {user ? (
               <>
+                <button onClick={() => navigate('/dashboard?tab=messages')} className="relative p-2 text-slate-500 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition-all">
+                  <MessageCircle className="w-5 h-5" />
+                  {unreadMsgCount > 0 && (
+                    <span className="absolute top-1 right-1 w-4 h-4 bg-brand-600 text-white text-[10px] font-bold rounded-full flex items-center justify-center ring-2 ring-white">
+                      {unreadMsgCount > 9 ? '9' : unreadMsgCount}
+                    </span>
+                  )}
+                </button>
                 <button onClick={handleBellClick} className="relative p-2 text-slate-500 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition-all">
                   <Bell className="w-5 h-5" />
                   {unreadCount > 0 && (

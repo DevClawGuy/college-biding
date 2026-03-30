@@ -118,6 +118,17 @@ export async function initializeDatabase(): Promise<void> {
     `ALTER TABLE bids ADD COLUMN group_id TEXT`,
     `ALTER TABLE users ADD COLUMN parent_email TEXT`,
     `ALTER TABLE users ADD COLUMN parent_access_token TEXT`,
+    `CREATE TABLE IF NOT EXISTS messages (
+      id TEXT PRIMARY KEY,
+      listing_id TEXT NOT NULL,
+      sender_id TEXT NOT NULL,
+      recipient_id TEXT NOT NULL,
+      body TEXT NOT NULL,
+      is_read INTEGER DEFAULT 0,
+      created_at INTEGER NOT NULL
+    )`,
+    `CREATE INDEX IF NOT EXISTS idx_messages_listing ON messages(listing_id)`,
+    `CREATE INDEX IF NOT EXISTS idx_messages_recipient ON messages(recipient_id)`,
   ];
   for (const sql of migrations) {
     try {

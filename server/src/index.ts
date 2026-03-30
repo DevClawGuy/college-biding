@@ -14,6 +14,7 @@ import adminRoutes from './routes/admin';
 import contactRoutes from './routes/contact';
 import bidGroupRoutes, { setGroupBidSocket } from './routes/bidGroups';
 import parentAccessRoutes from './routes/parentAccess';
+import messageRoutes, { setMessageSocket } from './routes/messages';
 import { setAuctionSocket, startAuctionCloseJob } from './jobs/auctionClose';
 
 // Prevent crashes from killing the process
@@ -64,6 +65,7 @@ const io = new SocketServer(server, {
 setBidSocket(io);
 setAuctionSocket(io);
 setGroupBidSocket(io);
+setMessageSocket(io);
 
 // Routes
 app.use('/api/auth', authRoutes);
@@ -75,6 +77,7 @@ app.use('/api/admin', adminRoutes);
 app.use('/api/contact', contactRoutes);
 app.use('/api/bid-groups', bidGroupRoutes);
 app.use('/api/parent-access', parentAccessRoutes);
+app.use('/api/messages', messageRoutes);
 
 app.get('/api/health', (_req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
