@@ -16,6 +16,7 @@ import TermsPage from './pages/TermsPage';
 import PrivacyPage from './pages/PrivacyPage';
 import HowItWorksPage from './pages/HowItWorksPage';
 import ContactPage from './pages/ContactPage';
+import AdminDashboardPage from './pages/AdminDashboardPage';
 import { useAuthStore } from './store/authStore';
 import { getSocket } from './lib/socket';
 
@@ -49,6 +50,7 @@ function AppContent() {
               <Route path="/dashboard" element={<DashboardPage />} />
               <Route path="/create-listing" element={<CreateListingPage />} />
               <Route path="/admin" element={<AdminPage />} />
+              <Route path="/admin/dashboard" element={<AdminDashboardPage />} />
               <Route path="/profile" element={<ProfilePage />} />
               <Route path="/terms" element={<TermsPage />} />
               <Route path="/privacy" element={<PrivacyPage />} />

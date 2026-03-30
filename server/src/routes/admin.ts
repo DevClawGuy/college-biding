@@ -2,7 +2,7 @@ import { Router, Request, Response } from 'express';
 import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
 import { db, schema } from '../db';
-import { eq, like } from 'drizzle-orm';
+import { eq, like, gte, desc, sql } from 'drizzle-orm';
 
 const router = Router();
 
@@ -341,6 +341,110 @@ router.post('/listings/:id/reject', async (req: Request, res: Response) => {
     await db.update(schema.listings).set({ approvalStatus: 'rejected' }).where(eq(schema.listings.id, String(req.params.id))).run();
     res.json({ success: true });
   } catch (error) {
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// ============================================================
+// Admin Analytics Dashboard
+// ============================================================
+router.get('/analytics', async (req: Request, res: Response) => {
+  try {
+    if (!checkAdminKey(req, res)) return;
+
+    const now = new Date();
+    const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate()).toISOString();
+    const weekAgo = new Date(now.getTime() - 7 * 86400000).toISOString();
+    const dayFromNow = new Date(now.getTime() + 86400000).toISOString();
+
+    // User stats
+    const allUsers = await db.select({ id: schema.users.id, role: schema.users.role, isEduVerified: schema.users.isEduVerified, createdAt: schema.users.createdAt }).from(schema.users);
+    const students = allUsers.filter(u => u.role === 'student');
+    const landlords = allUsers.filter(u => u.role === 'landlord');
+    const newToday = allUsers.filter(u => u.createdAt >= todayStart).length;
+    const newThisWeek = allUsers.filter(u => u.createdAt >= weekAgo).length;
+    const eduVerified = students.filter(u => u.isEduVerified).length;
+
+    // Active users (bid in last 7 days)
+    const recentBidders = await db.select({ userId: schema.bids.userId }).from(schema.bids).where(gte(schema.bids.timestamp, weekAgo));
+    const activeUsers = new Set(recentBidders.map(b => b.userId)).size;
+
+    // Listing stats
+    const allListings = await db.select({
+      id: schema.listings.id, status: schema.listings.status,
+      approvalStatus: schema.listings.approvalStatus, auctionEnd: schema.listings.auctionEnd,
+      startingBid: schema.listings.startingBid, currentBid: schema.listings.currentBid,
+      bidCount: schema.listings.bidCount, title: schema.listings.title,
+    }).from(schema.listings);
+    const activeListings = allListings.filter(l => l.status === 'active' && l.approvalStatus === 'approved');
+    const pendingListings = allListings.filter(l => l.approvalStatus === 'pending');
+    const closedListings = allListings.filter(l => l.status === 'ended');
+    const endingSoon = activeListings.filter(l => l.auctionEnd <= dayFromNow);
+    const avgStarting = activeListings.length > 0 ? Math.round(activeListings.reduce((s, l) => s + l.startingBid, 0) / activeListings.length) : 0;
+    const avgCurrent = activeListings.length > 0 ? Math.round(activeListings.reduce((s, l) => s + l.currentBid, 0) / activeListings.length) : 0;
+
+    // Bid stats
+    const allBids = await db.select({ id: schema.bids.id, amount: schema.bids.amount, timestamp: schema.bids.timestamp, listingId: schema.bids.listingId }).from(schema.bids);
+    const bidsToday = allBids.filter(b => b.timestamp >= todayStart).length;
+    const highestBid = allBids.reduce((max, b) => b.amount > max ? b.amount : max, 0);
+    const avgBidsPerListing = allListings.length > 0 ? Math.round(allBids.length / allListings.length * 10) / 10 : 0;
+
+    // Most contested listing
+    const contestedListing = allListings.reduce((best, l) => l.bidCount > (best?.bidCount ?? 0) ? l : best, allListings[0]);
+
+    // Recent activity feed (last 10 bids with listing + user info)
+    const recentBids = await db.select({
+      bidId: schema.bids.id,
+      amount: schema.bids.amount,
+      timestamp: schema.bids.timestamp,
+      isAutoBid: schema.bids.isAutoBid,
+      userId: schema.bids.userId,
+      listingTitle: schema.listings.title,
+    })
+      .from(schema.bids)
+      .leftJoin(schema.listings, eq(schema.bids.listingId, schema.listings.id))
+      .orderBy(desc(schema.bids.timestamp))
+      .limit(10);
+
+    const activityFeed = recentBids.map(b => ({
+      type: b.isAutoBid ? 'auto_bid' : 'bid',
+      user: `Student #${b.userId?.substring(0, 6)}`,
+      listing: b.listingTitle ?? 'Unknown',
+      amount: b.amount,
+      timestamp: b.timestamp,
+    }));
+
+    res.json({
+      users: {
+        total: allUsers.length,
+        students: students.length,
+        landlords: landlords.length,
+        newToday,
+        newThisWeek,
+        activeLastWeek: activeUsers,
+        eduVerified,
+        eduUnverified: students.length - eduVerified,
+      },
+      listings: {
+        total: allListings.length,
+        active: activeListings.length,
+        pending: pendingListings.length,
+        closed: closedListings.length,
+        endingIn24h: endingSoon.length,
+        avgStartingPrice: avgStarting,
+        avgCurrentBid: avgCurrent,
+      },
+      bids: {
+        total: allBids.length,
+        today: bidsToday,
+        avgPerListing: avgBidsPerListing,
+        highestEver: highestBid,
+        mostContested: contestedListing ? { title: contestedListing.title, bidCount: contestedListing.bidCount } : null,
+      },
+      activityFeed,
+    });
+  } catch (error) {
+    console.error('Analytics error:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });

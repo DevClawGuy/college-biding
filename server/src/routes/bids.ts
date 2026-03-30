@@ -1,7 +1,7 @@
 import { Router, Response } from 'express';
 import crypto from 'crypto';
 import { db, schema } from '../db';
-import { eq, and, desc, gte } from 'drizzle-orm';
+import { eq, and, desc, gte, lt, sql } from 'drizzle-orm';
 import { authenticateToken, AuthRequest } from '../middleware/auth';
 import { Server as SocketServer } from 'socket.io';
 
@@ -95,6 +95,25 @@ router.post('/listing/:listingId', authenticateToken, async (req: AuthRequest, r
     const bidId = crypto.randomUUID();
     const timestamp = new Date().toISOString();
 
+    // Atomic update: only succeeds if current_bid hasn't changed since we read it
+    // This prevents two simultaneous bids from both passing validation
+    const updateResult = await db.update(schema.listings).set({
+      currentBid: amount,
+      bidCount: sql`${schema.listings.bidCount} + 1`,
+    }).where(
+      and(
+        eq(schema.listings.id, listingId),
+        lt(schema.listings.currentBid, amount),
+      )
+    ).run();
+
+    // If 0 rows affected, another bid was placed first
+    if (updateResult.rowsAffected === 0) {
+      res.status(409).json({ error: 'Another bid was placed first. Please refresh and try again.' });
+      return;
+    }
+
+    // Insert the bid record (listing is already updated atomically)
     await db.insert(schema.bids).values({
       id: bidId,
       listingId,
@@ -104,12 +123,6 @@ router.post('/listing/:listingId', authenticateToken, async (req: AuthRequest, r
       timestamp,
     }).run();
 
-    // Update listing
-    const updateFields: any = {
-      currentBid: amount,
-      bidCount: listing.bidCount + 1,
-    };
-
     // Anti-snipe: extend auction by 5 minutes if ending within 5 minutes
     const fiveMinutes = 5 * 60 * 1000;
     const auctionEnd = new Date(listing.auctionEnd).getTime();
@@ -117,11 +130,13 @@ router.post('/listing/:listingId', authenticateToken, async (req: AuthRequest, r
     let newAuctionEnd: string | null = null;
     if (auctionEnd - now < fiveMinutes && auctionEnd > now) {
       newAuctionEnd = new Date(auctionEnd + fiveMinutes).toISOString();
-      updateFields.auctionEnd = newAuctionEnd;
+      await db.update(schema.listings).set({ auctionEnd: newAuctionEnd }).where(eq(schema.listings.id, listingId)).run();
       console.log(`Anti-snipe: extending auction ${listingId} to ${newAuctionEnd}`);
     }
 
-    await db.update(schema.listings).set(updateFields).where(eq(schema.listings.id, listingId)).run();
+    // Re-read listing to get accurate bidCount after atomic update
+    const updatedListing = await db.select().from(schema.listings).where(eq(schema.listings.id, listingId)).get();
+    const newBidCount = updatedListing?.bidCount ?? (listing.bidCount + 1);
 
     const bidder = await db.select().from(schema.users).where(eq(schema.users.id, req.userId!)).get();
 
@@ -142,7 +157,7 @@ router.post('/listing/:listingId', authenticateToken, async (req: AuthRequest, r
         listingId,
         bid,
         currentBid: amount,
-        bidCount: listing.bidCount + 1,
+        bidCount: newBidCount,
       });
 
       // Emit auction extension event
