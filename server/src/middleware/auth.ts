@@ -1,5 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
+import { db, schema } from '../db';
+import { eq } from 'drizzle-orm';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'houserush-secret-key-change-in-production';
 
@@ -19,6 +21,14 @@ export function authenticateToken(req: AuthRequest, res: Response, next: NextFun
   try {
     const decoded = jwt.verify(token, JWT_SECRET) as { userId: string };
     req.userId = decoded.userId;
+
+    // Update last_seen_at in background (non-blocking)
+    db.update(schema.users)
+      .set({ lastSeenAt: Date.now() })
+      .where(eq(schema.users.id, decoded.userId))
+      .run()
+      .catch(() => { /* non-fatal */ });
+
     next();
   } catch {
     res.status(403).json({ error: 'Invalid or expired token' });

@@ -138,6 +138,7 @@ export async function initializeDatabase(): Promise<void> {
       viewed_at INTEGER NOT NULL
     )`,
     `CREATE UNIQUE INDEX IF NOT EXISTS idx_listing_views_unique ON listing_views(listing_id, viewer_id) WHERE viewer_id IS NOT NULL`,
+    `ALTER TABLE users ADD COLUMN last_seen_at INTEGER`,
   ];
   for (const sql of migrations) {
     try {

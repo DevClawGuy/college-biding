@@ -17,6 +17,7 @@ export const users = sqliteTable('users', {
   verificationTokenExpires: integer('verification_token_expires'),
   parentEmail: text('parent_email'),
   parentAccessToken: text('parent_access_token'),
+  lastSeenAt: integer('last_seen_at'),
   createdAt: text('created_at').notNull().default(''),
 });
 

@@ -3,6 +3,7 @@ import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
 import { db, schema } from '../db';
 import { eq, like, gte, desc, sql } from 'drizzle-orm';
+import { sendEmail } from '../lib/email';
 
 const router = Router();
 
@@ -362,16 +363,16 @@ router.get('/analytics', async (req: Request, res: Response) => {
     const dayFromNow = new Date(now.getTime() + 86400000).toISOString();
 
     // User stats
-    const allUsers = await db.select({ id: schema.users.id, role: schema.users.role, isEduVerified: schema.users.isEduVerified, createdAt: schema.users.createdAt }).from(schema.users);
+    const allUsers = await db.select({ id: schema.users.id, role: schema.users.role, isEduVerified: schema.users.isEduVerified, createdAt: schema.users.createdAt, lastSeenAt: schema.users.lastSeenAt }).from(schema.users);
     const students = allUsers.filter(u => u.role === 'student');
     const landlords = allUsers.filter(u => u.role === 'landlord');
     const newToday = allUsers.filter(u => u.createdAt >= todayStart).length;
     const newThisWeek = allUsers.filter(u => u.createdAt >= weekAgo).length;
     const eduVerified = students.filter(u => u.isEduVerified).length;
 
-    // Active users (bid in last 7 days)
-    const recentBidders = await db.select({ userId: schema.bids.userId }).from(schema.bids).where(gte(schema.bids.timestamp, weekAgo));
-    const activeUsers = new Set(recentBidders.map(b => b.userId)).size;
+    // Active users: last_seen_at within 7 days (includes any authenticated request)
+    const weekAgoMs = Date.now() - 7 * 86400000;
+    const activeUsers = allUsers.filter(u => u.lastSeenAt && u.lastSeenAt > weekAgoMs).length;
 
     // Listing stats
     const allListings = await db.select({
@@ -425,7 +426,7 @@ router.get('/analytics', async (req: Request, res: Response) => {
         landlords: landlords.length,
         newToday,
         newThisWeek,
-        activeLastWeek: activeUsers,
+        active7d: activeUsers,
         eduVerified,
         eduUnverified: students.length - eduVerified,
       },
@@ -635,6 +636,106 @@ router.post('/seed-test-listings', async (req: Request, res: Response) => {
   } catch (error) {
     console.error('Seed test listings error:', error);
     res.status(500).json({ error: 'Seed failed', details: String(error) });
+  }
+});
+
+// ============================================================
+// GET /api/admin/users — list all users with bid counts
+// ============================================================
+router.get('/users', async (req: Request, res: Response) => {
+  try {
+    if (!checkAdminKey(req, res)) return;
+
+    const allUsers = await db.select({
+      id: schema.users.id,
+      name: schema.users.name,
+      email: schema.users.email,
+      role: schema.users.role,
+      isEduVerified: schema.users.isEduVerified,
+      createdAt: schema.users.createdAt,
+      lastSeenAt: schema.users.lastSeenAt,
+    }).from(schema.users);
+
+    // Count bids per user
+    const allBids = await db.select({ userId: schema.bids.userId }).from(schema.bids);
+    const bidCountMap = new Map<string, number>();
+    for (const b of allBids) {
+      bidCountMap.set(b.userId, (bidCountMap.get(b.userId) ?? 0) + 1);
+    }
+
+    const users = allUsers.map(u => ({
+      ...u,
+      bidCount: bidCountMap.get(u.id) ?? 0,
+    }));
+
+    res.json(users);
+  } catch (error) {
+    console.error('Admin users error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// ============================================================
+// POST /api/admin/send-reminder — send email to selected users
+// ============================================================
+// TODO: add scheduled/automated reminder sends via cron
+router.post('/send-reminder', async (req: Request, res: Response) => {
+  try {
+    if (!checkAdminKey(req, res)) return;
+
+    const { userIds, subject, message } = req.body;
+
+    if (!Array.isArray(userIds) || userIds.length === 0) {
+      res.status(400).json({ error: 'userIds array is required' });
+      return;
+    }
+    if (!subject || !message) {
+      res.status(400).json({ error: 'subject and message are required' });
+      return;
+    }
+    if (userIds.length > 50) {
+      res.status(400).json({ error: 'Maximum 50 recipients per send' });
+      return;
+    }
+
+    let sent = 0;
+    let failed = 0;
+
+    for (const userId of userIds) {
+      try {
+        const user = await db.select({ name: schema.users.name, email: schema.users.email })
+          .from(schema.users).where(eq(schema.users.id, userId)).get();
+        if (!user) { failed++; continue; }
+
+        const firstName = user.name.split(' ')[0];
+        const personalizedMessage = message.replace(/\[first name\]/gi, firstName);
+        const personalizedSubject = subject.replace(/\[first name\]/gi, firstName);
+
+        const html = `
+          <div style="font-family: 'Inter', system-ui, sans-serif; max-width: 560px; margin: 0 auto; padding: 40px 24px;">
+            <div style="text-align: center; margin-bottom: 24px;">
+              <span style="font-size: 36px;">&#127968;</span>
+            </div>
+            <div style="white-space: pre-wrap; color: #334155; font-size: 15px; line-height: 1.7;">
+${personalizedMessage}
+            </div>
+            <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 32px 0 16px;" />
+            <p style="color: #94a3b8; font-size: 12px; text-align: center;">HouseRush — The fastest way to find off-campus housing.</p>
+          </div>
+        `;
+
+        const success = await sendEmail(user.email, personalizedSubject, html);
+        if (success) { sent++; } else { failed++; }
+      } catch {
+        failed++;
+      }
+    }
+
+    console.log(`Admin send-reminder: sent ${sent}, failed ${failed}`);
+    res.json({ sent, failed });
+  } catch (error) {
+    console.error('Send reminder error:', error);
+    res.status(500).json({ error: 'Internal server error' });
   }
 });
 
