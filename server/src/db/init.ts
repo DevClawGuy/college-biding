@@ -97,6 +97,25 @@ export async function initializeDatabase(): Promise<void> {
     `CREATE UNIQUE INDEX IF NOT EXISTS favorites_unique ON favorites (user_id, listing_id)`,
     `ALTER TABLE listings ADD COLUMN secure_lease_price INTEGER`,
     `ALTER TABLE bids ADD COLUMN is_secure_lease INTEGER NOT NULL DEFAULT 0`,
+    `CREATE TABLE IF NOT EXISTS bid_groups (
+      id TEXT PRIMARY KEY,
+      listing_id TEXT NOT NULL,
+      leader_id TEXT NOT NULL,
+      name TEXT NOT NULL,
+      status TEXT DEFAULT 'active',
+      created_at INTEGER NOT NULL
+    )`,
+    `CREATE TABLE IF NOT EXISTS bid_group_members (
+      id TEXT PRIMARY KEY,
+      group_id TEXT NOT NULL,
+      user_id TEXT,
+      email TEXT NOT NULL,
+      name TEXT,
+      status TEXT DEFAULT 'pending',
+      invited_at INTEGER NOT NULL,
+      joined_at INTEGER
+    )`,
+    `ALTER TABLE bids ADD COLUMN group_id TEXT`,
   ];
   for (const sql of migrations) {
     try {

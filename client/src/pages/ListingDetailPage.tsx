@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback, useRef } from 'react';
-import { useParams, Link } from 'react-router-dom';
-import { MapPin, Bed, Bath, Ruler, Clock, Heart, ChevronLeft, ChevronRight, GraduationCap, Check, Lock } from 'lucide-react';
+import { useParams, Link, useSearchParams } from 'react-router-dom';
+import { MapPin, Bed, Bath, Ruler, Clock, Heart, ChevronLeft, ChevronRight, GraduationCap, Check, Lock, Users } from 'lucide-react';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import { motion } from 'framer-motion';
 import confetti from 'canvas-confetti';
@@ -8,6 +8,7 @@ import { useCountdown } from '../hooks/useCountdown';
 import { useAuthStore } from '../store/authStore';
 import { getSocket } from '../lib/socket';
 import BidModal from '../components/BidModal';
+import CreateGroupModal from '../components/CreateGroupModal';
 import api from '../lib/api';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
@@ -53,6 +54,27 @@ interface Bid {
   userUniversity: string;
 }
 
+interface BidGroupMember {
+  id: string;
+  groupId: string;
+  userId: string | null;
+  email: string;
+  name: string | null;
+  status: 'pending' | 'accepted' | 'declined';
+  invitedAt: number;
+  joinedAt: number | null;
+}
+
+interface BidGroup {
+  id: string;
+  listingId: string;
+  leaderId: string;
+  name: string;
+  status: string;
+  leaderName: string;
+  members: BidGroupMember[];
+}
+
 const icon = L.icon({
   iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
   iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
@@ -62,6 +84,7 @@ const icon = L.icon({
 
 export default function ListingDetailPage() {
   const { id } = useParams<{ id: string }>();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [listing, setListing] = useState<Listing | null>(null);
   const [bids, setBids] = useState<Bid[]>([]);
   const [loading, setLoading] = useState(true);
@@ -73,6 +96,10 @@ export default function ListingDetailPage() {
   const [showSecureLeaseConfirm, setShowSecureLeaseConfirm] = useState(false);
   const [secureLeaseLoading, setSecureLeaseLoading] = useState(false);
   const [secureLeaseError, setSecureLeaseError] = useState('');
+  const [showCreateGroupModal, setShowCreateGroupModal] = useState(false);
+  const [bidGroup, setBidGroup] = useState<BidGroup | null>(null);
+  const [groupJoinToast, setGroupJoinToast] = useState('');
+  const [showGroupBidModal, setShowGroupBidModal] = useState(false);
   const { user } = useAuthStore();
   const confettiFired = useRef(false);
 
@@ -120,6 +147,31 @@ export default function ListingDetailPage() {
   useEffect(() => {
     if (user && id) api.get(`/favorites/check/${id}`).then(({ data }) => setIsFavorited(data.isFavorited)).catch(() => {});
   }, [user, id]);
+
+  // Fetch group data
+  const fetchGroup = useCallback(async () => {
+    if (!user || !id) return;
+    try {
+      const { data } = await api.get(`/bid-groups/${id}`);
+      setBidGroup(data);
+    } catch { /* no group */ }
+  }, [user, id]);
+
+  useEffect(() => { fetchGroup(); }, [fetchGroup]);
+
+  // Auto-join group via URL param
+  useEffect(() => {
+    const joinGroupId = searchParams.get('join_group');
+    if (!joinGroupId || !user) return;
+    api.post(`/bid-groups/${joinGroupId}/join`).then(() => {
+      setGroupJoinToast('You joined the group!');
+      setTimeout(() => setGroupJoinToast(''), 5000);
+      fetchGroup();
+      // Remove the join_group param from URL
+      searchParams.delete('join_group');
+      setSearchParams(searchParams, { replace: true });
+    }).catch(() => {});
+  }, [user, searchParams]);
 
   useEffect(() => {
     if (!id) return;
@@ -209,6 +261,13 @@ export default function ListingDetailPage() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      {/* Group join toast */}
+      {groupJoinToast && (
+        <div className="mb-4 bg-brand-50 border border-brand-200 text-brand-800 px-4 py-3 rounded-xl text-sm font-medium flex items-center gap-2">
+          <Users className="w-4 h-4" /> {groupJoinToast}
+        </div>
+      )}
+
       {/* Auction extension toast */}
       {extensionToast && (
         <div className="mb-4 bg-amber-50 border border-amber-200 text-amber-800 px-4 py-3 rounded-xl text-sm font-medium flex items-center gap-2 animate-pulse">
@@ -464,6 +523,52 @@ export default function ListingDetailPage() {
                 <p className="text-xs text-slate-400 mt-1 text-center">Minimum bid: ${((listing.currentBid ?? 0) + 25).toLocaleString()}/mo</p>
               )}
             </div>
+
+            {/* Group Bidding Section */}
+            {listing.status !== 'ended' && !countdown.isExpired && user && user.role !== 'landlord' && (
+              <div className="bg-white rounded-2xl card-shadow border border-slate-200 p-5 mt-4">
+                <div className="flex items-center gap-2 mb-4">
+                  <Users className="w-4 h-4 text-brand-600" />
+                  <h3 className="text-sm font-semibold text-slate-900">Group Bidding</h3>
+                </div>
+
+                {bidGroup ? (
+                  <div>
+                    <div className="bg-brand-50 border border-brand-100 rounded-xl p-3.5 mb-3">
+                      <p className="text-sm font-semibold text-brand-800">{bidGroup.name}</p>
+                      <p className="text-xs text-brand-600 mt-0.5">{bidGroup.members.length} member{bidGroup.members.length !== 1 ? 's' : ''}</p>
+                    </div>
+                    <div className="space-y-1.5 mb-4">
+                      {bidGroup.members.map(m => (
+                        <div key={m.id} className="flex items-center justify-between text-xs bg-slate-50 rounded-lg px-3 py-2 border border-slate-100">
+                          <span className="text-slate-700 truncate">{m.name ?? m.email}</span>
+                          {m.status === 'accepted'
+                            ? <Check className="w-3.5 h-3.5 text-emerald-500 flex-shrink-0" />
+                            : <Clock className="w-3.5 h-3.5 text-amber-500 flex-shrink-0" />
+                          }
+                        </div>
+                      ))}
+                    </div>
+                    {bidGroup.leaderId === user.id ? (
+                      <button onClick={() => setShowGroupBidModal(true)}
+                        className="w-full bg-brand-600 hover:bg-brand-700 text-white py-3 rounded-xl font-semibold text-sm transition-all flex items-center justify-center gap-2 active:scale-[0.98]">
+                        <Users className="w-4 h-4" /> Place Group Bid
+                      </button>
+                    ) : (
+                      <p className="text-xs text-slate-500 text-center">You're in {bidGroup.leaderName}'s group. Only the leader can place bids.</p>
+                    )}
+                  </div>
+                ) : (
+                  <div>
+                    <p className="text-xs text-slate-500 mb-3">Invite roommates to bid together as a group.</p>
+                    <button onClick={() => setShowCreateGroupModal(true)}
+                      className="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 py-3 rounded-xl font-semibold text-sm transition-all flex items-center justify-center gap-2">
+                      <Users className="w-4 h-4" /> Create Group Bid
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -518,6 +623,30 @@ export default function ListingDetailPage() {
             <p className="text-xs text-slate-400 mt-4 text-center">By confirming, you agree to commit to this monthly rent.</p>
           </motion.div>
         </div>
+      )}
+
+      {/* Create Group Modal */}
+      {showCreateGroupModal && (
+        <CreateGroupModal
+          isOpen={showCreateGroupModal}
+          onClose={() => setShowCreateGroupModal(false)}
+          listingId={listing.id}
+          onGroupCreated={fetchGroup}
+        />
+      )}
+
+      {/* Group Bid Modal (reuses BidModal but submits to group endpoint) */}
+      {showGroupBidModal && bidGroup && (
+        <BidModal
+          isOpen={showGroupBidModal}
+          onClose={() => setShowGroupBidModal(false)}
+          listingId={listing.id}
+          listingTitle={listing.title}
+          currentBid={listing.currentBid ?? 0}
+          onBidPlaced={fetchData}
+          groupId={bidGroup.id}
+          groupName={bidGroup.name}
+        />
       )}
     </div>
   );

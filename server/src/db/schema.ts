@@ -56,6 +56,7 @@ export const bids = sqliteTable('bids', {
   amount: integer('amount').notNull(),
   isAutoBid: integer('is_auto_bid', { mode: 'boolean' }).notNull().default(false),
   isSecureLease: integer('is_secure_lease', { mode: 'boolean' }).notNull().default(false),
+  groupId: text('group_id'),
   timestamp: text('timestamp').notNull(),
 });
 
@@ -75,6 +76,26 @@ export const notifications = sqliteTable('notifications', {
   listingId: text('listing_id'),
   read: integer('read', { mode: 'boolean' }).notNull().default(false),
   createdAt: text('created_at').notNull().default(''),
+});
+
+export const bidGroups = sqliteTable('bid_groups', {
+  id: text('id').primaryKey(),
+  listingId: text('listing_id').notNull().references(() => listings.id),
+  leaderId: text('leader_id').notNull().references(() => users.id),
+  name: text('name').notNull(),
+  status: text('status', { enum: ['active', 'dissolved'] }).notNull().default('active'),
+  createdAt: integer('created_at').notNull(),
+});
+
+export const bidGroupMembers = sqliteTable('bid_group_members', {
+  id: text('id').primaryKey(),
+  groupId: text('group_id').notNull().references(() => bidGroups.id),
+  userId: text('user_id'),
+  email: text('email').notNull(),
+  name: text('name'),
+  status: text('status', { enum: ['pending', 'accepted', 'declined'] }).notNull().default('pending'),
+  invitedAt: integer('invited_at').notNull(),
+  joinedAt: integer('joined_at'),
 });
 
 export const favorites = sqliteTable('favorites', {

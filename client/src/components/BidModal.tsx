@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { X, DollarSign, Zap, Check } from 'lucide-react';
+import { X, DollarSign, Zap, Check, Users } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import api from '../lib/api';
 
@@ -10,9 +10,11 @@ interface BidModalProps {
   listingTitle: string;
   currentBid: number;
   onBidPlaced: () => void;
+  groupId?: string;
+  groupName?: string;
 }
 
-export default function BidModal({ isOpen, onClose, listingId, listingTitle, currentBid, onBidPlaced }: BidModalProps) {
+export default function BidModal({ isOpen, onClose, listingId, listingTitle, currentBid, onBidPlaced, groupId, groupName }: BidModalProps) {
   const [bidAmount, setBidAmount] = useState(currentBid + 25);
   const [autoBidMax, setAutoBidMax] = useState(0);
   const [showAutoBid, setShowAutoBid] = useState(false);
@@ -28,8 +30,12 @@ export default function BidModal({ isOpen, onClose, listingId, listingTitle, cur
     setLoading(true);
     setError('');
     try {
-      await api.post(`/bids/listing/${listingId}`, { amount: bidAmount });
-      if (showAutoBid && autoBidMax > bidAmount) {
+      if (groupId) {
+        await api.post(`/bid-groups/${groupId}/bid`, { amount: bidAmount });
+      } else {
+        await api.post(`/bids/listing/${listingId}`, { amount: bidAmount });
+      }
+      if (!groupId && showAutoBid && autoBidMax > bidAmount) {
         await api.post(`/bids/auto/${listingId}`, { maxAmount: autoBidMax });
       }
       setSuccess(true);
@@ -77,13 +83,23 @@ export default function BidModal({ isOpen, onClose, listingId, listingTitle, cur
             ) : (
               <>
                 <div className="flex items-center justify-between mb-6">
-                  <h3 className="text-lg font-bold text-slate-900">Place a Bid</h3>
+                  <h3 className="text-lg font-bold text-slate-900 flex items-center gap-2">
+                    {groupId && <Users className="w-5 h-5 text-brand-600" />}
+                    {groupId ? 'Place Group Bid' : 'Place a Bid'}
+                  </h3>
                   <button onClick={onClose} className="p-1.5 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-all">
                     <X className="w-5 h-5" />
                   </button>
                 </div>
 
                 <p className="text-sm text-slate-500 mb-5 truncate">{listingTitle}</p>
+
+                {groupName && (
+                  <div className="bg-brand-50 border border-brand-100 rounded-xl px-3.5 py-2.5 mb-5 flex items-center gap-2">
+                    <Users className="w-4 h-4 text-brand-600 flex-shrink-0" />
+                    <span className="text-sm font-medium text-brand-700">Bidding as "{groupName}"</span>
+                  </div>
+                )}
 
                 <div className="bg-slate-50 rounded-xl p-4 mb-5 border border-slate-100">
                   <span className="text-xs font-medium text-slate-400 uppercase tracking-wider">Current highest bid</span>
@@ -118,14 +134,14 @@ export default function BidModal({ isOpen, onClose, listingId, listingTitle, cur
                   ))}
                 </div>
 
-                {/* Auto-bid toggle */}
-                <button
+                {/* Auto-bid toggle (not available for group bids) */}
+                {!groupId && <button
                   onClick={() => setShowAutoBid(!showAutoBid)}
                   className="flex items-center gap-2 text-sm font-medium text-brand-600 hover:text-brand-700 mb-4 transition-colors"
                 >
                   <Zap className="w-4 h-4" />
                   {showAutoBid ? 'Hide auto-bid' : 'Set up auto-bid'}
-                </button>
+                </button>}
 
                 {showAutoBid && (
                   <div className="mb-5 p-4 bg-brand-50/50 rounded-xl border border-brand-100">
@@ -154,7 +170,7 @@ export default function BidModal({ isOpen, onClose, listingId, listingTitle, cur
                   disabled={loading}
                   className="w-full bg-brand-600 hover:bg-brand-700 text-white py-3.5 rounded-xl font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed hover:shadow-lg hover:shadow-brand-600/25 active:scale-[0.98]"
                 >
-                  {loading ? 'Placing bid...' : `Place Bid — $${bidAmount.toLocaleString()}/mo`}
+                  {loading ? 'Placing bid...' : `${groupId ? 'Place Group Bid' : 'Place Bid'} — $${bidAmount.toLocaleString()}/mo`}
                 </button>
 
                 <p className="text-xs text-slate-400 mt-4 text-center">

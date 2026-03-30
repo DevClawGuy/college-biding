@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useSearchParams, Link, useNavigate } from 'react-router-dom';
-import { Gavel, Home, Heart, Bell, Clock, Trophy, XCircle, Check, ChevronRight, Phone, Mail, Trash2, Lock } from 'lucide-react';
+import { Gavel, Home, Heart, Bell, Clock, Trophy, XCircle, Check, ChevronRight, Phone, Mail, Trash2, Lock, Users } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { useAuthStore } from '../store/authStore';
 import { useCountdown } from '../hooks/useCountdown';
@@ -144,7 +144,9 @@ export default function DashboardPage() {
                   <img src={bid.listingPhoto ? JSON.parse(bid.listingPhoto)[0] : ''} alt="" className="w-20 h-20 rounded-xl object-cover bg-slate-100" />
                   <div className="flex-1 min-w-0">
                     <h3 className="font-semibold text-slate-900 truncate group-hover:text-brand-600 transition-colors">{bid.listingTitle}</h3>
-                    <p className="text-sm text-slate-500 mt-0.5">Your bid: <span className="font-semibold text-slate-900">${bid.amount?.toLocaleString()}/mo</span></p>
+                    <p className="text-sm text-slate-500 mt-0.5">Your bid: <span className="font-semibold text-slate-900">${bid.amount?.toLocaleString()}/mo</span>
+                      {bid.groupId && <span className="inline-flex items-center gap-1 ml-2 text-xs font-medium text-brand-600 bg-brand-50 px-2 py-0.5 rounded-md border border-brand-100"><Users className="w-3 h-3" />Group Bid</span>}
+                    </p>
                     <p className="text-xs text-slate-400 mt-0.5">Current: ${bid.currentBid?.toLocaleString()}/mo</p>
                   </div>
                   <div className="flex flex-col items-end gap-2.5">

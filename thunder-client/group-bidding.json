@@ -1,0 +1,76 @@
+{
+  "collectionName": "HouseRush — Group Bidding",
+  "requests": [
+    {
+      "name": "Create Group",
+      "method": "POST",
+      "url": "{{baseUrl}}/api/bid-groups",
+      "headers": [
+        { "name": "Authorization", "value": "Bearer {{token}}" },
+        { "name": "Content-Type", "value": "application/json" }
+      ],
+      "body": {
+        "listingId": "<listing-id-here>",
+        "name": "The Beach House Gang",
+        "memberEmails": ["jordan.k@monmouth.edu", "casey.r@monmouth.edu"]
+      },
+      "notes": "Create a group bid. Auth required (student only). Max 6 members including leader."
+    },
+    {
+      "name": "Get My Group for Listing",
+      "method": "GET",
+      "url": "{{baseUrl}}/api/bid-groups/:listingId",
+      "headers": [
+        { "name": "Authorization", "value": "Bearer {{token}}" }
+      ],
+      "params": [
+        { "name": "listingId", "value": "<listing-id-here>" }
+      ],
+      "notes": "Returns the group the logged-in user belongs to for this listing, or null."
+    },
+    {
+      "name": "Join Group",
+      "method": "POST",
+      "url": "{{baseUrl}}/api/bid-groups/:groupId/join",
+      "headers": [
+        { "name": "Authorization", "value": "Bearer {{token}}" }
+      ],
+      "params": [
+        { "name": "groupId", "value": "<group-id-here>" }
+      ],
+      "notes": "Accept a group invitation. User must have been invited by email."
+    },
+    {
+      "name": "Leave Group",
+      "method": "DELETE",
+      "url": "{{baseUrl}}/api/bid-groups/:groupId/leave",
+      "headers": [
+        { "name": "Authorization", "value": "Bearer {{token}}" }
+      ],
+      "params": [
+        { "name": "groupId", "value": "<group-id-here>" }
+      ],
+      "notes": "Leave a group. If leader leaves, the entire group is dissolved."
+    },
+    {
+      "name": "Place Group Bid",
+      "method": "POST",
+      "url": "{{baseUrl}}/api/bid-groups/:groupId/bid",
+      "headers": [
+        { "name": "Authorization", "value": "Bearer {{token}}" },
+        { "name": "Content-Type", "value": "application/json" }
+      ],
+      "body": {
+        "amount": 1500
+      },
+      "params": [
+        { "name": "groupId", "value": "<group-id-here>" }
+      ],
+      "notes": "Place a bid on behalf of the group. Only the group leader can do this. Same bid rules apply (min increment, active auction, etc)."
+    }
+  ],
+  "variables": [
+    { "name": "baseUrl", "value": "http://localhost:3001" },
+    { "name": "token", "value": "<paste-jwt-token-here>" }
+  ]
+}
