@@ -484,4 +484,158 @@ router.post('/clear-listings', async (req: Request, res: Response) => {
   }
 });
 
+// ============================================================
+// POST /api/admin/seed-test-listings — insert 3 test listings for QA
+// ============================================================
+router.post('/seed-test-listings', async (req: Request, res: Response) => {
+  try {
+    if (!checkAdminKey(req, res)) return;
+
+    console.log('Admin SEED-TEST-LISTINGS: inserting 3 test listings...');
+
+    // Find an existing landlord, or create one
+    const existingLandlord = await db.select().from(schema.users)
+      .where(eq(schema.users.role, 'landlord')).get();
+
+    let landlordId: string;
+    if (existingLandlord) {
+      landlordId = existingLandlord.id;
+      console.log(`  Using existing landlord: ${existingLandlord.email}`);
+    } else {
+      const bcryptHash = await bcrypt.hash('password123', 10);
+      landlordId = crypto.randomUUID();
+      await db.insert(schema.users).values({
+        id: landlordId,
+        email: 'sarah.chen@realty.com',
+        password: bcryptHash,
+        name: 'Sarah Chen',
+        university: 'Shore Realty Group',
+        role: 'landlord',
+        isEduVerified: false,
+        createdAt: new Date().toISOString(),
+      }).run();
+      console.log('  Created test landlord: sarah.chen@realty.com');
+    }
+
+    const now = new Date();
+    const testListings = [
+      {
+        title: 'Sunny 2BR Near Monmouth Campus',
+        description: 'Bright 2-bedroom apartment just 0.4 miles from Monmouth University. Hardwood floors throughout, updated kitchen, private parking.',
+        address: '300 Norwood Ave',
+        city: 'West Long Branch',
+        state: 'NJ',
+        lat: 40.2904,
+        lng: -74.0165,
+        beds: 2,
+        baths: 1,
+        sqft: 900,
+        distanceToCampus: 0.4,
+        startingBid: 1800,
+        reservePrice: 2200,
+        secureLeasePrice: 2200,
+        amenities: ['Parking', 'Hardwood Floors', 'AC', 'Laundry'],
+        tags: ['Parking Included'],
+        photos: ['https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=800'],
+        daysLeft: 7,
+        viewCount: 47,
+      },
+      {
+        title: 'Cozy 1BR Studio on Cedar Ave',
+        description: 'Cozy studio apartment steps from Monmouth University campus. Utilities included, pet friendly, perfect for a single student.',
+        address: '85 Cedar Ave',
+        city: 'West Long Branch',
+        state: 'NJ',
+        lat: 40.2880,
+        lng: -74.0120,
+        beds: 1,
+        baths: 1,
+        sqft: 500,
+        distanceToCampus: 0.2,
+        startingBid: 1250,
+        reservePrice: 1550,
+        secureLeasePrice: 1550,
+        amenities: ['Utilities Included', 'Pet Friendly', 'Near Bus Stop'],
+        tags: ['Utilities Included', 'Pet Friendly'],
+        photos: ['https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=800'],
+        daysLeft: 3,
+        viewCount: 89,
+      },
+      {
+        title: 'Spacious 3BR House on Baker Drive',
+        description: 'Large 3-bedroom house perfect for a group of students. Private backyard, driveway parking, 5 min walk to Monmouth University.',
+        address: '32 Baker Drive',
+        city: 'West Long Branch',
+        state: 'NJ',
+        lat: 40.2912,
+        lng: -74.0198,
+        beds: 3,
+        baths: 2,
+        sqft: 1400,
+        distanceToCampus: 0.3,
+        startingBid: 2500,
+        reservePrice: 3000,
+        secureLeasePrice: 3000,
+        amenities: ['Parking', 'Laundry', 'AC', 'Pet Friendly', 'Hardwood Floors'],
+        tags: ['Pet Friendly', 'Parking Included'],
+        photos: ['https://images.unsplash.com/photo-1568605114967-8130f3a36994?w=800'],
+        daysLeft: 14,
+        viewCount: 123,
+      },
+    ];
+
+    const insertedIds: string[] = [];
+
+    for (const l of testListings) {
+      const id = crypto.randomUUID();
+      insertedIds.push(id);
+      const auctionEnd = new Date(now.getTime() + l.daysLeft * 86400000);
+      const auctionStart = new Date(now.getTime() - 3 * 86400000);
+
+      await db.insert(schema.listings).values({
+        id,
+        landlordId,
+        title: l.title,
+        description: l.description,
+        address: l.address,
+        city: l.city,
+        state: l.state,
+        lat: l.lat,
+        lng: l.lng,
+        photos: JSON.stringify(l.photos),
+        amenities: JSON.stringify(l.amenities),
+        beds: l.beds,
+        baths: l.baths,
+        sqft: l.sqft,
+        distanceToCampus: l.distanceToCampus,
+        nearestUniversity: 'Monmouth University',
+        startingBid: l.startingBid,
+        reservePrice: l.reservePrice,
+        currentBid: l.startingBid,
+        bidCount: 0,
+        auctionStart: auctionStart.toISOString(),
+        auctionEnd: auctionEnd.toISOString(),
+        status: 'active',
+        approvalStatus: 'approved',
+        secureLeasePrice: l.secureLeasePrice,
+        viewCount: l.viewCount,
+        tags: JSON.stringify(l.tags),
+        createdAt: auctionStart.toISOString(),
+      }).run();
+
+      console.log(`  Inserted: "${l.title}" (${id})`);
+    }
+
+    console.log('Admin SEED-TEST-LISTINGS: complete!');
+    res.json({
+      success: true,
+      message: `Inserted ${testListings.length} test listings`,
+      listingIds: insertedIds,
+    });
+  } catch (error) {
+    console.error('Seed test listings error:', error);
+    res.status(500).json({ error: 'Seed failed', details: String(error) });
+  }
+});
+
 export default router;

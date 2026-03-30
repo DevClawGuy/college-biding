@@ -508,6 +508,21 @@ export default function ListingDetailPage() {
         {/* Bid Panel */}
         <div className="lg:col-span-1">
           <div className="sticky top-20">
+            {/* Landlord viewing another listing — show info only, no bid actions */}
+            {user && user.role === 'landlord' && listing.landlordId !== user.id ? (
+              <div className="bg-white rounded-2xl card-shadow border border-slate-200 p-6">
+                <div className="bg-slate-50 rounded-xl p-5 mb-5 border border-slate-100">
+                  <p className="text-xs font-medium text-slate-400 uppercase tracking-wider">
+                    {listing.status === 'ended' ? 'Final Bid' : 'Current Highest Bid'}
+                  </p>
+                  <div className="text-3xl font-bold text-slate-900 mt-1 tracking-tight">
+                    ${(listing.currentBid ?? 0).toLocaleString()}<span className="text-lg font-normal text-slate-400">/mo</span>
+                  </div>
+                  <p className="text-sm text-slate-400 mt-1">{listing.bidCount ?? 0} bid{(listing.bidCount ?? 0) !== 1 ? 's' : ''}</p>
+                </div>
+                <p className="text-center text-slate-500 text-sm bg-slate-50 py-3.5 rounded-xl border border-slate-100">You are viewing this listing as a landlord.</p>
+              </div>
+            ) : (
             <div className={`bg-white rounded-2xl card-shadow border border-slate-200 p-6 ${bidPulse ? 'bid-pulse' : ''}`}>
               {/* Auction Closed Banner */}
               {(listing.status === 'ended' || countdown.isExpired) ? (
@@ -552,29 +567,27 @@ export default function ListingDetailPage() {
               {/* Only show bid actions if auction is still active */}
               {listing.status !== 'ended' && !countdown.isExpired ? (
                 user ? (
-                  user.role !== 'landlord' ? (
-                    <>
-                      <button onClick={() => setShowBidModal(true)}
-                        className="w-full bg-brand-600 hover:bg-brand-700 text-white py-4 rounded-xl font-semibold text-lg transition-all hover:shadow-xl hover:shadow-brand-600/20 active:scale-[0.98]">
-                        Place a Bid
-                      </button>
+                  <>
+                    <button onClick={() => setShowBidModal(true)}
+                      className="w-full bg-brand-600 hover:bg-brand-700 text-white py-4 rounded-xl font-semibold text-lg transition-all hover:shadow-xl hover:shadow-brand-600/20 active:scale-[0.98]">
+                      Place a Bid
+                    </button>
 
-                      {/* Secure Lease Now */}
-                      {listing.secureLeasePrice && (
-                        <div className="mt-4">
-                          <div className="relative">
-                            <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-slate-200" /></div>
-                            <div className="relative flex justify-center"><span className="bg-white px-3 text-xs text-slate-400 uppercase tracking-wider">or</span></div>
-                          </div>
-                          <button onClick={() => setShowSecureLeaseConfirm(true)}
-                            className="w-full mt-4 bg-emerald-600 hover:bg-emerald-700 text-white py-4 rounded-xl font-semibold text-base transition-all hover:shadow-xl hover:shadow-emerald-600/20 active:scale-[0.98] flex items-center justify-center gap-2">
-                            <Lock className="w-4 h-4" /> Secure Lease Now — ${listing.secureLeasePrice.toLocaleString()}/mo
-                          </button>
-                          <p className="text-xs text-slate-400 mt-2 text-center">Skip the auction. Pay ${listing.secureLeasePrice.toLocaleString()}/mo and the lease is yours immediately.</p>
+                    {/* Secure Lease Now */}
+                    {listing.secureLeasePrice && (
+                      <div className="mt-4">
+                        <div className="relative">
+                          <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-slate-200" /></div>
+                          <div className="relative flex justify-center"><span className="bg-white px-3 text-xs text-slate-400 uppercase tracking-wider">or</span></div>
                         </div>
-                      )}
-                    </>
-                  ) : <p className="text-center text-slate-500 text-sm bg-slate-50 py-3.5 rounded-xl border border-slate-100">Landlords cannot bid</p>
+                        <button onClick={() => setShowSecureLeaseConfirm(true)}
+                          className="w-full mt-4 bg-emerald-600 hover:bg-emerald-700 text-white py-4 rounded-xl font-semibold text-base transition-all hover:shadow-xl hover:shadow-emerald-600/20 active:scale-[0.98] flex items-center justify-center gap-2">
+                          <Lock className="w-4 h-4" /> Secure Lease Now — ${listing.secureLeasePrice.toLocaleString()}/mo
+                        </button>
+                        <p className="text-xs text-slate-400 mt-2 text-center">Skip the auction. Pay ${listing.secureLeasePrice.toLocaleString()}/mo and the lease is yours immediately.</p>
+                      </div>
+                    )}
+                  </>
                 ) : (
                   <>
                     <Link to="/login" className="block text-center w-full bg-brand-600 hover:bg-brand-700 text-white py-4 rounded-xl font-semibold text-lg transition-all">
@@ -591,6 +604,7 @@ export default function ListingDetailPage() {
                 <p className="text-xs text-slate-400 mt-1 text-center">Minimum bid: ${((listing.currentBid ?? 0) + 25).toLocaleString()}/mo</p>
               )}
             </div>
+            )}
 
             {/* Group Bidding Section */}
             {listing.status !== 'ended' && !countdown.isExpired && user && user.role !== 'landlord' && (

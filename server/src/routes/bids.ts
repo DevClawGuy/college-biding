@@ -52,6 +52,13 @@ router.post('/listing/:listingId', authenticateToken, async (req: AuthRequest, r
     const { amount } = req.body;
     const listingId = String(req.params.listingId);
 
+    // Block landlords from bidding
+    const currentUser = await db.select().from(schema.users).where(eq(schema.users.id, req.userId!)).get();
+    if (currentUser?.role === 'landlord') {
+      res.status(403).json({ error: 'Landlords cannot place bids on listings.' });
+      return;
+    }
+
     const listing = await db.select().from(schema.listings).where(eq(schema.listings.id, listingId)).get();
     if (!listing) {
       res.status(404).json({ error: 'Listing not found' });

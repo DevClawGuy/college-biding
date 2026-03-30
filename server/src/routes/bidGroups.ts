@@ -334,6 +334,13 @@ router.post('/:groupId/bid', authenticateToken, async (req: AuthRequest, res: Re
     const { amount } = req.body;
     const groupId = String(req.params.groupId);
 
+    // Block landlords from bidding
+    const currentUser = await db.select().from(schema.users).where(eq(schema.users.id, req.userId!)).get();
+    if (currentUser?.role === 'landlord') {
+      res.status(403).json({ error: 'Landlords cannot place bids on listings.' });
+      return;
+    }
+
     const group = await db.select().from(schema.bidGroups).where(eq(schema.bidGroups.id, groupId)).get();
     if (!group || group.status !== 'active') {
       res.status(404).json({ error: 'Group not found or no longer active' });
