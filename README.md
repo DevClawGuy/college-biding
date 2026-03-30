@@ -1,115 +1,185 @@
-# HouseRush - Off-Campus Student Housing Platform
+# HouseRush — Off-Campus Student Housing Platform
 
-A full-stack real estate bidding web app for college students. The fastest way to secure off-campus student housing. Browse verified homes near your campus, place bids, and move in with confidence.
+The fastest way to find off-campus housing near Monmouth University. Students browse verified listings, place real-time bids, and move in with confidence. Think Zillow meets StubHub for college housing.
+
+**Live site:** https://houserush.vercel.app
 
 ## Tech Stack
 
-- **Frontend:** React + TypeScript + Tailwind CSS + Vite
-- **Backend:** Node.js + Express + TypeScript
-- **Database:** SQLite with Drizzle ORM
-- **Auth:** JWT-based (email + password)
-- **Real-time:** Socket.io for live bid updates
-- **Maps:** Leaflet.js (OpenStreetMap)
+- **Frontend:** React + TypeScript + Tailwind CSS + Vite → Vercel
+- **Backend:** Node.js + Express + TypeScript → Railway
+- **Database:** Turso (LibSQL/SQLite cloud) — persists across Railway redeploys
+- **Auth:** JWT-based (email + password), .edu email verification via Resend
+- **Real-time:** Socket.io (live bid updates, auction events, notifications)
+- **Email:** Resend SDK (verification emails, winner notifications, landlord alerts)
+- **Maps:** Leaflet.js (OpenStreetMap) on listing detail pages
 
 ## Features
 
-- **Authentication** - Sign up/login with .edu email verification badge
-- **Listings** - Browse, search, filter, and sort property listings
-- **Live Bidding** - Place bids with real-time updates via WebSocket
-- **Auto-Bid** - Set a maximum bid and let the system bid for you
-- **Dashboard** - Track your bids (active/won/lost), favorites, and notifications
-- **Landlord Flow** - Create and manage auction listings
-- **Maps** - View property locations on interactive maps
-- **Mobile Responsive** - Works on all screen sizes
+- **Authentication** — Signup/login with .edu email verification, JWT auth
+- **Listings** — Browse, search, filter by price/beds/town/amenities, sort by ending soon/price/bids
+- **Live Bidding** — Real-time bid updates via Socket.io, atomic race condition prevention
+- **Auto-Bid** — Set a max bid, system counter-bids automatically up to 20 iterations
+- **Auction Extension** — Last-minute bids (within 5 min) extend auction by 5 minutes (anti-snipe)
+- **Auction Close Job** — Runs every 60s, detects expired auctions, declares winners, sends emails
+- **Winner Notifications** — Confetti on win, email to winner and landlord via Resend
+- **Dashboard** — My Bids (Winning/Outbid/Won/Lost), My Listings, Saved, Notifications
+- **Landlord Flow** — Create listings with auction end date, image URLs, amenities, approval queue
+- **Admin Panel** — Approve/reject listings at /admin, analytics dashboard at /admin/dashboard
+- **Maintenance Mode** — Toggle via VITE_MAINTENANCE_MODE env var, preview bypass via ?preview=
+- **Legal Pages** — Terms of Service, Privacy Policy, How It Works, Contact
+- **Mobile Responsive** — Full mobile bid flow, responsive grid, bottom-sheet bid modal
 
-## Quick Start
+## Environment Variables
+
+### Frontend (Vercel)
+VITE_API_URL=https://college-biding-production.up.railway.app/api
+VITE_MAINTENANCE_MODE=false
+
+### Backend (Railway)
+JWT_SECRET=
+NODE_ENV=production
+ADMIN_KEY=houserush2024
+PORT=8080
+TURSO_DATABASE_URL=libsql://houserush-devclawguy.aws-us-east-1.turso.io
+TURSO_AUTH_TOKEN=
+RESEND_API_KEY=
+
+## Quick Start (Local Development)
 
 ### 1. Install dependencies
-
 ```bash
-# Install server dependencies
-cd server
-npm install
-
-# Install client dependencies
-cd ../client
-npm install
+cd server && npm install
+cd ../client && npm install
 ```
 
-### 2. Seed the database
-
+### 2. Set up local environment
 ```bash
-cd server
-npm run seed
+# server/.env
+JWT_SECRET=localsecret
+NODE_ENV=development
+ADMIN_KEY=houserush2024
+TURSO_DATABASE_URL=file:./houserush.db
 ```
 
-### 3. Start the development servers
-
-In two terminal windows:
-
+### 3. Start development servers
 ```bash
-# Terminal 1 - Start the backend
-cd server
-npm run dev
+# Terminal 1 - Backend
+cd server && npm run dev
 
-# Terminal 2 - Start the frontend
-cd client
-npm run dev
+# Terminal 2 - Frontend
+cd client && npm run dev
 ```
 
-The app will be available at **http://localhost:5173**
+App runs at http://localhost:5173
 
-### Demo Accounts
+### 4. Seed the database
+```bash
+curl -X POST http://localhost:3000/api/admin/seed \
+  -H "x-admin-key: houserush2024"
+```
+
+## Demo Accounts
 
 | Role     | Email                    | Password    |
 |----------|--------------------------|-------------|
-| Student  | alex.m@bu.edu            | password123 |
+| Student  | alex.m@monmouth.edu      | password123 |
 | Landlord | sarah.chen@realty.com    | password123 |
 
-## Project Structure
+## Admin Access
 
-```
-/client          - React frontend (Vite)
-  /src
-    /components  - Reusable UI components
-    /pages       - Page components
-    /store       - Zustand state management
-    /hooks       - Custom React hooks
-    /lib         - API client, socket config
-/server          - Express backend
-  /src
-    /db          - Drizzle schema & database
-    /routes      - API route handlers
-    /middleware   - Auth middleware
-/shared          - Shared TypeScript types
-```
+| Page                | URL                              | Password       |
+|---------------------|----------------------------------|----------------|
+| Listing Approval    | /admin                           | houserush2024  |
+| Analytics Dashboard | /admin/dashboard                 | creiguide2026  |
 
 ## API Endpoints
 
-| Method | Endpoint                  | Description              |
-|--------|---------------------------|--------------------------|
-| POST   | /api/auth/signup          | Create account           |
-| POST   | /api/auth/login           | Login                    |
-| GET    | /api/auth/me              | Get current user         |
-| GET    | /api/listings             | List all (with filters)  |
-| GET    | /api/listings/:id         | Get listing details      |
-| POST   | /api/listings             | Create listing           |
-| PUT    | /api/listings/:id         | Update listing           |
-| GET    | /api/bids/listing/:id     | Get bids for listing     |
-| POST   | /api/bids/listing/:id     | Place a bid              |
-| POST   | /api/bids/auto/:id        | Set auto-bid             |
-| GET    | /api/bids/my/bids         | Get user's bids          |
-| GET    | /api/favorites            | Get favorites            |
-| POST   | /api/favorites/:id        | Add favorite             |
-| DELETE | /api/favorites/:id        | Remove favorite          |
-| GET    | /api/notifications        | Get notifications        |
-| PUT    | /api/notifications/:id/read | Mark notification read |
+### Auth
+| Method | Endpoint                        | Description              |
+|--------|---------------------------------|--------------------------|
+| POST   | /api/auth/signup                | Create account           |
+| POST   | /api/auth/login                 | Login                    |
+| GET    | /api/auth/me                    | Get current user         |
+| PUT    | /api/auth/profile               | Update profile           |
+| GET    | /api/auth/verify-email?token=   | Verify .edu email        |
 
-## Seed Data
+### Listings
+| Method | Endpoint                        | Description              |
+|--------|---------------------------------|--------------------------|
+| GET    | /api/listings                   | Browse (with filters)    |
+| GET    | /api/listings/:id               | Get listing details      |
+| POST   | /api/listings                   | Create listing           |
+| PUT    | /api/listings/:id               | Update listing           |
+| DELETE | /api/listings/:id               | Delete listing           |
+| GET    | /api/listings/my                | Landlord's listings      |
 
-The seed script generates:
-- 5 landlord accounts
-- 15 student accounts across 10 universities
-- 12 realistic listings in Boston, Austin, LA, NYC, and Chicago
-- Bid history with 3-10 bids per listing
-- Favorites and notifications
+### Bids
+| Method | Endpoint                        | Description              |
+|--------|---------------------------------|--------------------------|
+| POST   | /api/bids                       | Place a bid              |
+| GET    | /api/bids/:listingId            | Get bid history          |
+| GET    | /api/bids/my/bids               | Get user's bids          |
+
+### Favorites
+| Method | Endpoint                        | Description              |
+|--------|---------------------------------|--------------------------|
+| GET    | /api/favorites                  | Get favorites            |
+| POST   | /api/favorites/:listingId       | Add favorite             |
+| DELETE | /api/favorites/:listingId       | Remove favorite          |
+
+### Notifications
+| Method | Endpoint                              | Description              |
+|--------|---------------------------------------|--------------------------|
+| GET    | /api/notifications                    | Get notifications        |
+| GET    | /api/notifications/unread-count       | Get unread count         |
+| POST   | /api/notifications/:id/read           | Mark as read             |
+| POST   | /api/notifications/read-all           | Mark all as read         |
+
+### Admin
+| Method | Endpoint                              | Description              |
+|--------|---------------------------------------|--------------------------|
+| POST   | /api/admin/seed                       | Safe seed (non-destructive) |
+| POST   | /api/admin/reset                      | Full wipe + reseed       |
+| GET    | /api/admin/analytics                  | Live analytics data      |
+| GET    | /api/admin/listings/pending           | Pending approval queue   |
+| POST   | /api/admin/listings/:id/approve       | Approve listing          |
+| POST   | /api/admin/listings/:id/reject        | Reject listing           |
+
+## Project Structure
+/client                  - React frontend (Vite)
+/src
+/components          - Reusable UI components (Navbar, Footer, BidModal)
+/pages               - Page components
+/hooks               - Custom React hooks (useCountdown, useSocket)
+/lib                 - API client, socket config
+/public                - Static assets (og-image.svg)
+vercel.json            - Catch-all rewrite for React Router
+/server                  - Express backend
+/src
+/db                  - LibSQL schema, init, migrations
+/routes              - API route handlers
+/middleware          - JWT auth middleware
+/jobs                - Auction close job (runs every 60s)
+/lib                 - Email (Resend), socket helpers
+
+## Database
+
+Hosted on Turso (persistent LibSQL cloud). Survives Railway redeploys.
+
+**To reset and reseed production:**
+```bash
+# Full wipe + reseed (destructive)
+curl -X POST https://college-biding-production.up.railway.app/api/admin/reset \
+  -H "x-admin-key: houserush2024"
+
+# Safe seed only (non-destructive, skips existing)
+curl -X POST https://college-biding-production.up.railway.app/api/admin/seed \
+  -H "x-admin-key: houserush2024"
+```
+
+## Deployment
+
+- **Frontend:** Push to GitHub → auto-deploys to Vercel
+- **Backend:** Push to GitHub → auto-deploys to Railway (root: /server)
+- **Every commit must end with:** `git add . && git commit -m "description" && git push`
