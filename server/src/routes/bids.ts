@@ -246,6 +246,23 @@ async function processAutoBids(listingId: string, initialAmount: number, exclude
       const bidId = crypto.randomUUID();
       const timestamp = new Date().toISOString();
 
+      // TODO: consider moving auto-bid to a queue for high traffic
+      // Atomic update: only succeeds if current_bid hasn't changed (matches manual bid pattern)
+      const autoBidUpdate = await db.update(schema.listings).set({
+        currentBid: newAmount,
+        bidCount: sql`${schema.listings.bidCount} + 1`,
+      }).where(
+        and(
+          eq(schema.listings.id, listingId),
+          lt(schema.listings.currentBid, newAmount),
+        )
+      ).run();
+
+      if (autoBidUpdate.rowsAffected === 0) {
+        // Another bid was placed concurrently — stop auto-bid loop
+        break;
+      }
+
       await db.insert(schema.bids).values({
         id: bidId,
         listingId,
@@ -255,13 +272,9 @@ async function processAutoBids(listingId: string, initialAmount: number, exclude
         timestamp,
       }).run();
 
-      // Update listing
+      // Re-read listing to get accurate bidCount after atomic update
       const listing = await db.select().from(schema.listings).where(eq(schema.listings.id, listingId)).get();
-      const newBidCount = (listing?.bidCount || 0) + 1;
-      await db.update(schema.listings).set({
-        currentBid: newAmount,
-        bidCount: newBidCount,
-      }).where(eq(schema.listings.id, listingId)).run();
+      const newBidCount = listing?.bidCount ?? (currentAmount + 1);
 
       // Emit socket event for real-time update
       if (io) {

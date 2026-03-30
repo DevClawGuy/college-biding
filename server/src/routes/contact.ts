@@ -1,4 +1,5 @@
 import { Router, Request, Response } from 'express';
+import { sendEmail } from '../lib/email';
 
 const router = Router();
 
@@ -13,6 +14,26 @@ router.post('/', async (req: Request, res: Response) => {
 
     console.log(`[Contact Form] From: ${name} <${email}>`);
     console.log(`[Contact Form] Message: ${message}`);
+
+    // TODO: set CONTACT_EMAIL in Railway env vars
+    const contactEmail = process.env.CONTACT_EMAIL || 'contact@houserush.com';
+    const html = `
+      <div style="font-family: 'Inter', system-ui, sans-serif; max-width: 560px; margin: 0 auto; padding: 40px 24px;">
+        <h1 style="font-size: 22px; font-weight: 700; color: #0f172a; margin: 0 0 24px;">New Contact Form Submission</h1>
+        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 24px; margin-bottom: 24px;">
+          <p style="margin: 0 0 8px; color: #64748b; font-size: 13px; text-transform: uppercase; letter-spacing: 0.05em;">From</p>
+          <p style="margin: 0 0 16px; font-size: 16px; font-weight: 600; color: #0f172a;">${name} &lt;${email}&gt;</p>
+          <p style="margin: 0 0 8px; color: #64748b; font-size: 13px; text-transform: uppercase; letter-spacing: 0.05em;">Message</p>
+          <p style="margin: 0; font-size: 15px; color: #334155; line-height: 1.6; white-space: pre-wrap;">${message}</p>
+        </div>
+        <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 32px 0 16px;" />
+        <p style="color: #94a3b8; font-size: 12px; text-align: center;">HouseRush Contact Form</p>
+      </div>
+    `;
+
+    sendEmail(contactEmail, 'New HouseRush Contact Form Submission', html).catch(err => {
+      console.error('Contact email failed:', err);
+    });
 
     res.json({ success: true });
   } catch (error) {

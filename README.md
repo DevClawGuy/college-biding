@@ -101,7 +101,7 @@ curl -X POST http://localhost:3000/api/admin/seed \
 | POST   | /api/auth/signup                | Create account           |
 | POST   | /api/auth/login                 | Login                    |
 | GET    | /api/auth/me                    | Get current user         |
-| PUT    | /api/auth/profile               | Update profile           |
+| PUT    | /api/auth/me                    | Update profile           |
 | GET    | /api/auth/verify-email?token=   | Verify .edu email        |
 
 ### Listings
@@ -112,13 +112,14 @@ curl -X POST http://localhost:3000/api/admin/seed \
 | POST   | /api/listings                   | Create listing           |
 | PUT    | /api/listings/:id               | Update listing           |
 | DELETE | /api/listings/:id               | Delete listing           |
-| GET    | /api/listings/my                | Landlord's listings      |
+| GET    | /api/listings/my/listings       | Landlord's listings      |
 
 ### Bids
 | Method | Endpoint                        | Description              |
 |--------|---------------------------------|--------------------------|
-| POST   | /api/bids                       | Place a bid              |
-| GET    | /api/bids/:listingId            | Get bid history          |
+| POST   | /api/bids/listing/:listingId    | Place a bid              |
+| GET    | /api/bids/listing/:listingId    | Get bid history          |
+| POST   | /api/bids/auto/:listingId       | Set auto-bid             |
 | GET    | /api/bids/my/bids               | Get user's bids          |
 
 ### Favorites
@@ -133,8 +134,8 @@ curl -X POST http://localhost:3000/api/admin/seed \
 |--------|---------------------------------------|--------------------------|
 | GET    | /api/notifications                    | Get notifications        |
 | GET    | /api/notifications/unread-count       | Get unread count         |
-| POST   | /api/notifications/:id/read           | Mark as read             |
-| POST   | /api/notifications/read-all           | Mark all as read         |
+| PUT    | /api/notifications/:id/read           | Mark as read             |
+| PUT    | /api/notifications/read-all           | Mark all as read         |
 
 ### Admin
 | Method | Endpoint                              | Description              |

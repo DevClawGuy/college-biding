@@ -12,6 +12,45 @@ import api from '../lib/api';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 
+interface Listing {
+  id: string;
+  title: string;
+  description: string;
+  address: string;
+  city: string;
+  state: string;
+  lat: number;
+  lng: number;
+  photos: string[];
+  amenities: string[];
+  tags: string[];
+  beds: number;
+  baths: number;
+  sqft: number;
+  distanceToCampus: number;
+  nearestUniversity: string;
+  startingBid: number;
+  currentBid: number;
+  bidCount: number;
+  auctionEnd: string;
+  status: 'active' | 'ended' | 'cancelled';
+  winnerId: string | null;
+  landlordId: string;
+  landlord?: { id: string; name: string; university: string; avatar: string | null };
+  winner?: { id: string; name: string; email: string; university: string } | null;
+}
+
+interface Bid {
+  id: string;
+  listingId: string;
+  userId: string;
+  amount: number;
+  isAutoBid: boolean;
+  timestamp: string;
+  userName: string;
+  userUniversity: string;
+}
+
 const icon = L.icon({
   iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
   iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
@@ -21,8 +60,8 @@ const icon = L.icon({
 
 export default function ListingDetailPage() {
   const { id } = useParams<{ id: string }>();
-  const [listing, setListing] = useState<any>(null);
-  const [bids, setBids] = useState<any[]>([]);
+  const [listing, setListing] = useState<Listing | null>(null);
+  const [bids, setBids] = useState<Bid[]>([]);
   const [loading, setLoading] = useState(true);
   const [photoIndex, setPhotoIndex] = useState(0);
   const [showBidModal, setShowBidModal] = useState(false);
@@ -83,7 +122,7 @@ export default function ListingDetailPage() {
     socket.emit('join_listing', id);
     socket.on('bid_update', (data) => {
       if (data.listingId === id) {
-        setListing((prev: any) => prev ? { ...prev, currentBid: data.currentBid, bidCount: data.bidCount } : prev);
+        setListing((prev) => prev ? { ...prev, currentBid: data.currentBid, bidCount: data.bidCount } : prev);
         setBids((prev) => [data.bid, ...prev]);
         setBidPulse(true);
         setTimeout(() => setBidPulse(false), 1000);
@@ -91,7 +130,7 @@ export default function ListingDetailPage() {
     });
     socket.on('auction_ended', (data) => {
       if (data.listingId === id) {
-        setListing((prev: any) => prev ? { ...prev, status: 'ended', winnerId: data.winnerId, winner: data.winnerName ? { name: data.winnerName } : null } : prev);
+        setListing((prev) => prev ? { ...prev, status: 'ended' as const, winnerId: data.winnerId, winner: data.winnerName ? { id: data.winnerId, name: data.winnerName, email: '', university: '' } : null } : prev);
         if (user && data.winnerId === user.id && !confettiFired.current) {
           confettiFired.current = true;
           setTimeout(() => confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } }), 300);
@@ -100,7 +139,7 @@ export default function ListingDetailPage() {
     });
     socket.on('auction_extended', (data) => {
       if (data.listingId === id) {
-        setListing((prev: any) => prev ? { ...prev, auctionEnd: data.newAuctionEnd } : prev);
+        setListing((prev) => prev ? { ...prev, auctionEnd: data.newAuctionEnd } : prev);
         setExtensionToast(true);
         setTimeout(() => setExtensionToast(false), 6000);
       }
@@ -286,7 +325,7 @@ export default function ListingDetailPage() {
             <div className="space-y-2 max-h-80 overflow-y-auto">
               {safeBids.length === 0 ? (
                 <p className="text-slate-500 text-sm">No bids yet. Be the first!</p>
-              ) : safeBids.map((bid: any, i: number) => {
+              ) : safeBids.map((bid: Bid, i: number) => {
                 const isYou = user && bid.userId === user.id;
                 return (
                 <motion.div key={bid.id ?? i} initial={i === 0 ? { opacity: 0, x: -20 } : false} animate={{ opacity: 1, x: 0 }}

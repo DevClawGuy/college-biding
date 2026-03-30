@@ -31,6 +31,10 @@ function AppContent() {
     if (user) {
       const socket = getSocket();
       socket.emit('join_user', user.id);
+      // TODO: add leave_user on tab close
+      return () => {
+        socket.emit('leave_user', user.id);
+      };
     }
   }, [user]);
 
