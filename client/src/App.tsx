@@ -39,6 +39,7 @@ function AppContent() {
       <Route path="/login" element={<LoginPage />} />
       <Route path="/signup" element={<SignupPage />} />
       <Route path="/verify-email" element={<VerifyEmailPage />} />
+      <Route path="/admin/dashboard" element={<AdminDashboardPage />} />
       <Route path="*" element={
         <div className="min-h-screen flex flex-col">
           <Navbar />
@@ -50,7 +51,6 @@ function AppContent() {
               <Route path="/dashboard" element={<DashboardPage />} />
               <Route path="/create-listing" element={<CreateListingPage />} />
               <Route path="/admin" element={<AdminPage />} />
-              <Route path="/admin/dashboard" element={<AdminDashboardPage />} />
               <Route path="/profile" element={<ProfilePage />} />
               <Route path="/terms" element={<TermsPage />} />
               <Route path="/privacy" element={<PrivacyPage />} />
