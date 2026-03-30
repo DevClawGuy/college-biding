@@ -6,11 +6,16 @@ import { useAuthStore } from '../store/authStore';
 import { useCountdown } from '../hooks/useCountdown';
 import api from '../lib/api';
 
-const tabs = [
+const studentTabs = [
   { id: 'bids', label: 'My Bids', icon: Gavel },
-  { id: 'listings', label: 'My Listings', icon: Home },
   { id: 'messages', label: 'Messages', icon: MessageCircle },
   { id: 'favorites', label: 'Saved', icon: Heart },
+  { id: 'notifications', label: 'Notifications', icon: Bell },
+];
+
+const landlordTabs = [
+  { id: 'listings', label: 'My Listings', icon: Home },
+  { id: 'messages', label: 'Messages', icon: MessageCircle },
   { id: 'notifications', label: 'Notifications', icon: Bell },
 ];
 
@@ -54,8 +59,11 @@ function CountdownText({ endDate }: { endDate: string }) {
 
 export default function DashboardPage() {
   const [searchParams, setSearchParams] = useSearchParams();
-  const activeTab = searchParams.get('tab') || 'bids';
   const { user } = useAuthStore();
+  const tabs = user?.role === 'landlord' ? landlordTabs : studentTabs;
+  const defaultTab = user?.role === 'landlord' ? 'listings' : 'bids';
+  const rawTab = searchParams.get('tab');
+  const activeTab = rawTab && tabs.some(t => t.id === rawTab) ? rawTab : defaultTab;
   const navigate = useNavigate();
 
   const [bids, setBids] = useState<any[]>([]);

@@ -453,4 +453,35 @@ router.get('/analytics', async (req: Request, res: Response) => {
   }
 });
 
+// ============================================================
+// POST /api/admin/clear-listings — wipe all listings, bids, views
+// Keeps user accounts intact
+// ============================================================
+router.post('/clear-listings', async (req: Request, res: Response) => {
+  try {
+    if (!checkAdminKey(req, res)) return;
+
+    console.log('Admin CLEAR-LISTINGS: wiping all listing data...');
+
+    await db.delete(schema.favorites).run();
+    await db.delete(schema.notifications).run();
+    await db.delete(schema.autoBids).run();
+    await db.delete(schema.bids).run();
+    await db.delete(schema.bidGroups).run();
+    await db.delete(schema.bidGroupMembers).run();
+    await db.delete(schema.messages).run();
+    await db.delete(schema.listingViews).run();
+    await db.delete(schema.listings).run();
+
+    console.log('Admin CLEAR-LISTINGS: complete — all listings wiped, users preserved');
+    res.json({
+      success: true,
+      message: 'All listings, bids, views, favorites, notifications, messages, and groups cleared. User accounts preserved.',
+    });
+  } catch (error) {
+    console.error('Clear listings error:', error);
+    res.status(500).json({ error: 'Clear failed', details: String(error) });
+  }
+});
+
 export default router;
