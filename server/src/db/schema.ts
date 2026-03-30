@@ -47,6 +47,7 @@ export const listings = sqliteTable('listings', {
   approvalStatus: text('approval_status').notNull().default('pending'),
   winnerId: text('winner_id'),
   secureLeasePrice: integer('secure_lease_price'),
+  viewCount: integer('view_count').notNull().default(0),
   tags: text('tags').notNull().default('[]'), // JSON array
   createdAt: text('created_at').notNull().default(''),
 });
@@ -108,6 +109,14 @@ export const messages = sqliteTable('messages', {
   body: text('body').notNull(),
   isRead: integer('is_read', { mode: 'boolean' }).notNull().default(false),
   createdAt: integer('created_at').notNull(),
+});
+
+export const listingViews = sqliteTable('listing_views', {
+  id: text('id').primaryKey(),
+  listingId: text('listing_id').notNull().references(() => listings.id),
+  viewerId: text('viewer_id'),
+  viewerIp: text('viewer_ip'),
+  viewedAt: integer('viewed_at').notNull(),
 });
 
 export const favorites = sqliteTable('favorites', {

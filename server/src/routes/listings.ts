@@ -1,8 +1,9 @@
 import { Router, Request, Response } from 'express';
 import crypto from 'crypto';
+import jwt from 'jsonwebtoken';
 import { db, schema } from '../db';
 import { eq, and, like, gte, lte, asc, desc, sql } from 'drizzle-orm';
-import { authenticateToken, AuthRequest } from '../middleware/auth';
+import { authenticateToken, AuthRequest, JWT_SECRET } from '../middleware/auth';
 
 const router = Router();
 
@@ -97,7 +98,69 @@ router.get('/:id', async (req: Request, res: Response) => {
       }).from(schema.users).where(eq(schema.users.id, listing.winnerId)).get();
     }
 
-    res.json({ ...parseListing(listing), landlord, winner });
+    // TODO: track views over time for analytics dashboard
+    // Record view (non-blocking, don't fail the request)
+    try {
+      // Optionally extract userId from JWT if present
+      let viewerId: string | null = null;
+      const authHeader = req.headers['authorization'];
+      const token = authHeader && authHeader.split(' ')[1];
+      if (token) {
+        try {
+          const decoded = jwt.verify(token, JWT_SECRET) as { userId: string };
+          viewerId = decoded.userId;
+        } catch { /* invalid token — treat as anonymous */ }
+      }
+
+      // Don't count landlord viewing their own listing
+      if (viewerId !== listing.landlordId) {
+        const viewerIp = viewerId ? null : (req.ip || req.socket.remoteAddress || null);
+        const viewId = crypto.randomUUID();
+
+        // For logged-in users: INSERT OR IGNORE (unique on listing_id + viewer_id)
+        // For anonymous: always insert (tracked by IP but not deduplicated strictly)
+        if (viewerId) {
+          const existing = await db.select({ id: schema.listingViews.id })
+            .from(schema.listingViews)
+            .where(and(
+              eq(schema.listingViews.listingId, listing.id),
+              eq(schema.listingViews.viewerId, viewerId),
+            )).get();
+
+          if (!existing) {
+            await db.insert(schema.listingViews).values({
+              id: viewId, listingId: listing.id, viewerId, viewerIp: null, viewedAt: Date.now(),
+            }).run();
+            await db.update(schema.listings).set({
+              viewCount: sql`${schema.listings.viewCount} + 1`,
+            }).where(eq(schema.listings.id, listing.id)).run();
+          }
+        } else if (viewerIp) {
+          const existing = await db.select({ id: schema.listingViews.id })
+            .from(schema.listingViews)
+            .where(and(
+              eq(schema.listingViews.listingId, listing.id),
+              eq(schema.listingViews.viewerIp, viewerIp),
+            )).get();
+
+          if (!existing) {
+            await db.insert(schema.listingViews).values({
+              id: viewId, listingId: listing.id, viewerId: null, viewerIp, viewedAt: Date.now(),
+            }).run();
+            await db.update(schema.listings).set({
+              viewCount: sql`${schema.listings.viewCount} + 1`,
+            }).where(eq(schema.listings.id, listing.id)).run();
+          }
+        }
+      }
+    } catch (viewErr) {
+      console.error('View tracking error (non-fatal):', viewErr);
+    }
+
+    // Re-read to get updated viewCount
+    const updated = await db.select().from(schema.listings).where(eq(schema.listings.id, listing.id)).get();
+
+    res.json({ ...parseListing(updated ?? listing), landlord, winner });
   } catch (error) {
     res.status(500).json({ error: 'Internal server error' });
   }

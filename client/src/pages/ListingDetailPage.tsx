@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback, useRef } from 'react';
 import { useParams, Link, useSearchParams } from 'react-router-dom';
-import { MapPin, Bed, Bath, Ruler, Clock, Heart, ChevronLeft, ChevronRight, GraduationCap, Check, Lock, Users, MessageCircle, Send } from 'lucide-react';
+import { MapPin, Bed, Bath, Ruler, Clock, Heart, ChevronLeft, ChevronRight, GraduationCap, Check, Lock, Users, MessageCircle, Send, Eye } from 'lucide-react';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import { motion } from 'framer-motion';
 import confetti from 'canvas-confetti';
@@ -37,6 +37,7 @@ interface Listing {
   status: 'active' | 'ended' | 'cancelled';
   winnerId: string | null;
   secureLeasePrice: number | null;
+  viewCount: number;
   landlordId: string;
   landlord?: { id: string; name: string; university: string; avatar: string | null };
   winner?: { id: string; name: string; email: string; university: string } | null;
@@ -406,6 +407,19 @@ export default function ListingDetailPage() {
                 </span>
               ))}
             </div>
+
+            {/* View count */}
+            {(listing.viewCount ?? 0) > 0 && (
+              <div className={`flex items-center gap-1.5 mt-3 text-sm font-medium ${
+                listing.viewCount > 100 ? 'text-rose-600' : listing.viewCount > 50 ? 'text-amber-600' : 'text-slate-500'
+              }`}>
+                <Eye className="w-4 h-4" />
+                {listing.viewCount > 100
+                  ? <span>{listing.viewCount} students viewed this — high demand!</span>
+                  : <span>{listing.viewCount} students viewed this</span>
+                }
+              </div>
+            )}
           </div>
 
           {/* Description */}

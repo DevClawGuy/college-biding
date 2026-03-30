@@ -129,6 +129,15 @@ export async function initializeDatabase(): Promise<void> {
     )`,
     `CREATE INDEX IF NOT EXISTS idx_messages_listing ON messages(listing_id)`,
     `CREATE INDEX IF NOT EXISTS idx_messages_recipient ON messages(recipient_id)`,
+    `ALTER TABLE listings ADD COLUMN view_count INTEGER DEFAULT 0`,
+    `CREATE TABLE IF NOT EXISTS listing_views (
+      id TEXT PRIMARY KEY,
+      listing_id TEXT NOT NULL,
+      viewer_id TEXT,
+      viewer_ip TEXT,
+      viewed_at INTEGER NOT NULL
+    )`,
+    `CREATE UNIQUE INDEX IF NOT EXISTS idx_listing_views_unique ON listing_views(listing_id, viewer_id) WHERE viewer_id IS NOT NULL`,
   ];
   for (const sql of migrations) {
     try {

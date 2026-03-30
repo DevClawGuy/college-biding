@@ -172,7 +172,8 @@ router.post('/seed', async (req: Request, res: Response) => {
         }).run();
         bidsInserted++;
       }
-      await db.update(schema.listings).set({ currentBid, bidCount: numBids }).where(eq(schema.listings.id, id)).run();
+      const viewCount = 15 + Math.floor(Math.random() * 186); // 15-200
+      await db.update(schema.listings).set({ currentBid, bidCount: numBids, viewCount }).where(eq(schema.listings.id, id)).run();
     }
 
     const summary = {
@@ -274,7 +275,8 @@ router.post('/reset', async (req: Request, res: Response) => {
           timestamp: new Date(now.getTime() - (listingsData[i].daysLeft + 14 - j) * 86400000 / numBids * (numBids - j)).toISOString(),
         }).run();
       }
-      await db.update(schema.listings).set({ currentBid, bidCount: numBids }).where(eq(schema.listings.id, listingId)).run();
+      const viewCount = 15 + Math.floor(Math.random() * 186); // 15-200
+      await db.update(schema.listings).set({ currentBid, bidCount: numBids, viewCount }).where(eq(schema.listings.id, listingId)).run();
     }
 
     console.log('Admin RESET: complete!');
