@@ -63,7 +63,25 @@ function AppContent() {
   );
 }
 
+function MaintenancePage() {
+  return (
+    <div className="min-h-screen bg-brand-950 flex flex-col items-center justify-center px-4 text-center">
+      <div className="w-12 h-12 bg-brand-600 rounded-xl flex items-center justify-center mb-6">
+        <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
+      </div>
+      <h1 className="text-3xl sm:text-4xl font-bold text-white mb-3">HouseRush</h1>
+      <p className="text-lg text-brand-200 mb-2">We're making some improvements. Check back soon!</p>
+      <p className="text-sm text-brand-400">HouseRush will be back online shortly.</p>
+      <p className="absolute bottom-6 text-xs text-brand-600">&copy; 2026 HouseRush</p>
+    </div>
+  );
+}
+
 export default function App() {
+  if (import.meta.env.VITE_MAINTENANCE_MODE === 'true') {
+    return <MaintenancePage />;
+  }
+
   return (
     <Router>
       <AppContent />
