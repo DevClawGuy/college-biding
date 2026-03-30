@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Shield, Users, Building, TrendingUp, Activity, Loader2, RefreshCw, AlertCircle } from 'lucide-react';
 
-const ADMIN_KEY = 'houserush2024';
+const ADMIN_KEY = 'creiguide2026';
 const SESSION_KEY = 'admin_authenticated';
 
 function StatCard({ label, value, sub }: { label: string; value: string | number; sub?: string }) {
