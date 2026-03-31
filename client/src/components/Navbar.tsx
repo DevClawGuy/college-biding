@@ -90,26 +90,31 @@ export default function Navbar() {
           </div>
 
           {/* Right side */}
-          <div className="hidden md:flex items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-3">
             {user ? (
               <>
-                <button onClick={() => navigate('/dashboard?tab=messages')} className="relative p-2 text-slate-500 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition-all">
-                  <MessageCircle className="w-5 h-5" />
-                  {unreadMsgCount > 0 && (
-                    <span className="absolute top-1 right-1 w-4 h-4 bg-brand-600 text-white text-[10px] font-bold rounded-full flex items-center justify-center ring-2 ring-white">
-                      {unreadMsgCount > 9 ? '9' : unreadMsgCount}
-                    </span>
-                  )}
-                </button>
-                <button onClick={handleBellClick} className="relative p-2 text-slate-500 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition-all">
-                  <Bell className="w-5 h-5" />
-                  {unreadCount > 0 && (
-                    <span className="absolute top-1 right-1 w-4 h-4 bg-rose-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center ring-2 ring-white">
-                      {unreadCount > 9 ? '9' : unreadCount}
-                    </span>
-                  )}
-                </button>
-                <div className="w-px h-6 bg-slate-200" />
+                {/* Messages + Bell — desktop only */}
+                <div className="hidden md:flex items-center gap-1">
+                  <button onClick={() => navigate('/dashboard?tab=messages')} className="relative p-2 text-slate-500 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition-all">
+                    <MessageCircle className="w-5 h-5" />
+                    {unreadMsgCount > 0 && (
+                      <span className="absolute top-1 right-1 w-4 h-4 bg-brand-600 text-white text-[10px] font-bold rounded-full flex items-center justify-center ring-2 ring-white">
+                        {unreadMsgCount > 9 ? '9' : unreadMsgCount}
+                      </span>
+                    )}
+                  </button>
+                  <button onClick={handleBellClick} className="relative p-2 text-slate-500 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition-all">
+                    <Bell className="w-5 h-5" />
+                    {unreadCount > 0 && (
+                      <span className="absolute top-1 right-1 w-4 h-4 bg-rose-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center ring-2 ring-white">
+                        {unreadCount > 9 ? '9' : unreadCount}
+                      </span>
+                    )}
+                  </button>
+                  <div className="w-px h-6 bg-slate-200 mx-1" />
+                </div>
+
+                {/* Avatar + logout — always visible */}
                 <Link to="/profile" className="flex items-center gap-2.5 hover:opacity-80 transition-opacity">
                   <div className="w-8 h-8 rounded-full bg-gradient-to-br from-brand-400 to-brand-600 flex items-center justify-center text-white text-sm font-semibold flex-shrink-0">
                     {user.name.charAt(0)}
@@ -121,26 +126,34 @@ export default function Navbar() {
                     )}
                   </div>
                 </Link>
-                  <button onClick={handleLogout} className="p-1.5 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-all">
-                    <LogOut className="w-4 h-4" />
-                  </button>
+                <button onClick={handleLogout} className="p-1.5 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-all">
+                  <LogOut className="w-4 h-4" />
+                </button>
+
+                {/* Mobile hamburger — for nav links */}
+                <button className="md:hidden p-2 text-slate-600 hover:bg-slate-100 rounded-lg" onClick={() => setMenuOpen(!menuOpen)}>
+                  {menuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+                </button>
               </>
             ) : (
               <>
-                <Link to="/login" className="px-4 py-2 text-sm font-medium text-slate-700 hover:text-slate-900 transition-colors">
-                  Log in
-                </Link>
-                <Link to="/signup" className="px-4 py-2.5 bg-brand-600 hover:bg-brand-700 text-white text-sm font-semibold rounded-xl transition-all hover:shadow-lg hover:shadow-brand-600/25 active:scale-[0.98]">
-                  Get Started
-                </Link>
+                {/* Login/signup — desktop */}
+                <div className="hidden md:flex items-center gap-3">
+                  <Link to="/login" className="px-4 py-2 text-sm font-medium text-slate-700 hover:text-slate-900 transition-colors">
+                    Log in
+                  </Link>
+                  <Link to="/signup" className="px-4 py-2.5 bg-brand-600 hover:bg-brand-700 text-white text-sm font-semibold rounded-xl transition-all hover:shadow-lg hover:shadow-brand-600/25 active:scale-[0.98]">
+                    Get Started
+                  </Link>
+                </div>
+
+                {/* Mobile hamburger — for login/signup links */}
+                <button className="md:hidden p-2 text-slate-600 hover:bg-slate-100 rounded-lg" onClick={() => setMenuOpen(!menuOpen)}>
+                  {menuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+                </button>
               </>
             )}
           </div>
-
-          {/* Mobile hamburger */}
-          <button className="md:hidden p-2 text-slate-600 hover:bg-slate-100 rounded-lg" onClick={() => setMenuOpen(!menuOpen)}>
-            {menuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-          </button>
         </div>
       </div>
 

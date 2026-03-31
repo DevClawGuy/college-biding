@@ -3,10 +3,12 @@ import { Search, Shield, TrendingUp, ArrowRight, Star, Users, Building, CheckSqu
 import Logo from '../components/Logo';
 import { motion } from 'framer-motion';
 import { useEffect, useState } from 'react';
+import { useAuthStore } from '../store/authStore';
 import api from '../lib/api';
 import ListingCard from '../components/ListingCard';
 
 export default function HomePage() {
+  const { user } = useAuthStore();
   const [featured, setFeatured] = useState<any[]>([]);
 
   useEffect(() => {
@@ -67,12 +69,14 @@ export default function HomePage() {
                 Browse Listings
                 <ArrowRight className="w-4 h-4" />
               </Link>
-              <Link
-                to="/signup"
-                className="text-slate-600 hover:text-slate-900 px-8 py-3.5 rounded-xl font-semibold text-base transition-colors border border-slate-200 hover:border-slate-300 hover:bg-white"
-              >
-                Create Account
-              </Link>
+              {!user && (
+                <Link
+                  to="/signup"
+                  className="text-slate-600 hover:text-slate-900 px-8 py-3.5 rounded-xl font-semibold text-base transition-colors border border-slate-200 hover:border-slate-300 hover:bg-white"
+                >
+                  Create Account
+                </Link>
+              )}
             </div>
           </motion.div>
 
