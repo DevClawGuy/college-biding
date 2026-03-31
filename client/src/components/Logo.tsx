@@ -1,4 +1,4 @@
-import { FC } from 'react';
+import type { FC } from 'react';
 
 // HouseRush logo — house outline with lightning bolt on indigo background
 interface LogoProps {
