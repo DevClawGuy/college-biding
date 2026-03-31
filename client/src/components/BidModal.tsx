@@ -12,10 +12,11 @@ interface BidModalProps {
   onBidPlaced: () => void;
   groupId?: string;
   groupName?: string;
+  initialBidAmount?: number;
 }
 
-export default function BidModal({ isOpen, onClose, listingId, listingTitle, currentBid, onBidPlaced, groupId, groupName }: BidModalProps) {
-  const [bidAmount, setBidAmount] = useState(currentBid + 25);
+export default function BidModal({ isOpen, onClose, listingId, listingTitle, currentBid, onBidPlaced, groupId, groupName, initialBidAmount }: BidModalProps) {
+  const [bidAmount, setBidAmount] = useState(initialBidAmount ?? (currentBid + 25));
   const [autoBidMax, setAutoBidMax] = useState(0);
   const [showAutoBid, setShowAutoBid] = useState(false);
   const [error, setError] = useState('');

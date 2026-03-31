@@ -149,6 +149,7 @@ export default function ListingDetailPage() {
   const [recLoading, setRecLoading] = useState(false);
   const [recError, setRecError] = useState(false);
   const [recSignalsOpen, setRecSignalsOpen] = useState(false);
+  const [bidPreFillAmount, setBidPreFillAmount] = useState<number | undefined>(undefined);
   const [bidGroup, setBidGroup] = useState<BidGroup | null>(null);
   const [groupJoinToast, setGroupJoinToast] = useState('');
   const [showGroupBidModal, setShowGroupBidModal] = useState(false);
@@ -221,6 +222,11 @@ export default function ListingDetailPage() {
   }, [user, id]);
 
   useEffect(() => { fetchMessages(); }, [fetchMessages]);
+
+  const openBidWithAmount = (amount: number) => {
+    setBidPreFillAmount(amount);
+    setShowBidModal(true);
+  };
 
   const fetchRecommendation = async () => {
     if (!id) return;
@@ -640,93 +646,169 @@ export default function ListingDetailPage() {
                     </div>
                   )}
 
-                  {recommendation && !recLoading && (
-                    <div className="bg-white border-l-4 border-indigo-500 rounded-lg p-4 border border-slate-200">
+                  {recommendation && !recLoading && (() => {
+                    const COMP_STYLES = {
+                      low:       { bar: 'bg-emerald-500', text: 'text-emerald-700', bg: 'bg-emerald-50',  label: 'Low',       desc: 'Few bidders active. Good chance to win near minimum.' },
+                      medium:    { bar: 'bg-amber-500',   text: 'text-amber-700',   bg: 'bg-amber-50',    label: 'Medium',    desc: 'Moderate interest. A competitive bid should do well.' },
+                      high:      { bar: 'bg-orange-500',  text: 'text-orange-700',   bg: 'bg-orange-50',   label: 'High',      desc: 'Multiple active bidders. Consider bidding above minimum.' },
+                      very_high: { bar: 'bg-rose-500',    text: 'text-rose-700',     bg: 'bg-rose-50',     label: 'Very High', desc: 'Intense competition. Aggressive bid or Secure Lease recommended.' },
+                    } as const;
+                    const comp = COMP_STYLES[recommendation.competitionLevel];
+                    const s = recommendation.signals;
+
+                    return (
+                    <div className="bg-white border-l-4 border-indigo-500 rounded-lg p-4 border border-slate-200 space-y-3">
                       {/* Header */}
-                      <div className="flex items-center justify-between mb-3">
-                        <div className="flex items-center gap-1.5">
-                          <Sparkles className="w-4 h-4 text-indigo-600" />
-                          <span className="text-sm font-semibold text-indigo-700">AI Bid Recommendation</span>
-                        </div>
-                        <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${
-                          recommendation.competitionLevel === 'low' ? 'bg-emerald-50 text-emerald-700' :
-                          recommendation.competitionLevel === 'medium' ? 'bg-amber-50 text-amber-700' :
-                          recommendation.competitionLevel === 'high' ? 'bg-orange-50 text-orange-700' :
-                          'bg-rose-50 text-rose-700'
-                        }`}>
-                          {recommendation.competitionLevel.replace('_', ' ')} competition
-                        </span>
+                      <div className="flex items-center gap-1.5">
+                        <Sparkles className="w-4 h-4 text-indigo-600" />
+                        <span className="text-sm font-semibold text-indigo-700">AI Bid Recommendation</span>
                       </div>
 
-                      {/* Range */}
-                      <div className="mb-3">
-                        <p className="text-2xl font-bold text-slate-900">
+                      {/* Competition Level */}
+                      <div>
+                        <p className="text-[11px] font-medium text-slate-400 uppercase tracking-wider mb-1">Competition Level</p>
+                        <div className="h-1.5 rounded-full bg-slate-100 overflow-hidden mb-1.5">
+                          <div className={`h-full rounded-full ${comp.bar}`} style={{ width: `${Math.max(15, recommendation.competitionScore)}%` }} />
+                        </div>
+                        <p className={`text-sm font-semibold ${comp.text}`}>{comp.label}</p>
+                        <p className="text-xs text-slate-500">{comp.desc}</p>
+                      </div>
+
+                      {/* Price range */}
+                      <div>
+                        <p className="text-xl font-bold text-slate-900">
                           ${recommendation.recommendedMin.toLocaleString()} – ${recommendation.recommendedMax.toLocaleString()}<span className="text-sm font-normal text-slate-400">/mo</span>
                         </p>
-                        <p className="text-xs text-slate-400">Recommended range</p>
+                        <p className="text-[11px] text-slate-400">Recommended bid range</p>
                       </div>
 
-                      {/* Win probability table */}
-                      <div className="space-y-2 mb-3">
-                        {[
-                          { label: `At minimum ($${recommendation.recommendedMin.toLocaleString()}/mo)`, prob: recommendation.winProbAtMin },
-                          { label: `At recommended ($${recommendation.recommendedMid.toLocaleString()}/mo)`, prob: recommendation.winProbAtMid },
-                          { label: `At maximum ($${recommendation.recommendedMax.toLocaleString()}/mo)`, prob: recommendation.winProbAtMax },
-                          ...(recommendation.winProbAtSecureLease != null && listing.secureLeasePrice ? [{ label: `Secure Lease ($${listing.secureLeasePrice.toLocaleString()}/mo)`, prob: recommendation.winProbAtSecureLease }] : []),
-                        ].map(row => (
-                          <div key={row.label}>
+                      {/* Win probability rows */}
+                      <div className="space-y-1.5">
+                        {/* Minimum */}
+                        <div>
+                          <div className="flex items-center justify-between text-xs mb-0.5">
+                            <span className="text-slate-500">Minimum (${recommendation.recommendedMin.toLocaleString()}/mo)</span>
+                            <span className="font-semibold text-slate-700">{recommendation.winProbAtMin}%</span>
+                          </div>
+                          <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                            <div className="h-full rounded-full bg-orange-400" style={{ width: `${recommendation.winProbAtMin}%` }} />
+                          </div>
+                        </div>
+
+                        {/* Recommended — highlighted */}
+                        <div className="bg-indigo-50/60 rounded-lg px-2 py-1.5 -mx-1">
+                          <div className="flex items-center justify-between text-xs mb-0.5">
+                            <span className="text-indigo-700 font-medium flex items-center gap-1">
+                              Recommended (${recommendation.recommendedMid.toLocaleString()}/mo)
+                              <span className="text-[9px] font-semibold bg-indigo-100 text-indigo-600 px-1.5 py-0.5 rounded">BEST VALUE</span>
+                            </span>
+                            <span className="font-bold text-indigo-700">{recommendation.winProbAtMid}%</span>
+                          </div>
+                          <div className="h-1.5 bg-indigo-100 rounded-full overflow-hidden">
+                            <div className="h-full rounded-full bg-indigo-500" style={{ width: `${recommendation.winProbAtMid}%` }} />
+                          </div>
+                        </div>
+
+                        {/* Aggressive */}
+                        <div>
+                          <div className="flex items-center justify-between text-xs mb-0.5">
+                            <span className="text-slate-500">Aggressive (${recommendation.recommendedMax.toLocaleString()}/mo)</span>
+                            <span className="font-semibold text-slate-700">{recommendation.winProbAtMax}%</span>
+                          </div>
+                          <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                            <div className="h-full rounded-full bg-emerald-500" style={{ width: `${recommendation.winProbAtMax}%` }} />
+                          </div>
+                        </div>
+
+                        {/* Secure Lease */}
+                        {listing.secureLeasePrice && (
+                          <div>
                             <div className="flex items-center justify-between text-xs mb-0.5">
-                              <span className="text-slate-600">{row.label}</span>
-                              <span className="font-semibold text-slate-900">{row.prob}%</span>
+                              <span className="text-emerald-700 font-medium flex items-center gap-1">
+                                <Lock className="w-3 h-3" /> Secure Lease (${listing.secureLeasePrice.toLocaleString()}/mo)
+                              </span>
+                              <span className="font-semibold text-emerald-700">Guaranteed — no auction risk</span>
                             </div>
-                            <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden">
-                              <div className={`h-full rounded-full transition-all ${row.prob > 65 ? 'bg-emerald-500' : row.prob > 40 ? 'bg-amber-500' : 'bg-rose-400'}`}
-                                style={{ width: `${row.prob}%` }} />
+                            <div className="h-1.5 bg-emerald-100 rounded-full overflow-hidden">
+                              <div className="h-full rounded-full bg-emerald-700 w-full" />
                             </div>
                           </div>
-                        ))}
-                      </div>
-
-                      {/* Confidence */}
-                      <div className="flex items-center gap-1.5 mb-2">
-                        <span className={`w-2 h-2 rounded-full ${recommendation.confidence === 'high' ? 'bg-emerald-500' : recommendation.confidence === 'medium' ? 'bg-amber-500' : 'bg-slate-400'}`} />
-                        <span className="text-xs text-slate-500">{recommendation.confidenceNote}</span>
-                      </div>
-
-                      {/* Insight */}
-                      <div className="flex items-start gap-1.5 mb-2">
-                        <Lightbulb className="w-3.5 h-3.5 text-amber-500 mt-0.5 flex-shrink-0" />
-                        <p className="text-sm text-slate-600 italic">{recommendation.insight}</p>
+                        )}
                       </div>
 
                       {/* Urgency */}
                       {(recommendation.urgency === 'high' || recommendation.urgency === 'extreme') && (
-                        <div className="flex items-center gap-1.5 mb-2 text-xs font-medium text-rose-600">
-                          <span className="w-2 h-2 rounded-full bg-rose-500 animate-pulse" />
+                        <div className="flex items-center gap-1.5 text-xs font-medium text-rose-600 bg-rose-50 rounded-lg px-3 py-2">
+                          <span className="w-2 h-2 rounded-full bg-rose-500 animate-pulse flex-shrink-0" />
                           {recommendation.urgency === 'extreme' ? 'Auction ending very soon — place your bid now' : 'Act soon — auction closing in under 6 hours'}
                         </div>
                       )}
 
-                      {/* Expandable signals */}
-                      <button onClick={() => setRecSignalsOpen(!recSignalsOpen)}
-                        className="flex items-center gap-1 text-[11px] text-slate-400 hover:text-slate-600 transition-colors">
-                        <ChevronDown className={`w-3 h-3 transition-transform ${recSignalsOpen ? 'rotate-180' : ''}`} />
-                        Auction signals
-                      </button>
-                      {recSignalsOpen && (
-                        <div className="mt-1.5 text-[11px] text-slate-400 space-y-0.5">
-                          <p>{recommendation.signals.activeBidders} active bidders · {recommendation.signals.bidVelocity24h} bids today · {recommendation.signals.viewCount} views · {recommendation.signals.hoursLeft}h left</p>
-                          {recommendation.signals.p50 && <p>Market median: ${recommendation.signals.p50.toLocaleString()}/mo from {recommendation.compsUsed} similar listings</p>}
+                      {/* Suggested action */}
+                      <div className="pt-2 border-t border-slate-100">
+                        <p className="text-[11px] font-medium text-slate-400 uppercase tracking-wider mb-1">Suggested next step</p>
+                        <p className="text-sm text-slate-700 mb-2">
+                          Place a bid at <span className="font-semibold">${recommendation.recommendedMid.toLocaleString()}/mo</span>
+                        </p>
+                        <button onClick={() => openBidWithAmount(recommendation.recommendedMid)}
+                          className="w-full py-2.5 rounded-lg text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-700 transition-all active:scale-[0.98]">
+                          Bid ${recommendation.recommendedMid.toLocaleString()}/mo
+                        </button>
+                      </div>
+
+                      {/* Based on */}
+                      <div className="pt-2 border-t border-slate-100">
+                        <p className="text-[11px] font-medium text-slate-400 uppercase tracking-wider mb-1">Recommendation based on</p>
+                        <ul className="text-xs text-slate-500 space-y-0.5">
+                          <li>{s.viewCount} student{s.viewCount !== 1 ? 's' : ''} viewed this listing</li>
+                          <li>{s.activeBidders} active bidder{s.activeBidders !== 1 ? 's' : ''}</li>
+                          <li>{s.hoursLeft < 1 ? 'Less than 1 hour' : `${Math.round(s.hoursLeft)}h`} remaining</li>
+                          {s.p50 != null
+                            ? <li>Similar listings close around ${s.p50.toLocaleString()}/mo ({recommendation.compsUsed} comp{recommendation.compsUsed !== 1 ? 's' : ''})</li>
+                            : <li>No similar closed listings yet — based on live activity</li>
+                          }
+                        </ul>
+                      </div>
+
+                      {/* Insight */}
+                      {recommendation.insight && (
+                        <div className="flex items-start gap-1.5">
+                          <Lightbulb className="w-3.5 h-3.5 text-amber-500 mt-0.5 flex-shrink-0" />
+                          <p className="text-sm text-slate-600">{recommendation.insight}</p>
                         </div>
                       )}
 
+                      {/* Confidence */}
+                      <div className="flex items-center gap-1.5">
+                        <span className={`w-1.5 h-1.5 rounded-full ${recommendation.confidence === 'high' ? 'bg-emerald-500' : recommendation.confidence === 'medium' ? 'bg-amber-500' : 'bg-slate-400'}`} />
+                        <span className="text-[11px] text-slate-400">{recommendation.confidenceNote}</span>
+                      </div>
+
+                      {/* Signals (collapsible) */}
+                      <div>
+                        <button onClick={() => setRecSignalsOpen(!recSignalsOpen)}
+                          className="flex items-center gap-1 text-[11px] text-slate-400 hover:text-slate-600 transition-colors">
+                          <ChevronDown className={`w-3 h-3 transition-transform ${recSignalsOpen ? 'rotate-180' : ''}`} />
+                          Auction signals
+                        </button>
+                        {recSignalsOpen && (
+                          <ul className="mt-1 text-[11px] text-slate-400 space-y-0.5">
+                            <li>{s.viewCount} views ({s.viewVelocity > 0 ? 'trending up' : 'steady'} interest)</li>
+                            <li>{s.bidVelocity24h} bid{s.bidVelocity24h !== 1 ? 's' : ''} in the last 24 hours</li>
+                            <li>Bid activity {s.recentMomentumPercent > 10 ? 'accelerating' : s.recentMomentumPercent > 0 ? 'steady' : 'slowing'} ({s.recentMomentumPercent > 0 ? '+' : ''}{s.recentMomentumPercent}%)</li>
+                            {s.p25 != null && s.p75 != null && <li>Comparable listings close between ${s.p25.toLocaleString()} – ${s.p75.toLocaleString()}/mo</li>}
+                          </ul>
+                        )}
+                      </div>
+
                       {/* Footer */}
-                      <div className="flex items-center justify-between mt-2 pt-2 border-t border-slate-100">
+                      <div className="flex items-center justify-between pt-2 border-t border-slate-100">
                         <p className="text-[10px] text-slate-400 italic">{recommendation.disclaimer}</p>
                         <button onClick={fetchRecommendation} className="text-[10px] text-indigo-400 hover:text-indigo-600 font-medium">Refresh</button>
                       </div>
                     </div>
-                  )}
+                    );
+                  })()}
                 </div>
               )}
 
@@ -884,8 +966,9 @@ export default function ListingDetailPage() {
       </div>
 
       {showBidModal && (
-        <BidModal isOpen={showBidModal} onClose={() => setShowBidModal(false)} listingId={listing.id}
-          listingTitle={listing.title} currentBid={listing.currentBid ?? 0} onBidPlaced={fetchData} />
+        <BidModal isOpen={showBidModal} onClose={() => { setShowBidModal(false); setBidPreFillAmount(undefined); }} listingId={listing.id}
+          listingTitle={listing.title} currentBid={listing.currentBid ?? 0} onBidPlaced={fetchData}
+          initialBidAmount={bidPreFillAmount} />
       )}
 
       {/* Secure Lease Confirmation Modal */}
