@@ -88,12 +88,15 @@ export default function ListingCard({ listing, onFavorite, isFavorited }: Listin
   const heatTier = getHeatmapTier(listing);
 
   return (
+    <div
+      className={`rounded-2xl ${HEAT_RING[heatTier]}`}
+      style={HEAT_STYLE[heatTier]}
+    >
     <motion.div
       initial={{ opacity: 0, y: 24 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, ease: [0.23, 1, 0.32, 1] }}
-      className={`bg-white rounded-2xl card-shadow hover:card-shadow-hover transition-all duration-300 overflow-hidden group ${HEAT_RING[heatTier]}`}
-      style={HEAT_STYLE[heatTier]}
+      className="bg-white rounded-2xl card-shadow hover:card-shadow-hover transition-all duration-300 overflow-hidden group"
     >
       {/* Photo */}
       <div className="relative h-52 overflow-hidden">
@@ -212,5 +215,6 @@ export default function ListingCard({ listing, onFavorite, isFavorited }: Listin
         </div>
       </Link>
     </motion.div>
+    </div>
   );
 }
