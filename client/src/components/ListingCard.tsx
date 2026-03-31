@@ -4,6 +4,60 @@ import { useCountdown } from '../hooks/useCountdown';
 import { motion } from 'framer-motion';
 import { useState } from 'react';
 
+type HeatTier = 'none' | 'warm' | 'hot' | 'fire';
+
+function getHeatmapTier(listing: ListingCardProps['listing']): HeatTier {
+  // Bid count score (0-40)
+  const bids = listing.bidCount ?? 0;
+  let bidScore: number;
+  if (bids >= 10) bidScore = 40;
+  else if (bids >= 6) bidScore = 33;
+  else if (bids >= 3) bidScore = 25;
+  else if (bids >= 1) bidScore = 15;
+  else bidScore = 0;
+
+  // Time urgency score (0-35)
+  const hoursLeft = listing.auctionEnd
+    ? Math.max(0, (new Date(listing.auctionEnd).getTime() - Date.now()) / 3600000)
+    : Infinity;
+  let timeScore: number;
+  if (hoursLeft < 6) timeScore = 35;
+  else if (hoursLeft < 24) timeScore = 28;
+  else if (hoursLeft < 72) timeScore = 20;
+  else if (hoursLeft < 168) timeScore = 10;
+  else timeScore = 0;
+
+  // Price trajectory score (0-25)
+  const start = listing.startingBid ?? 0;
+  const current = listing.currentBid ?? 0;
+  const pctAbove = start > 0 ? ((current - start) / start) * 100 : 0;
+  let priceScore: number;
+  if (pctAbove >= 16) priceScore = 25;
+  else if (pctAbove >= 6) priceScore = 16;
+  else if (pctAbove >= 1) priceScore = 8;
+  else priceScore = 0;
+
+  const total = bidScore + timeScore + priceScore;
+  if (total >= 76) return 'fire';
+  if (total >= 51) return 'hot';
+  if (total >= 26) return 'warm';
+  return 'none';
+}
+
+const HEAT_RING: Record<HeatTier, string> = {
+  none: '',
+  warm: 'ring-2 ring-indigo-400 ring-offset-2 animate-pulse',
+  hot: 'ring-2 ring-orange-400 ring-offset-2 animate-pulse',
+  fire: 'ring-2 ring-red-500 ring-offset-2 animate-pulse',
+};
+
+const HEAT_STYLE: Record<HeatTier, React.CSSProperties | undefined> = {
+  none: undefined,
+  warm: { animationDuration: '2.5s' },
+  hot: { animationDuration: '1.5s' },
+  fire: { animationDuration: '0.8s' },
+};
+
 interface ListingCardProps {
   listing: {
     id: string;
@@ -31,13 +85,15 @@ interface ListingCardProps {
 export default function ListingCard({ listing, onFavorite, isFavorited }: ListingCardProps) {
   const countdown = useCountdown(listing.auctionEnd);
   const [imgIndex, setImgIndex] = useState(0);
+  const heatTier = getHeatmapTier(listing);
 
   return (
     <motion.div
       initial={{ opacity: 0, y: 24 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, ease: [0.23, 1, 0.32, 1] }}
-      className="bg-white rounded-2xl card-shadow hover:card-shadow-hover transition-all duration-300 overflow-hidden group"
+      className={`bg-white rounded-2xl card-shadow hover:card-shadow-hover transition-all duration-300 overflow-hidden group ${HEAT_RING[heatTier]}`}
+      style={HEAT_STYLE[heatTier]}
     >
       {/* Photo */}
       <div className="relative h-52 overflow-hidden">
@@ -72,6 +128,18 @@ export default function ListingCard({ listing, onFavorite, isFavorited }: Listin
             </span>
           ))}
         </div>
+
+        {/* Heat badge */}
+        {heatTier === 'hot' && (
+          <span className="absolute top-3 right-14 bg-orange-100 text-orange-800 text-xs font-medium px-2 py-0.5 rounded-full z-10">
+            🔥 Hot
+          </span>
+        )}
+        {heatTier === 'fire' && (
+          <span className="absolute top-3 right-14 bg-red-100 text-red-800 text-xs font-medium px-2 py-0.5 rounded-full z-10">
+            🔥 On Fire
+          </span>
+        )}
 
         {/* Favorite */}
         {onFavorite && (
