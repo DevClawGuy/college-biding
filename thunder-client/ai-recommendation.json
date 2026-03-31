@@ -1,0 +1,33 @@
+{
+  "collectionName": "HouseRush — AI Bid Recommendation",
+  "requests": [
+    {
+      "name": "Get AI Bid Recommendation (POST)",
+      "method": "POST",
+      "url": "{{baseUrl}}/api/ai/bid-recommendation/:listingId",
+      "headers": [
+        { "name": "Authorization", "value": "Bearer {{token}}" }
+      ],
+      "params": [
+        { "name": "listingId", "value": "<listing-id-here>" }
+      ],
+      "notes": "Generate AI bid recommendation. Students only (403 for landlords). Returns cached result if < 5 min old. Includes recommended range, win probabilities, competition score, signals, and insight."
+    },
+    {
+      "name": "Get AI Bid Recommendation (GET)",
+      "method": "GET",
+      "url": "{{baseUrl}}/api/ai/bid-recommendation/:listingId",
+      "headers": [
+        { "name": "Authorization", "value": "Bearer {{token}}" }
+      ],
+      "params": [
+        { "name": "listingId", "value": "<listing-id-here>" }
+      ],
+      "notes": "Same as POST — useful for browser/testing. Returns same recommendation payload."
+    }
+  ],
+  "variables": [
+    { "name": "baseUrl", "value": "http://localhost:3001" },
+    { "name": "token", "value": "<paste-student-jwt-token-here>" }
+  ]
+}

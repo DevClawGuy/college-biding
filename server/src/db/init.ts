@@ -139,6 +139,16 @@ export async function initializeDatabase(): Promise<void> {
     )`,
     `CREATE UNIQUE INDEX IF NOT EXISTS idx_listing_views_unique ON listing_views(listing_id, viewer_id) WHERE viewer_id IS NOT NULL`,
     `ALTER TABLE users ADD COLUMN last_seen_at INTEGER`,
+    `CREATE TABLE IF NOT EXISTS view_snapshots (
+      id TEXT PRIMARY KEY,
+      listing_id TEXT NOT NULL,
+      view_count INTEGER NOT NULL,
+      recorded_at INTEGER NOT NULL
+    )`,
+    `CREATE INDEX IF NOT EXISTS idx_view_snapshots ON view_snapshots(listing_id, recorded_at)`,
+    `ALTER TABLE listings ADD COLUMN recommendation_cache TEXT`,
+    `ALTER TABLE listings ADD COLUMN recommendation_cached_at INTEGER`,
+    `ALTER TABLE listings ADD COLUMN property_type TEXT DEFAULT 'apartment'`,
   ];
   for (const sql of migrations) {
     try {

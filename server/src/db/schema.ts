@@ -49,6 +49,9 @@ export const listings = sqliteTable('listings', {
   winnerId: text('winner_id'),
   secureLeasePrice: integer('secure_lease_price'),
   viewCount: integer('view_count').notNull().default(0),
+  recommendationCache: text('recommendation_cache'),
+  recommendationCachedAt: integer('recommendation_cached_at'),
+  propertyType: text('property_type').default('apartment'),
   tags: text('tags').notNull().default('[]'), // JSON array
   createdAt: text('created_at').notNull().default(''),
 });
@@ -118,6 +121,13 @@ export const listingViews = sqliteTable('listing_views', {
   viewerId: text('viewer_id'),
   viewerIp: text('viewer_ip'),
   viewedAt: integer('viewed_at').notNull(),
+});
+
+export const viewSnapshots = sqliteTable('view_snapshots', {
+  id: text('id').primaryKey(),
+  listingId: text('listing_id').notNull().references(() => listings.id),
+  viewCount: integer('view_count').notNull(),
+  recordedAt: integer('recorded_at').notNull(),
 });
 
 export const favorites = sqliteTable('favorites', {

@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback, useRef } from 'react';
 import { useParams, Link, useSearchParams } from 'react-router-dom';
-import { MapPin, Bed, Bath, Ruler, Clock, Heart, ChevronLeft, ChevronRight, GraduationCap, Check, Lock, Users, MessageCircle, Send, Eye } from 'lucide-react';
+import { MapPin, Bed, Bath, Ruler, Clock, Heart, ChevronLeft, ChevronRight, GraduationCap, Check, Lock, Users, MessageCircle, Send, Eye, Sparkles, ChevronDown, Lightbulb } from 'lucide-react';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import { motion } from 'framer-motion';
 import confetti from 'canvas-confetti';
@@ -65,6 +65,39 @@ interface Message {
   createdAt: number;
 }
 
+interface BidRecommendation {
+  recommendedMin: number;
+  recommendedMid: number;
+  recommendedMax: number;
+  winProbAtMin: number;
+  winProbAtMid: number;
+  winProbAtMax: number;
+  winProbAtSecureLease: number | null;
+  competitionScore: number;
+  competitionLevel: 'low' | 'medium' | 'high' | 'very_high';
+  confidence: 'high' | 'medium' | 'low';
+  confidenceNote: string;
+  compsUsed: number;
+  urgency: 'low' | 'medium' | 'high' | 'extreme';
+  insight: string;
+  signals: {
+    activeBidders: number;
+    bidVelocity24h: number;
+    viewCount: number;
+    viewVelocity: number;
+    hoursLeft: number;
+    priceIncreasePercent: number;
+    recentMomentumPercent: number;
+    p25: number | null;
+    p50: number | null;
+    p75: number | null;
+    weightedMedian: number | null;
+  };
+  cached: boolean;
+  generatedAt: number;
+  disclaimer: string;
+}
+
 interface BidGroupMember {
   id: string;
   groupId: string;
@@ -112,6 +145,10 @@ export default function ListingDetailPage() {
   const [msgSending, setMsgSending] = useState(false);
   const msgEndRef = useRef<HTMLDivElement>(null);
   const [showCreateGroupModal, setShowCreateGroupModal] = useState(false);
+  const [recommendation, setRecommendation] = useState<BidRecommendation | null>(null);
+  const [recLoading, setRecLoading] = useState(false);
+  const [recError, setRecError] = useState(false);
+  const [recSignalsOpen, setRecSignalsOpen] = useState(false);
   const [bidGroup, setBidGroup] = useState<BidGroup | null>(null);
   const [groupJoinToast, setGroupJoinToast] = useState('');
   const [showGroupBidModal, setShowGroupBidModal] = useState(false);
@@ -184,6 +221,19 @@ export default function ListingDetailPage() {
   }, [user, id]);
 
   useEffect(() => { fetchMessages(); }, [fetchMessages]);
+
+  const fetchRecommendation = async () => {
+    if (!id) return;
+    setRecLoading(true);
+    setRecError(false);
+    try {
+      const { data } = await api.post(`/ai/bid-recommendation/${id}`);
+      setRecommendation(data);
+    } catch {
+      setRecError(true);
+    }
+    setRecLoading(false);
+  };
 
   // Auto-scroll messages to bottom
   useEffect(() => {
@@ -563,6 +613,122 @@ export default function ListingDetailPage() {
                 <span>Starting bid</span>
                 <span className="font-medium text-slate-700">${(listing.startingBid ?? 0).toLocaleString()}/mo</span>
               </div>
+
+              {/* AI Bid Recommendation — students only, active auctions */}
+              {listing.status !== 'ended' && !countdown.isExpired && user && user.role === 'student' && (
+                <div className="mb-5">
+                  {!recommendation && !recLoading && !recError && (
+                    <button onClick={fetchRecommendation}
+                      className="w-full flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-semibold text-indigo-600 border border-indigo-200 hover:bg-indigo-50 transition-all">
+                      <Sparkles className="w-4 h-4" /> Get AI Bid Recommendation
+                    </button>
+                  )}
+
+                  {recLoading && (
+                    <div className="animate-pulse space-y-2 p-4 bg-slate-50 rounded-xl border border-slate-100">
+                      <div className="h-4 bg-slate-200 rounded w-2/3" />
+                      <div className="h-3 bg-slate-200 rounded w-1/2" />
+                      <div className="h-3 bg-slate-200 rounded w-3/4" />
+                      <p className="text-xs text-slate-400 mt-2">Analyzing auction data...</p>
+                    </div>
+                  )}
+
+                  {recError && (
+                    <div className="p-4 bg-slate-50 rounded-xl border border-slate-100 text-center">
+                      <p className="text-sm text-slate-500">Recommendation unavailable right now.</p>
+                      <button onClick={fetchRecommendation} className="text-xs text-indigo-500 mt-1 hover:underline">Try again</button>
+                    </div>
+                  )}
+
+                  {recommendation && !recLoading && (
+                    <div className="bg-white border-l-4 border-indigo-500 rounded-lg p-4 border border-slate-200">
+                      {/* Header */}
+                      <div className="flex items-center justify-between mb-3">
+                        <div className="flex items-center gap-1.5">
+                          <Sparkles className="w-4 h-4 text-indigo-600" />
+                          <span className="text-sm font-semibold text-indigo-700">AI Bid Recommendation</span>
+                        </div>
+                        <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${
+                          recommendation.competitionLevel === 'low' ? 'bg-emerald-50 text-emerald-700' :
+                          recommendation.competitionLevel === 'medium' ? 'bg-amber-50 text-amber-700' :
+                          recommendation.competitionLevel === 'high' ? 'bg-orange-50 text-orange-700' :
+                          'bg-rose-50 text-rose-700'
+                        }`}>
+                          {recommendation.competitionLevel.replace('_', ' ')} competition
+                        </span>
+                      </div>
+
+                      {/* Range */}
+                      <div className="mb-3">
+                        <p className="text-2xl font-bold text-slate-900">
+                          ${recommendation.recommendedMin.toLocaleString()} – ${recommendation.recommendedMax.toLocaleString()}<span className="text-sm font-normal text-slate-400">/mo</span>
+                        </p>
+                        <p className="text-xs text-slate-400">Recommended range</p>
+                      </div>
+
+                      {/* Win probability table */}
+                      <div className="space-y-2 mb-3">
+                        {[
+                          { label: `At minimum ($${recommendation.recommendedMin.toLocaleString()}/mo)`, prob: recommendation.winProbAtMin },
+                          { label: `At recommended ($${recommendation.recommendedMid.toLocaleString()}/mo)`, prob: recommendation.winProbAtMid },
+                          { label: `At maximum ($${recommendation.recommendedMax.toLocaleString()}/mo)`, prob: recommendation.winProbAtMax },
+                          ...(recommendation.winProbAtSecureLease != null && listing.secureLeasePrice ? [{ label: `Secure Lease ($${listing.secureLeasePrice.toLocaleString()}/mo)`, prob: recommendation.winProbAtSecureLease }] : []),
+                        ].map(row => (
+                          <div key={row.label}>
+                            <div className="flex items-center justify-between text-xs mb-0.5">
+                              <span className="text-slate-600">{row.label}</span>
+                              <span className="font-semibold text-slate-900">{row.prob}%</span>
+                            </div>
+                            <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                              <div className={`h-full rounded-full transition-all ${row.prob > 65 ? 'bg-emerald-500' : row.prob > 40 ? 'bg-amber-500' : 'bg-rose-400'}`}
+                                style={{ width: `${row.prob}%` }} />
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+
+                      {/* Confidence */}
+                      <div className="flex items-center gap-1.5 mb-2">
+                        <span className={`w-2 h-2 rounded-full ${recommendation.confidence === 'high' ? 'bg-emerald-500' : recommendation.confidence === 'medium' ? 'bg-amber-500' : 'bg-slate-400'}`} />
+                        <span className="text-xs text-slate-500">{recommendation.confidenceNote}</span>
+                      </div>
+
+                      {/* Insight */}
+                      <div className="flex items-start gap-1.5 mb-2">
+                        <Lightbulb className="w-3.5 h-3.5 text-amber-500 mt-0.5 flex-shrink-0" />
+                        <p className="text-sm text-slate-600 italic">{recommendation.insight}</p>
+                      </div>
+
+                      {/* Urgency */}
+                      {(recommendation.urgency === 'high' || recommendation.urgency === 'extreme') && (
+                        <div className="flex items-center gap-1.5 mb-2 text-xs font-medium text-rose-600">
+                          <span className="w-2 h-2 rounded-full bg-rose-500 animate-pulse" />
+                          {recommendation.urgency === 'extreme' ? 'Auction ending very soon — place your bid now' : 'Act soon — auction closing in under 6 hours'}
+                        </div>
+                      )}
+
+                      {/* Expandable signals */}
+                      <button onClick={() => setRecSignalsOpen(!recSignalsOpen)}
+                        className="flex items-center gap-1 text-[11px] text-slate-400 hover:text-slate-600 transition-colors">
+                        <ChevronDown className={`w-3 h-3 transition-transform ${recSignalsOpen ? 'rotate-180' : ''}`} />
+                        Auction signals
+                      </button>
+                      {recSignalsOpen && (
+                        <div className="mt-1.5 text-[11px] text-slate-400 space-y-0.5">
+                          <p>{recommendation.signals.activeBidders} active bidders · {recommendation.signals.bidVelocity24h} bids today · {recommendation.signals.viewCount} views · {recommendation.signals.hoursLeft}h left</p>
+                          {recommendation.signals.p50 && <p>Market median: ${recommendation.signals.p50.toLocaleString()}/mo from {recommendation.compsUsed} similar listings</p>}
+                        </div>
+                      )}
+
+                      {/* Footer */}
+                      <div className="flex items-center justify-between mt-2 pt-2 border-t border-slate-100">
+                        <p className="text-[10px] text-slate-400 italic">{recommendation.disclaimer}</p>
+                        <button onClick={fetchRecommendation} className="text-[10px] text-indigo-400 hover:text-indigo-600 font-medium">Refresh</button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
 
               {/* Only show bid actions if auction is still active */}
               {listing.status !== 'ended' && !countdown.isExpired ? (
