@@ -1,0 +1,28 @@
+{
+  "collectionName": "HouseRush — Test Bidders",
+  "requests": [
+    {
+      "name": "Seed Test Bidders",
+      "method": "POST",
+      "url": "{{baseUrl}}/api/admin/seed-test-bidders",
+      "headers": [
+        { "name": "x-admin-key", "value": "houserush2024" },
+        { "name": "Content-Type", "value": "application/json" }
+      ],
+      "notes": "Creates 5 test student bidders (@houserush.test) and places 2-3 staggered bids per active listing. Safe to run multiple times — skips existing users. Returns { users_created, bids_placed }."
+    },
+    {
+      "name": "Wipe Test Bidders",
+      "method": "POST",
+      "url": "{{baseUrl}}/api/admin/wipe-test-bidders",
+      "headers": [
+        { "name": "x-admin-key", "value": "houserush2024" },
+        { "name": "Content-Type", "value": "application/json" }
+      ],
+      "notes": "Deletes all @houserush.test users and their bids. Recalculates listing currentBid and bidCount after deletion. Returns { users_deleted, bids_deleted }."
+    }
+  ],
+  "variables": [
+    { "name": "baseUrl", "value": "http://localhost:3001" }
+  ]
+}

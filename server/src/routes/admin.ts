@@ -739,4 +739,148 @@ ${personalizedMessage}
   }
 });
 
+// ============================================================
+// POST /api/admin/seed-test-bidders — create test bidders + place bids
+// ============================================================
+router.post('/seed-test-bidders', async (req: Request, res: Response) => {
+  try {
+    if (!checkAdminKey(req, res)) return;
+
+    console.log('Admin SEED-TEST-BIDDERS: starting...');
+    const hashedPassword = await bcrypt.hash('testpass123', 10);
+    const now = new Date();
+    let usersCreated = 0;
+    let bidsPlaced = 0;
+
+    const testBidders: { email: string; name: string; id: string }[] = [];
+
+    for (let i = 1; i <= 5; i++) {
+      const email = `testbidder${i}@houserush.test`;
+      const name = `Test Bidder ${i}`;
+
+      // Check if already exists
+      const existing = await db.select({ id: schema.users.id }).from(schema.users).where(eq(schema.users.email, email)).get();
+      if (existing) {
+        testBidders.push({ email, name, id: existing.id });
+        console.log(`  skip user: ${email} (exists)`);
+        continue;
+      }
+
+      const id = crypto.randomUUID();
+      await db.insert(schema.users).values({
+        id,
+        email,
+        password: hashedPassword,
+        name,
+        university: 'Monmouth University',
+        year: ['Sophomore', 'Junior', 'Senior'][i % 3],
+        role: 'student',
+        isEduVerified: true,
+        createdAt: now.toISOString(),
+      }).run();
+      testBidders.push({ email, name, id });
+      usersCreated++;
+      console.log(`  created user: ${email}`);
+    }
+
+    // Fetch all active listings
+    const activeListings = await db.select()
+      .from(schema.listings)
+      .where(eq(schema.listings.status, 'active'));
+
+    for (const listing of activeListings) {
+      // Place 2-3 staggered bids from different test bidders
+      const numBids = 2 + (activeListings.indexOf(listing) % 2); // alternates 2 and 3
+      let currentBid = listing.currentBid > listing.startingBid ? listing.currentBid : listing.startingBid;
+      const increments = [25, 50, 25];
+
+      for (let j = 0; j < numBids; j++) {
+        const bidder = testBidders[j % testBidders.length];
+        currentBid += increments[j % increments.length];
+        const bidTime = new Date(now.getTime() - (numBids - j) * 3600000); // stagger by hours
+
+        await db.insert(schema.bids).values({
+          id: crypto.randomUUID(),
+          listingId: listing.id,
+          userId: bidder.id,
+          amount: currentBid,
+          isAutoBid: false,
+          timestamp: bidTime.toISOString(),
+        }).run();
+        bidsPlaced++;
+        console.log(`  bid: ${bidder.name} → $${currentBid} on "${listing.title}"`);
+      }
+
+      // Update listing with new current bid and bid count
+      await db.update(schema.listings).set({
+        currentBid,
+        bidCount: listing.bidCount + numBids,
+      }).where(eq(schema.listings.id, listing.id)).run();
+    }
+
+    console.log(`Admin SEED-TEST-BIDDERS: done — ${usersCreated} users, ${bidsPlaced} bids`);
+    res.json({ users_created: usersCreated, bids_placed: bidsPlaced });
+  } catch (error) {
+    console.error('Seed test bidders error:', error);
+    res.status(500).json({ error: 'Seed failed', details: String(error) });
+  }
+});
+
+// ============================================================
+// POST /api/admin/wipe-test-bidders — remove test bidders + their bids
+// ============================================================
+router.post('/wipe-test-bidders', async (req: Request, res: Response) => {
+  try {
+    if (!checkAdminKey(req, res)) return;
+
+    console.log('Admin WIPE-TEST-BIDDERS: starting...');
+
+    // Find all test user IDs
+    const testUsers = await db.select({ id: schema.users.id })
+      .from(schema.users)
+      .where(like(schema.users.email, '%@houserush.test'));
+
+    const testUserIds = testUsers.map(u => u.id);
+    let bidsDeleted = 0;
+
+    // Delete bids by these users
+    for (const userId of testUserIds) {
+      const userBids = await db.select({ id: schema.bids.id })
+        .from(schema.bids)
+        .where(eq(schema.bids.userId, userId));
+      for (const bid of userBids) {
+        await db.delete(schema.bids).where(eq(schema.bids.id, bid.id)).run();
+        bidsDeleted++;
+      }
+    }
+
+    // Delete the users
+    let usersDeleted = 0;
+    for (const userId of testUserIds) {
+      await db.delete(schema.users).where(eq(schema.users.id, userId)).run();
+      usersDeleted++;
+    }
+
+    // Recalculate currentBid and bidCount for affected listings
+    const allListings = await db.select({ id: schema.listings.id }).from(schema.listings);
+    for (const listing of allListings) {
+      const bids = await db.select({ amount: schema.bids.amount })
+        .from(schema.bids)
+        .where(eq(schema.bids.listingId, listing.id))
+        .orderBy(desc(schema.bids.amount))
+        .limit(1);
+      const listingObj = await db.select({ startingBid: schema.listings.startingBid }).from(schema.listings).where(eq(schema.listings.id, listing.id)).get();
+      const topBid = bids.length > 0 ? bids[0].amount : (listingObj?.startingBid ?? 0);
+      const totalBids = await db.select({ id: schema.bids.id }).from(schema.bids).where(eq(schema.bids.listingId, listing.id));
+      await db.update(schema.listings).set({ currentBid: topBid, bidCount: totalBids.length }).where(eq(schema.listings.id, listing.id)).run();
+    }
+
+    console.log(`Admin WIPE-TEST-BIDDERS: done — ${usersDeleted} users, ${bidsDeleted} bids`);
+    res.json({ users_deleted: usersDeleted, bids_deleted: bidsDeleted });
+  } catch (error) {
+    console.error('Wipe test bidders error:', error);
+    res.status(500).json({ error: 'Wipe failed', details: String(error) });
+  }
+});
+
 export default router;
