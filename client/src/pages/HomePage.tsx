@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { Search, Shield, TrendingUp, ArrowRight, Star, Users, Building, CheckSquare, AlertTriangle, ShieldAlert } from 'lucide-react';
+import { Search, Shield, TrendingUp, ArrowRight, CheckSquare, AlertTriangle, ShieldAlert } from 'lucide-react';
 import Logo from '../components/Logo';
 import { motion } from 'framer-motion';
 import { useEffect, useState } from 'react';
@@ -35,11 +35,6 @@ export default function HomePage() {
             transition={{ duration: 0.7, ease: [0.23, 1, 0.32, 1] }}
             className="text-center max-w-4xl mx-auto"
           >
-            <div className="inline-flex items-center gap-2 px-4 py-2 bg-brand-50 border border-brand-100 rounded-full text-sm font-medium text-brand-700 mb-8">
-              <Star className="w-4 h-4" />
-              Trusted by 1,200+ students across 25 universities
-            </div>
-
             <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight text-slate-900 leading-[1.08]">
               Find Your
               <span className="bg-gradient-to-r from-brand-600 via-brand-500 to-brand-400 bg-clip-text text-transparent"> Off-Campus</span>
@@ -80,25 +75,6 @@ export default function HomePage() {
             </div>
           </motion.div>
 
-          {/* Stats */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3, duration: 0.6 }}
-            className="grid grid-cols-3 gap-8 max-w-md mx-auto mt-20"
-          >
-            {[
-              { icon: Building, label: 'Active Listings', value: '50+' },
-              { icon: Users, label: 'Universities', value: '25+' },
-              { icon: TrendingUp, label: 'Bids Placed', value: '1.2K+' },
-            ].map((stat) => (
-              <div key={stat.label} className="text-center">
-                <stat.icon className="w-5 h-5 text-brand-500 mx-auto mb-2" />
-                <div className="text-2xl md:text-3xl font-bold text-slate-900">{stat.value}</div>
-                <div className="text-xs text-slate-400 mt-0.5">{stat.label}</div>
-              </div>
-            ))}
-          </motion.div>
         </div>
       </section>
 
