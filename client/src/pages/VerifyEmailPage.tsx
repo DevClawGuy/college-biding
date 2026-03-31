@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
-import { CheckCircle, XCircle, Loader2, Zap } from 'lucide-react';
+import { CheckCircle, XCircle, Loader2 } from 'lucide-react';
+import Logo from '../components/Logo';
 import api from '../lib/api';
 
 export default function VerifyEmailPage() {
@@ -32,9 +33,7 @@ export default function VerifyEmailPage() {
     <div className="min-h-screen bg-slate-50 flex items-center justify-center px-4">
       <div className="bg-white rounded-2xl card-shadow border border-slate-200 max-w-md w-full p-8 text-center">
         <Link to="/" className="inline-flex items-center gap-2 mb-8">
-          <div className="w-8 h-8 bg-gradient-to-br from-brand-500 to-brand-700 rounded-lg flex items-center justify-center">
-            <Zap className="w-4 h-4 text-white" />
-          </div>
+          <Logo size={32} />
           <span className="text-xl font-bold text-slate-900">House<span className="text-brand-600">Rush</span></span>
         </Link>
 

@@ -1,6 +1,7 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
-import { Search, LayoutDashboard, PlusCircle, Bell, LogOut, Menu, X, Zap, MessageCircle } from 'lucide-react';
+import { Search, LayoutDashboard, PlusCircle, Bell, LogOut, Menu, X, MessageCircle } from 'lucide-react';
+import Logo from './Logo';
 import { useState, useEffect, useCallback } from 'react';
 import api from '../lib/api';
 
@@ -60,9 +61,7 @@ export default function Navbar() {
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2.5 group">
-            <div className="w-8 h-8 bg-gradient-to-br from-brand-500 to-brand-700 rounded-lg flex items-center justify-center shadow-sm group-hover:shadow-md transition-shadow">
-              <Zap className="w-4.5 h-4.5 text-white" />
-            </div>
+            <Logo size={32} />
             <span className="text-xl font-bold tracking-tight text-slate-900">
               House<span className="text-brand-600">Rush</span>
             </span>

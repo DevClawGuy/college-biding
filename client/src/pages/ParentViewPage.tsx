@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Clock, Trophy, XCircle, Gavel, Heart, AlertCircle } from 'lucide-react';
 import { useCountdown } from '../hooks/useCountdown';
+import Logo from '../components/Logo';
 import api from '../lib/api';
 
 interface ParentSavedListing {
@@ -82,9 +83,7 @@ export default function ParentViewPage() {
       <div className="min-h-screen bg-slate-50">
         <header className="bg-white border-b border-slate-200">
           <div className="max-w-5xl mx-auto px-4 sm:px-6 py-4 flex items-center gap-3">
-            <div className="w-8 h-8 bg-brand-600 rounded-lg flex items-center justify-center">
-              <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
-            </div>
+            <Logo size={32} />
             <span className="font-bold text-slate-900 text-lg">HouseRush</span>
           </div>
         </header>
@@ -104,9 +103,7 @@ export default function ParentViewPage() {
       <div className="min-h-screen bg-slate-50">
         <header className="bg-white border-b border-slate-200">
           <div className="max-w-5xl mx-auto px-4 sm:px-6 py-4 flex items-center gap-3">
-            <div className="w-8 h-8 bg-brand-600 rounded-lg flex items-center justify-center">
-              <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
-            </div>
+            <Logo size={32} />
             <span className="font-bold text-slate-900 text-lg">HouseRush</span>
           </div>
         </header>
@@ -127,9 +124,7 @@ export default function ParentViewPage() {
       <header className="bg-white border-b border-slate-200">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 bg-brand-600 rounded-lg flex items-center justify-center">
-              <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
-            </div>
+            <Logo size={32} />
             <span className="font-bold text-slate-900 text-lg">HouseRush</span>
           </div>
           <span className="text-xs text-slate-400 font-medium bg-slate-100 px-3 py-1.5 rounded-lg">Read-only access</span>

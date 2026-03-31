@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { Zap } from 'lucide-react';
+import Logo from './Logo';
 
 export default function Footer() {
   return (
@@ -9,9 +9,7 @@ export default function Footer() {
           {/* Brand */}
           <div className="sm:col-span-2 lg:col-span-2">
             <div className="flex items-center gap-2.5 mb-3">
-              <div className="w-7 h-7 bg-gradient-to-br from-brand-400 to-brand-600 rounded-lg flex items-center justify-center">
-                <Zap className="w-3.5 h-3.5 text-white" />
-              </div>
+              <Logo size={28} />
               <span className="text-lg font-bold text-white">HouseRush</span>
             </div>
             <p className="text-sm leading-relaxed max-w-sm">

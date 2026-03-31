@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
-import { Users, Building, TrendingUp, Activity, Loader2, RefreshCw, AlertCircle, Zap, Mail, Search, Check, Send } from 'lucide-react';
+import { Users, Building, TrendingUp, Activity, Loader2, RefreshCw, AlertCircle, Mail, Search, Check, Send } from 'lucide-react';
+import Logo from '../components/Logo';
 
 const ADMIN_PASSWORD = 'creiguide2026';
 const API_ADMIN_KEY = 'houserush2024';
@@ -100,9 +101,7 @@ export default function AdminDashboardPage() {
     return (
       <div className="min-h-screen bg-slate-100 flex items-center justify-center px-4">
         <form onSubmit={handleAuth} className="bg-white rounded-2xl shadow-sm border border-slate-200 max-w-xs w-full p-8 text-center">
-          <div className="w-10 h-10 bg-slate-900 rounded-lg flex items-center justify-center mx-auto mb-5">
-            <Zap className="w-5 h-5 text-white" />
-          </div>
+          <div className="mx-auto mb-5 w-fit"><Logo size={40} /></div>
           <h2 className="text-lg font-bold text-slate-900 mb-0.5">HouseRush Admin</h2>
           <p className="text-sm text-slate-400 mb-6">Enter password to continue</p>
           <input type="password" value={password} onChange={(e) => setPassword(e.target.value)}
@@ -145,9 +144,7 @@ export default function AdminDashboardPage() {
       <div className="bg-white border-b border-slate-200">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 h-14 flex items-center justify-between">
           <div className="flex items-center gap-2.5">
-            <div className="w-7 h-7 bg-slate-900 rounded-md flex items-center justify-center">
-              <Zap className="w-3.5 h-3.5 text-white" />
-            </div>
+            <Logo size={28} />
             <span className="text-sm font-bold text-slate-900 tracking-tight">HouseRush</span>
             <span className="text-slate-300 mx-1">/</span>
             <span className="text-sm text-slate-500">Analytics</span>

@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
-import { Mail, Lock, Eye, EyeOff, Zap } from 'lucide-react';
+import { Mail, Lock, Eye, EyeOff } from 'lucide-react';
+import Logo from '../components/Logo';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -32,9 +33,7 @@ export default function LoginPage() {
         </div>
         <div className="relative max-w-md">
           <div className="flex items-center gap-3 mb-8">
-            <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur-sm">
-              <Zap className="w-5 h-5 text-white" />
-            </div>
+            <Logo size={40} />
             <span className="text-2xl font-bold text-white">HouseRush</span>
           </div>
           <h2 className="text-4xl font-bold text-white leading-tight mb-4">
@@ -50,9 +49,7 @@ export default function LoginPage() {
       <div className="flex-1 flex items-center justify-center px-4 py-12">
         <div className="w-full max-w-md">
           <Link to="/" className="lg:hidden flex items-center justify-center gap-2 mb-8">
-            <div className="w-8 h-8 bg-gradient-to-br from-brand-500 to-brand-700 rounded-lg flex items-center justify-center">
-              <Zap className="w-4 h-4 text-white" />
-            </div>
+            <Logo size={32} />
             <span className="text-xl font-bold text-slate-900">HouseRush</span>
           </Link>
 

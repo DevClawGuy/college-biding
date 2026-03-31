@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
-import { Search, Shield, TrendingUp, ArrowRight, Zap, Star, Users, Building, CheckSquare, AlertTriangle, ShieldAlert } from 'lucide-react';
+import { Search, Shield, TrendingUp, ArrowRight, Star, Users, Building, CheckSquare, AlertTriangle, ShieldAlert } from 'lucide-react';
+import Logo from '../components/Logo';
 import { motion } from 'framer-motion';
 import { useEffect, useState } from 'react';
 import api from '../lib/api';
@@ -180,7 +181,7 @@ export default function HomePage() {
           <div className="absolute bottom-10 right-10 w-80 h-80 bg-white rounded-full blur-[100px]" />
         </div>
         <div className="max-w-3xl mx-auto text-center px-4 py-20 relative">
-          <Zap className="w-10 h-10 text-brand-200 mx-auto mb-5" />
+          <div className="mx-auto mb-5 w-fit"><Logo size={48} /></div>
           <h2 className="text-3xl md:text-4xl font-bold text-white mb-4 tracking-tight">Ready to find your place?</h2>
           <p className="text-brand-200 mb-8 text-lg">Join thousands of students already bidding on the best off-campus housing.</p>
           <Link
