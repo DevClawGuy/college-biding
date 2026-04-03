@@ -19,7 +19,7 @@ const sections = [
   },
   {
     title: '5. Bidding Rules',
-    content: 'All bids placed on HouseRush are binding commitments. By placing a bid, you agree to enter into a lease agreement at your bid price if you are the winning bidder. The minimum bid increment is $25 above the current highest bid. Auctions end at the time specified by the landlord. If a bid is placed within the final 5 minutes of an auction, the auction may be automatically extended by 5 minutes to prevent last-second sniping. The highest bidder at auction close is the winner. Auto-bid features, if used, will automatically bid on your behalf up to your specified maximum in $25 increments.',
+    content: 'All bids placed on HouseRush are non-binding expressions of interest only. No bid creates a legal obligation to enter into a lease. Landlords retain full discretion to accept or decline any bid. If a landlord confirms your offer, you agree to make good faith efforts to finalize a lease directly with the landlord at your bid price. The minimum bid increment is $25 above the current highest bid. Auctions end at the time specified by the landlord. If a bid is placed within the final 5 minutes of an auction, the auction may be automatically extended by 5 minutes to prevent last-second sniping. The highest bidder at auction close is the winner. Auto-bid features, if used, will automatically bid on your behalf up to your specified maximum in $25 increments.',
   },
   {
     title: '6. Landlord Responsibilities',
