@@ -149,6 +149,7 @@ export async function initializeDatabase(): Promise<void> {
     `ALTER TABLE listings ADD COLUMN recommendation_cache TEXT`,
     `ALTER TABLE listings ADD COLUMN recommendation_cached_at INTEGER`,
     `ALTER TABLE listings ADD COLUMN property_type TEXT DEFAULT 'apartment'`,
+    // Note: pending_landlord_confirmation status is handled at application level — SQLite TEXT column already accepts it
   ];
   for (const sql of migrations) {
     try {

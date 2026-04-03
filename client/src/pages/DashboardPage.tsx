@@ -44,6 +44,7 @@ function BidStatusBadge({ bid, userId }: { bid: any; userId?: string }) {
 
 function ListingStatusBadge({ listing }: { listing: any }) {
   const countdown = useCountdown(listing.auctionEnd || '');
+  if (listing.status === 'pending_landlord_confirmation') return <span className="text-xs font-medium px-2 py-0.5 rounded-md bg-amber-50 text-amber-700">Awaiting Your Confirmation</span>;
   if (listing.status === 'ended') return <span className="text-xs font-medium px-2 py-0.5 rounded-md bg-slate-100 text-slate-600">Closed</span>;
   if (listing.approvalStatus === 'pending') return <span className="text-xs font-medium px-2 py-0.5 rounded-md bg-amber-50 text-amber-700">Pending Approval</span>;
   if (listing.approvalStatus === 'rejected') return <span className="text-xs font-medium px-2 py-0.5 rounded-md bg-rose-50 text-rose-700">Rejected</span>;
@@ -218,6 +219,36 @@ export default function DashboardPage() {
                         <div className="flex flex-wrap items-center gap-3 mt-1 text-xs text-slate-600">
                           <a href={`mailto:${listing.winner.email}`} className="flex items-center gap-1 text-brand-600 hover:underline"><Mail className="w-3 h-3" />{listing.winner.email}</a>
                           {listing.winner.phone && <span className="flex items-center gap-1"><Phone className="w-3 h-3" />{listing.winner.phone}</span>}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Pending landlord confirmation — confirm or decline */}
+                  {listing.status === 'pending_landlord_confirmation' && listing.winner && (
+                    <div className="px-4 pb-4 pt-0">
+                      <div className="bg-amber-50 border border-amber-100 rounded-xl p-4">
+                        <p className="text-xs font-semibold text-amber-700 mb-2 flex items-center gap-1"><Clock className="w-3.5 h-3.5" /> Action Required — Confirm Top Bidder</p>
+                        <p className="text-sm font-medium text-slate-900">{listing.winner.name}</p>
+                        <div className="flex flex-wrap items-center gap-3 mt-1 text-xs text-slate-600">
+                          <a href={`mailto:${listing.winner.email}`} className="flex items-center gap-1 text-brand-600 hover:underline"><Mail className="w-3 h-3" />{listing.winner.email}</a>
+                          {listing.winner.phone && <span className="flex items-center gap-1"><Phone className="w-3 h-3" />{listing.winner.phone}</span>}
+                        </div>
+                        <p className="text-xs text-slate-500 mt-2">Top bid: <span className="font-semibold text-slate-900">${listing.currentBid?.toLocaleString()}/mo</span></p>
+                        <p className="text-[11px] text-slate-400 mt-1">This is a non-binding offer. You retain full discretion to accept or decline.</p>
+                        <div className="flex gap-2 mt-3">
+                          <button
+                            onClick={async (e) => { e.preventDefault(); if (confirm('Confirm this offer? The student will be notified as the winner.')) { try { await api.post(`/listings/${listing.id}/confirm-offer`); fetchTabData(); } catch {} } }}
+                            className="flex-1 py-2 rounded-lg text-sm font-semibold text-white bg-emerald-600 hover:bg-emerald-700 transition-all active:scale-[0.98]"
+                          >
+                            Confirm Offer
+                          </button>
+                          <button
+                            onClick={async (e) => { e.preventDefault(); if (confirm('Decline and relist? The listing will be relisted for 7 more days.')) { try { await api.post(`/listings/${listing.id}/decline-relist`); fetchTabData(); } catch {} } }}
+                            className="flex-1 py-2 rounded-lg text-sm font-semibold text-rose-600 bg-rose-50 hover:bg-rose-100 border border-rose-200 transition-all active:scale-[0.98]"
+                          >
+                            Decline & Relist
+                          </button>
                         </div>
                       </div>
                     </div>

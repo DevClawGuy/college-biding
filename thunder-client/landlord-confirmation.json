@@ -1,0 +1,33 @@
+{
+  "collectionName": "HouseRush — Landlord Confirmation",
+  "requests": [
+    {
+      "name": "Confirm Offer",
+      "method": "POST",
+      "url": "{{baseUrl}}/api/listings/:id/confirm-offer",
+      "headers": [
+        { "name": "Authorization", "value": "Bearer {{token}}" }
+      ],
+      "params": [
+        { "name": "id", "value": "<listing-id-here>" }
+      ],
+      "notes": "Landlord confirms the top bidder. Listing status changes from pending_landlord_confirmation to ended. Winner and loser notifications sent. Requires landlord auth."
+    },
+    {
+      "name": "Decline and Relist",
+      "method": "POST",
+      "url": "{{baseUrl}}/api/listings/:id/decline-relist",
+      "headers": [
+        { "name": "Authorization", "value": "Bearer {{token}}" }
+      ],
+      "params": [
+        { "name": "id", "value": "<listing-id-here>" }
+      ],
+      "notes": "Landlord declines the top bidder. Listing resets to active with new 7-day auction end. Top bidder notified via email. Existing bids preserved. Requires landlord auth."
+    }
+  ],
+  "variables": [
+    { "name": "baseUrl", "value": "http://localhost:3001" },
+    { "name": "token", "value": "<paste-landlord-jwt-token-here>" }
+  ]
+}

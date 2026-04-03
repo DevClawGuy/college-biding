@@ -44,7 +44,7 @@ export const listings = sqliteTable('listings', {
   bidCount: integer('bid_count').notNull().default(0),
   auctionStart: text('auction_start').notNull(),
   auctionEnd: text('auction_end').notNull(),
-  status: text('status', { enum: ['active', 'ended', 'cancelled'] }).notNull().default('active'),
+  status: text('status', { enum: ['active', 'ended', 'cancelled', 'pending_landlord_confirmation'] }).notNull().default('active'),
   approvalStatus: text('approval_status').notNull().default('pending'),
   winnerId: text('winner_id'),
   secureLeasePrice: integer('secure_lease_price'),

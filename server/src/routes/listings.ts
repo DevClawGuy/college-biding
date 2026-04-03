@@ -313,7 +313,7 @@ router.get('/my/listings', authenticateToken, async (req: AuthRequest, res: Resp
     const enriched = [];
     for (const l of results) {
       let winner = null;
-      if (l.status === 'ended' && l.winnerId) {
+      if ((l.status === 'ended' || l.status === 'pending_landlord_confirmation') && l.winnerId) {
         winner = await db.select({
           id: schema.users.id, name: schema.users.name,
           email: schema.users.email, phone: schema.users.phone,
@@ -324,6 +324,126 @@ router.get('/my/listings', authenticateToken, async (req: AuthRequest, res: Resp
     }
     res.json(enriched);
   } catch (error) {
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Confirm offer — landlord accepts the top bidder
+router.post('/:id/confirm-offer', authenticateToken, async (req: AuthRequest, res: Response) => {
+  try {
+    const listing = await db.select().from(schema.listings).where(eq(schema.listings.id, String(req.params.id))).get();
+    if (!listing) { res.status(404).json({ error: 'Listing not found' }); return; }
+    if (listing.landlordId !== req.userId) { res.status(403).json({ error: 'Not authorized' }); return; }
+    if (listing.status !== 'pending_landlord_confirmation') {
+      res.status(400).json({ error: 'Listing is not pending confirmation' });
+      return;
+    }
+
+    const topBidUserId = listing.winnerId;
+    if (!topBidUserId) {
+      res.status(400).json({ error: 'No top bidder found' });
+      return;
+    }
+
+    // Confirm — set status to ended (winner is already stored in winnerId)
+    await db.update(schema.listings).set({ status: 'ended' }).where(eq(schema.listings.id, listing.id)).run();
+
+    const winner = await db.select({ name: schema.users.name, email: schema.users.email })
+      .from(schema.users).where(eq(schema.users.id, topBidUserId)).get();
+    const winnerName = winner?.name ?? 'Unknown';
+    const winnerEmail = winner?.email ?? '';
+
+    const now = new Date().toISOString();
+
+    // Notify winner
+    const winNotifId = crypto.randomUUID();
+    await db.insert(schema.notifications).values({
+      id: winNotifId, userId: topBidUserId, type: 'won',
+      message: `The landlord has confirmed your offer for ${listing.address}! Expect to hear from them shortly to finalize the lease.`,
+      listingId: listing.id, read: false, createdAt: now,
+    }).run();
+
+    // Send winner email
+    const { winnerEmailHtml, landlordEmailHtml } = await import('../lib/email');
+    if (winnerEmail) {
+      const { sendEmail: send } = await import('../lib/email');
+      send(winnerEmail, `The landlord confirmed your offer for ${listing.address}!`,
+        winnerEmailHtml({ address: listing.address, amount: listing.currentBid, listingId: listing.id }),
+      ).catch(err => console.error('Winner confirm email failed:', err));
+    }
+
+    // Notify losers
+    const allBidders = await db.select({ userId: schema.bids.userId }).from(schema.bids).where(eq(schema.bids.listingId, listing.id));
+    const loserIds = [...new Set(allBidders.map(b => b.userId))].filter(id => id !== topBidUserId);
+    for (const loserId of loserIds) {
+      const lostNotifId = crypto.randomUUID();
+      await db.insert(schema.notifications).values({
+        id: lostNotifId, userId: loserId, type: 'lost',
+        message: `Auction ended for ${listing.address}. The landlord has selected another applicant. The final bid was $${listing.currentBid}/mo.`,
+        listingId: listing.id, read: false, createdAt: now,
+      }).run();
+    }
+
+    res.json({ success: true, message: 'Offer confirmed. Winner has been notified.' });
+  } catch (error) {
+    console.error('Confirm offer error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Decline and relist — landlord declines the top bidder
+router.post('/:id/decline-relist', authenticateToken, async (req: AuthRequest, res: Response) => {
+  try {
+    const listing = await db.select().from(schema.listings).where(eq(schema.listings.id, String(req.params.id))).get();
+    if (!listing) { res.status(404).json({ error: 'Listing not found' }); return; }
+    if (listing.landlordId !== req.userId) { res.status(403).json({ error: 'Not authorized' }); return; }
+    if (listing.status !== 'pending_landlord_confirmation') {
+      res.status(400).json({ error: 'Listing is not pending confirmation' });
+      return;
+    }
+
+    const topBidUserId = listing.winnerId;
+
+    // Reset listing to active with new 7-day auction end
+    const newAuctionEnd = new Date(Date.now() + 7 * 86400000).toISOString();
+    await db.update(schema.listings).set({
+      status: 'active',
+      winnerId: null,
+      auctionEnd: newAuctionEnd,
+    }).where(eq(schema.listings.id, listing.id)).run();
+
+    const now = new Date().toISOString();
+
+    // Notify top bidder
+    if (topBidUserId) {
+      const declineNotifId = crypto.randomUUID();
+      await db.insert(schema.notifications).values({
+        id: declineNotifId, userId: topBidUserId, type: 'lost',
+        message: `The landlord has decided not to proceed with your offer for ${listing.address} at this time. The listing has been relisted.`,
+        listingId: listing.id, read: false, createdAt: now,
+      }).run();
+
+      // Send decline email to top bidder
+      const bidder = await db.select({ email: schema.users.email }).from(schema.users).where(eq(schema.users.id, topBidUserId)).get();
+      if (bidder?.email) {
+        const { sendEmail: send } = await import('../lib/email');
+        send(bidder.email, `Update on ${listing.address}`,
+          `<div style="font-family: 'Inter', system-ui, sans-serif; max-width: 560px; margin: 0 auto; padding: 40px 24px;">
+            <h1 style="font-size: 22px; font-weight: 700; color: #0f172a; margin: 0 0 16px;">Listing Update</h1>
+            <p style="color: #475569; font-size: 15px; line-height: 1.6;">The landlord has decided not to proceed at this time for <strong>${listing.address}</strong>. The listing has been relisted with a new auction period. You can continue bidding if interested.</p>
+            <div style="text-align: center; margin-top: 24px;">
+              <a href="https://houserush.vercel.app/listing/${listing.id}" style="display: inline-block; background: #4f46e5; color: white; text-decoration: none; padding: 14px 32px; border-radius: 12px; font-weight: 600; font-size: 15px;">View Listing</a>
+            </div>
+            <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 32px 0 16px;" />
+            <p style="color: #94a3b8; font-size: 12px; text-align: center;">HouseRush — The fastest way to find off-campus housing.</p>
+          </div>`,
+        ).catch(err => console.error('Decline email failed:', err));
+      }
+    }
+
+    res.json({ success: true, message: 'Listing relisted with new 7-day auction.' });
+  } catch (error) {
+    console.error('Decline relist error:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });

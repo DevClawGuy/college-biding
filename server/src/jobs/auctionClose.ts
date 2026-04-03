@@ -2,12 +2,42 @@ import crypto from 'crypto';
 import { db, schema } from '../db';
 import { eq, and, lt, desc } from 'drizzle-orm';
 import { Server as SocketServer } from 'socket.io';
-import { sendEmail, winnerEmailHtml, landlordEmailHtml } from '../lib/email';
+import { sendEmail } from '../lib/email';
 
 let io: SocketServer | null = null;
 
 export function setAuctionSocket(socketIo: SocketServer) {
   io = socketIo;
+}
+
+// TODO: landlord confirmation timeout — if landlord does not confirm within 48 hours, auto-send reminder email
+
+function pendingConfirmationEmailHtml(opts: { address: string; bidderName: string; amount: number; listingId: string }): string {
+  return `
+    <div style="font-family: 'Inter', system-ui, sans-serif; max-width: 560px; margin: 0 auto; padding: 40px 24px;">
+      <div style="text-align: center; margin-bottom: 32px;">
+        <span style="font-size: 48px;">&#9200;</span>
+        <h1 style="font-size: 24px; font-weight: 700; color: #0f172a; margin: 16px 0 8px;">Your Auction Has Closed</h1>
+        <p style="color: #64748b; font-size: 16px; margin: 0;">A decision is needed from you.</p>
+      </div>
+      <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 24px; margin-bottom: 24px;">
+        <p style="margin: 0 0 8px; color: #64748b; font-size: 13px; text-transform: uppercase; letter-spacing: 0.05em;">Property</p>
+        <p style="margin: 0 0 16px; font-size: 18px; font-weight: 600; color: #0f172a;">${opts.address}</p>
+        <p style="margin: 0 0 8px; color: #64748b; font-size: 13px; text-transform: uppercase; letter-spacing: 0.05em;">Top Bidder</p>
+        <p style="margin: 0 0 16px; font-size: 16px; font-weight: 600; color: #0f172a;">${opts.bidderName}</p>
+        <p style="margin: 0 0 8px; color: #64748b; font-size: 13px; text-transform: uppercase; letter-spacing: 0.05em;">Bid Amount</p>
+        <p style="margin: 0; font-size: 24px; font-weight: 700; color: #4f46e5;">$${opts.amount.toLocaleString()}/mo</p>
+      </div>
+      <p style="color: #475569; font-size: 15px; line-height: 1.6; margin-bottom: 24px;">
+        This is a <strong>non-binding offer</strong>. You retain full discretion to accept or decline. Please log in to your dashboard to confirm or decline this offer.
+      </p>
+      <div style="text-align: center;">
+        <a href="https://houserush.vercel.app/dashboard?tab=listings" style="display: inline-block; background: #4f46e5; color: white; text-decoration: none; padding: 14px 32px; border-radius: 12px; font-weight: 600; font-size: 15px;">Review on Dashboard</a>
+      </div>
+      <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 32px 0 16px;" />
+      <p style="color: #94a3b8; font-size: 12px; text-align: center;">HouseRush — The fastest way to find off-campus housing.</p>
+    </div>
+  `;
 }
 
 export async function checkExpiredAuctions() {
@@ -40,48 +70,27 @@ export async function checkExpiredAuctions() {
           .get();
 
         if (topBid) {
-          // We have a winner
+          // Has bids — move to pending_landlord_confirmation instead of auto-declaring winner
           await db.update(schema.listings).set({
-            status: 'ended',
-            winnerId: topBid.userId,
+            status: 'pending_landlord_confirmation',
+            winnerId: topBid.userId, // store top bidder for reference, not yet confirmed
           }).where(eq(schema.listings.id, listing.id)).run();
 
-          // Get winner details
-          const winner = await db.select({
+          // Get bidder details
+          const bidder = await db.select({
             name: schema.users.name,
             email: schema.users.email,
           }).from(schema.users).where(eq(schema.users.id, topBid.userId)).get();
 
-          const winnerName = winner?.name ?? 'Unknown';
-          const winnerEmail = winner?.email ?? '';
+          const bidderName = bidder?.name ?? 'Unknown';
 
-          // Notify the winner
-          const winNotifId = crypto.randomUUID();
-          await db.insert(schema.notifications).values({
-            id: winNotifId,
-            userId: topBid.userId,
-            type: 'won',
-            message: `You won the auction for ${listing.address}! Your agent will contact you shortly to finalize the lease.`,
-            listingId: listing.id,
-            read: false,
-            createdAt: now,
-          }).run();
-
-          if (io) {
-            io.to(`user:${topBid.userId}`).emit('notification', {
-              id: winNotifId, userId: topBid.userId, type: 'won',
-              message: `You won the auction for ${listing.address}! Your agent will contact you shortly to finalize the lease.`,
-              listingId: listing.id, read: false, createdAt: now,
-            });
-          }
-
-          // Notify the landlord
+          // Notify the landlord — they must confirm or decline
           const landlordNotifId = crypto.randomUUID();
           await db.insert(schema.notifications).values({
             id: landlordNotifId,
             userId: listing.landlordId,
             type: 'won',
-            message: `Auction closed for ${listing.address}. Winning bid: $${topBid.amount}/mo. Winner: ${winnerName} (${winnerEmail}). Please reach out to finalize the lease.`,
+            message: `Auction closed for ${listing.address}. Top bid: $${topBid.amount}/mo by ${bidderName}. Please confirm or decline on your dashboard.`,
             listingId: listing.id,
             read: false,
             createdAt: now,
@@ -90,69 +99,49 @@ export async function checkExpiredAuctions() {
           if (io) {
             io.to(`user:${listing.landlordId}`).emit('notification', {
               id: landlordNotifId, userId: listing.landlordId, type: 'won',
-              message: `Auction closed for ${listing.address}. Winning bid: $${topBid.amount}/mo. Winner: ${winnerName} (${winnerEmail}). Please reach out to finalize the lease.`,
+              message: `Auction closed for ${listing.address}. Top bid: $${topBid.amount}/mo by ${bidderName}. Please confirm or decline.`,
               listingId: listing.id, read: false, createdAt: now,
             });
-          }
 
-          // Notify all other bidders they lost
-          const allBidders = await db.select({ userId: schema.bids.userId })
-            .from(schema.bids)
-            .where(eq(schema.bids.listingId, listing.id));
-
-          const loserIds = [...new Set(allBidders.map(b => b.userId))].filter(id => id !== topBid.userId);
-          for (const loserId of loserIds) {
-            const lostNotifId = crypto.randomUUID();
-            await db.insert(schema.notifications).values({
-              id: lostNotifId,
-              userId: loserId,
-              type: 'lost',
-              message: `Auction ended for ${listing.address}. Unfortunately, you were outbid. The winning bid was $${topBid.amount}/mo.`,
+            io.to(`listing:${listing.id}`).emit('auction_pending_confirmation', {
               listingId: listing.id,
-              read: false,
-              createdAt: now,
-            }).run();
-
-            if (io) {
-              io.to(`user:${loserId}`).emit('notification', {
-                id: lostNotifId, userId: loserId, type: 'lost',
-                message: `Auction ended for ${listing.address}. Unfortunately, you were outbid.`,
-                listingId: listing.id, read: false, createdAt: now,
-              });
-            }
-          }
-
-          // Emit auction closed to listing room
-          if (io) {
-            io.to(`listing:${listing.id}`).emit('auction_ended', {
-              listingId: listing.id,
-              winnerId: topBid.userId,
-              winningBid: topBid.amount,
-              winnerName,
+              topBidderId: topBid.userId,
+              topBidAmount: topBid.amount,
             });
           }
 
-          // Send emails
-          if (winnerEmail) {
-            sendEmail(
-              winnerEmail,
-              `🎉 You won the auction for ${listing.address}!`,
-              winnerEmailHtml({ address: listing.address, amount: topBid.amount, listingId: listing.id }),
-            ).catch(err => console.error('Winner email failed:', err));
-          }
-
-          // Get landlord email for landlord notification
+          // Send email to landlord
           const landlord = await db.select({ email: schema.users.email })
             .from(schema.users).where(eq(schema.users.id, listing.landlordId)).get();
           if (landlord?.email) {
             sendEmail(
               landlord.email,
-              `Auction closed: ${listing.address} — Winner details inside`,
-              landlordEmailHtml({ address: listing.address, amount: topBid.amount, winnerName, winnerEmail, listingId: listing.id }),
-            ).catch(err => console.error('Landlord email failed:', err));
+              `Auction closed: ${listing.address} — Your confirmation needed`,
+              pendingConfirmationEmailHtml({ address: listing.address, bidderName, amount: topBid.amount, listingId: listing.id }),
+            ).catch(err => console.error('Landlord pending email failed:', err));
           }
 
-          console.log(`  Auction closed: "${listing.title}" — winner: ${winnerName} at $${topBid.amount}/mo`);
+          // Notify top bidder that auction closed and is pending landlord review
+          const bidderNotifId = crypto.randomUUID();
+          await db.insert(schema.notifications).values({
+            id: bidderNotifId,
+            userId: topBid.userId,
+            type: 'auction_ending',
+            message: `Auction closed for ${listing.address}. Your bid of $${topBid.amount}/mo is the highest. The landlord is reviewing your offer.`,
+            listingId: listing.id,
+            read: false,
+            createdAt: now,
+          }).run();
+
+          if (io) {
+            io.to(`user:${topBid.userId}`).emit('notification', {
+              id: bidderNotifId, userId: topBid.userId, type: 'auction_ending',
+              message: `Auction closed for ${listing.address}. Your bid is the highest — awaiting landlord confirmation.`,
+              listingId: listing.id, read: false, createdAt: now,
+            });
+          }
+
+          console.log(`  Auction pending confirmation: "${listing.title}" — top bidder: ${bidderName} at $${topBid.amount}/mo`);
         } else {
           // No bids — just close it
           await db.update(schema.listings).set({
