@@ -163,6 +163,124 @@ formed in NJ, research each new state before launching:
 - California: broad broker definition covers leasing/renting for compensation
 - Each state requires individual legal review before pay-per-lease launches
 
+### COMPETITOR LEGAL ANALYSIS — UNIBID (April 2026)
+Source: ChatGPT deep research into UniBid's public terms and product
+
+UniBid is HouseRush's direct competitor. They operate without a broker
+license using a marketplace-only legal theory. They are currently focused
+on Connecticut (Fairfield University) not New Jersey.
+
+Their legal structure that HouseRush should copy:
+- "Not a real estate broker, agent, or property management company"
+- "Online marketplace where students and property listers connect"
+- "Rental transactions conducted directly between students and property listers"
+- "Does not negotiate or enforce rental agreements"
+- "Not a party to the lease"
+- Bids are NON-BINDING
+- Lease is a SEPARATE DIRECT AGREEMENT between landlord and tenant
+- Landlord retains full control — may accept, reject, counter, or modify
+  any offer at their sole discretion
+- Revenue described as subscription, listing, platform, or transaction fees
+- Never described as a commission
+
+WARNING: UniBid's model is legally documented as a marketplace but their
+marketing copy describes more operationally involved features (bidding,
+offer comparison, screening help, digital signing). NJ regulators care
+about actual conduct not just contract language. Do not assume their
+model is NJ-safe just because it exists online.
+
+### AUCTION MECHANIC — REQUIRED PRODUCT CHANGE
+Current (risky): Auction closes → HouseRush automatically declares
+winner → winner and landlord emails sent → HouseRush operationally
+involved in outcome
+
+Required change (safer): Auction closes → HouseRush shows landlord
+the top bidder → landlord CONFIRMS → lease handled directly between
+landlord and tenant → HouseRush never touches what happens after
+
+This one confirmation step keeps the entire auction UX intact while
+moving the selection decision to the landlord where it legally belongs.
+Bids must be described as NON-BINDING in Terms of Service.
+
+### TERMS OF SERVICE — REQUIRED UPDATES
+The following language must be added to HouseRush Terms of Service:
+- HouseRush is not a real estate broker, agent, or property manager
+- HouseRush is an online marketplace only
+- Rental transactions occur directly between students and landlords
+- HouseRush does not negotiate or enforce rental agreements
+- HouseRush is not a party to any lease
+- All bids are non-binding expressions of interest only
+- Landlords retain full control over tenant selection
+- Landlords may accept, reject, counter, or modify any offer
+- Any fee paid to HouseRush is a platform/software/marketing fee only
+- HouseRush does not screen, select, recommend, or place tenants
+
+### MARKETING LANGUAGE — NEVER USE THESE PHRASES
+These phrases make HouseRush look like a broker under NJ law:
+- "Find tenants"
+- "Fill vacancies"
+- "Place renters"
+- "Get the deal done"
+- "We match students to landlords"
+- "Guaranteed tenant"
+- Any language implying HouseRush selects or recommends who gets the unit
+
+Safe alternative language:
+- "Connect students and landlords"
+- "Browse listings and submit offers"
+- "Landlords choose who they work with"
+- "Student housing marketplace"
+- "Platform for off-campus housing discovery"
+
+### DUAL COMPANY STRUCTURE — LONG TERM GOAL
+HouseRush Inc. = software platform (Dev + Conor 50/50)
+  - Charges flat software/advertising fees to landlords
+  - Featured badge $150/month
+  - Platform subscription $299/month
+  - Never receives lease-based compensation
+
+HouseRush Realty LLC = licensed NJ brokerage (Dev + Conor own it,
+licensed broker serves as broker of record)
+  - Charges per-lease success fees legally
+  - All lease-based revenue flows through here
+  - Broker of record supervises all brokerage activity
+  - Broker compensated via equity, revenue share, or salary
+
+Formation cost: $3,000-13,000
+Timeline: 2-8 weeks once broker is designated
+Requires: physical NJ office, E&O insurance, Commission filing
+
+BROKER OF RECORD RISKS TO MANAGE:
+- If broker quits or loses license, brokerage cannot operate
+- Need written operating agreement with replacement broker clause
+- Need vesting/buyout terms for broker equity
+- Need non-compete and confidentiality provisions
+
+### SHORT TERM LEGAL ROADMAP (April 2026)
+Week 1-2 (NOW):
+- Stop commission split with Alex immediately
+- Add non-broker disclaimer language to Terms of Service
+- Add landlord confirmation step to auction close flow
+- Remove any "find tenants / fill vacancies" marketing language
+- Build featured listing badge — only safe revenue stream
+
+Month 1-2:
+- Have conversation with broker friend about broker of record role
+- Consult NJ real estate attorney re: HouseRush Realty LLC formation
+- Draft landlord agreement template with compliant fee language
+- Budget $3,000-13,000 for formation
+
+Month 2-4:
+- Form HouseRush Realty LLC with broker of record
+- File with NJ Real Estate Commission
+- Obtain E&O insurance
+- Redesign auction close to landlord confirmation flow
+
+Month 4+:
+- Pay-per-lease billing launches through HouseRush Realty LLC
+- Alex works under HouseRush Realty LLC if they choose
+- Full revenue model live and legally compliant
+
 ## Claude API Integration Plan (Decided April 2026)
 
 ANTHROPIC_API_KEY goes in Railway environment variables.
