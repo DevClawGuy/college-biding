@@ -7,7 +7,7 @@ const sections = [
   },
   {
     title: '2. How We Use Your Information',
-    content: 'We use your information to: operate and improve the Platform; match students with available housing near their campus; process and display bids in real time; send notifications about bid activity, auction results, and account updates; verify .edu email addresses to establish student status; enable landlords to contact auction winners to finalize leases; prevent fraud and enforce our Terms of Service; and analyze usage patterns to improve the user experience.',
+    content: 'We use your information to: operate and improve the Platform; connect students with available housing listings near their campus; process and display bids in real time; send notifications about bid activity, auction results, and account updates; verify .edu email addresses to establish student status; enable landlords to contact auction winners to finalize leases; prevent fraud and enforce our Terms of Service; and analyze usage patterns to improve the user experience.',
   },
   {
     title: '3. Information Sharing',
