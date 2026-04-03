@@ -21,101 +21,147 @@ Revenue projections:
 - National full penetration theoretical ceiling (800 campuses): ~$168M/year
 
 ## Legal Status — READ BEFORE BUILDING ANY REVENUE FEATURES
+Last updated: April 3, 2026
+Source: Two rounds of ChatGPT deep research into NJ real estate law
 
-CRITICAL: New Jersey is one of the strictest states in the country for this
-exact business model. Deep legal research completed April 2026 found the
-following:
+### IMMEDIATE ACTIONS REQUIRED
 
-### What Is High Risk Right Now
+1. STOP COMMISSION SPLIT WITH AGENT FRIEND — IMMEDIATELY
+The current arrangement where the licensed agent splits their commission
+with Dev (unlicensed) is a direct violation of N.J.S.A. 45:15-17(k).
+This puts the agent's real estate LICENSE at risk — not just Dev.
+The 2024 NJ Real Estate Commission disciplinary actions show the Commission
+is actively sanctioning agents for exactly this type of arrangement.
+Action: Agent keeps 100% of their commission through their broker.
+HouseRush invoices landlords SEPARATELY for platform/advertising fees only.
+The two revenue streams must never touch.
 
-1. DIRECT PAY-PER-LEASE INVOICING TO LANDLORDS — HIGH RISK
-Under N.J.S.A. 45:15, the NJ Real Estate License Act broadly prohibits
-unlicensed persons/companies from engaging in brokerage activity. The statute
-defines brokerage to include "assists or directs in the procuring of prospects"
-for a rental — for compensation. HouseRush literally does this. A per-lease
-success fee tied to procuring a prospect is high risk regardless of what it is
-called. Penalties: up to $5,000 first violation, up to $10,000 each subsequent
-violation, each transaction treated as a separate offense.
+2. NEVER INVOICE LANDLORDS BASED ON LEASE OUTCOMES UNTIL LICENSED
+Per N.J.S.A. 45:15 and confirmed by two rounds of legal research, the
+moment HouseRush charges a fee because a lease closed, HouseRush needs
+a NJ real estate broker license or licensed brokerage subsidiary.
+This includes: success fees, per-lease fees, commission percentages,
+referral fees tied to completed leases.
+DO NOT BUILD pay-per-lease invoicing until licensed entity is formed.
 
-2. CURRENT AGENT COMMISSION SPLIT — MODERATE-HIGH RISK
-N.J.S.A. 45:15-17(k) makes it a sanctionable violation to pay "any rebate,
-profit, compensation or commission to anyone not possessed of a real estate
-license." The agent paying Dev a split of their commission may itself violate
-this provision. A 2024 NJ Real Estate Commission consent order sanctioned a
-licensed agent specifically for accepting money from an unlicensed entity for
-marketing/renting-related services. This arrangement needs legal restructuring.
+### WHAT IS SAFE TO CHARGE RIGHT NOW
 
-3. PORTABLE APPLICATION FEE FROM STUDENTS — HIGH RISK / CRIMINAL EXPOSURE
-N.J.S.A. 45:15-1.2 makes it a disorderly persons offense (minimum $200 fine,
-up to 30 days imprisonment) for an unlicensed person to charge or accept any
-fee BEFORE a lease is executed for "assistance in locating rental housing."
-This includes providing lists or contact information. Charging students $25-30
-for a portable application before their lease is signed falls directly into
-this provision. DO NOT BUILD until legal structure is resolved.
+HouseRush can charge landlords flat advertising/software fees only:
+- $150/month featured listing badge — SAFE (pure advertising)
+- $199/month platform subscription — SAFE (software access)
+- $500 flat listing placement fee — SAFE (one-time advertising)
 
-4. "PLATFORM FEE" OR "MARKETING FEE" LABEL DOES NOT PROTECT YOU
-NJ law looks at what you actually do, not what you call the fee. The 1972
-Boise Cascade case established that unlicensed entities doing prospect
-solicitation violate the Act even when licensed agents are involved later.
-The 2014 Jeffrey Ray enforcement case fined an online rental platform $10,000,
-ordered restitution, and issued a cease-and-desist — for operating a rental
-referral website with matching and appointment scheduling, even though it
-called itself a "database."
+These fees must be:
+- Flat rate (not percentage of rent or commission)
+- Not described as commission split, referral fee, or success fee
+- Invoiced directly by HouseRush to the landlord
+- Completely separate from any commission the agent earns
 
-5. LICENSED AGENT INVOLVEMENT DOES NOT COVER THE PLATFORM
-The NJ Real Estate Commission enforcement lens is not limited to the licensed
-agent. It can go after "any person, firm or corporation" engaging in brokerage
-activity without a license. Dev's agent friend's license does not protect
-HouseRush as a company.
+### THE COMPLIANT STRUCTURE RIGHT NOW
 
-### What Is Safe Right Now
+Two completely separate transactions:
 
-FEATURED LISTING BADGE ($150/month) — SAFE
-Pure advertising. Landlord pays for visibility and placement. No fee tied to
-whether a lease closes. This is how Zillow structures its Premier Agent
-product. Build this first and generate revenue safely while legal structure
-is resolved.
+TRANSACTION 1 (agent's money):
+Landlord → pays commission → agent's broker → agent keeps 100%
+HouseRush never touches this money. Ever.
 
-### How Zillow and Apartment List Do Pay-Per-Lease Legally
+TRANSACTION 2 (HouseRush's money):
+Landlord → pays flat marketing/software fee → HouseRush directly
+This is advertising revenue. Not brokerage compensation.
 
-Both platforms use pay-per-lease pricing legally by:
-- Selling advertising exposure and lead delivery only
-- Contracting with property management companies who execute leases
-- Defining the fee as consideration for advertising/lead delivery, not for
-  negotiating the lease
-- Never representing either party or touching the negotiation
-- Never coordinating showings or verifying tenants for the landlord's benefit
+### LANDLORD AGREEMENT LANGUAGE (USE THIS TEMPLATE)
+Every landlord on the platform should eventually sign an agreement stating:
+- HouseRush is not a real estate broker, agent, or property manager
+- HouseRush does not negotiate, show, screen, select, or recommend tenants
+- HouseRush provides only advertising, lead delivery, listing software,
+  and platform services
+- Any fee paid to HouseRush is consideration for software and marketing
+  only, not for leasing activity
+- Landlord retains sole authority for: communicating with prospects,
+  showing the property, screening applicants, negotiating and executing
+  leases, accepting or rejecting any applicant
+- Landlord independently evaluated and selected the tenant
+- Landlord may choose not to use any lead received through HouseRush
 
-HouseRush currently does several things that cross this line — auction format,
-bid management, winner selection, messaging system, tenant verification.
-These features need legal review before attaching transaction-based fees.
+### FEATURES THAT CREATE LEGAL EXPOSURE IF MONETIZED
+The following features are fine as FREE product features but cannot have
+transaction-based fees attached until HouseRush is licensed:
+- Auction format and winner selection (looks like procuring prospects)
+- Bid recommendation engine (looks like recommending one applicant)
+- Auto-bid system (looks like negotiating on tenant's behalf)
+- Secure Lease Now (platform facilitating lease bypass)
+- Group Bidding winner selection (platform selecting which group wins)
+- Competition scoring between tenants (match scoring = brokerage)
 
-### Three Paths to Legal Revenue
+These features are your product differentiators. KEEP THEM.
+Just do not attach per-lease success fees to their outcomes until licensed.
 
-PATH 1 — Pure Advertising Model (safest, do this now)
-Restructure everything as advertising. Featured listings, impression-based
-placement, lead delivery. Never charge based on lease outcomes. Legal without
-a license. This is the immediate path.
+### WHAT THE AUCTION LEGALLY NEEDS TO LOOK LIKE
+For the advertising model to hold up under NJ law, the platform must
+appear to function as:
+- HouseRush hosts a listing page
+- All applicants/bidders are transmitted to the landlord
+- Landlord alone chooses who to lease to
+- HouseRush does not curate, rank, or influence the final outcome
+- Landlord could ignore the auction winner entirely if they chose to
 
-PATH 2 — Get Licensed (cleanest long term)
-Form a licensed NJ brokerage entity that HouseRush operates under.
-Transaction-based fees become legal. Real cost and regulatory overhead but
-cleanest long-term solution.
+The auction is a UX feature that helps landlords see student interest.
+It is NOT HouseRush selecting or placing a tenant.
 
-PATH 3 — Hybrid with Counsel (middle path)
-Hire a NJ real estate attorney to structure the exact relationship between
-HouseRush, the agent, and landlords in a way that keeps fees on the
-advertising side of the legal line. Estimated cost: $300-500 for one hour.
-This is what Zillow did before launching pay-per-lease.
+### PORTABLE APPLICATION — REVISED STRUCTURE
+Original plan (ILLEGAL): Charge students $25-30 before lease execution
+for help locating housing. Criminal exposure under N.J.S.A. 45:15-1.2.
 
-### Action Items Before Building Any Revenue Feature
+Revised plan (SAFE): Charge students a flat post-lease move-in package
+fee AFTER lease is signed. Content:
+- Archived application storage
+- Moving concierge connections
+- Renters insurance comparison
+- Utilities setup assistance
+- Rent payment setup
+A flat fee after lease execution is outside the criminal statute entirely.
+DO NOT charge this fee before the lease is signed.
 
-- DO NOT build direct landlord invoicing
-- DO NOT build portable application fee
-- DO NOT continue agent commission split without legal restructuring
-- DO build featured listing badge — this is safe
-- CONSULT a NJ real estate attorney before building any transaction-tied fee
-- RESEARCH forming a licensed brokerage entity or partnering with one
+### THE LICENSED BROKERAGE ENTITY ROADMAP
+When HouseRush is ready for pay-per-lease revenue, it needs:
+- A New Jersey licensed brokerage entity (subsidiary or partner)
+- A licensed NJ broker of record
+- All pay-per-lease revenue flowing through that brokerage
+- The auction/selection process legally owned by the licensed entity
+
+This is a Month 4-6 project requiring a NJ real estate attorney.
+Estimated attorney consultation cost: $300-500 for initial structure.
+
+Timeline:
+NOW: Featured badge $150/month only. Agent keeps 100% commission.
+Month 2-3: Consult NJ attorney re: licensed brokerage subsidiary.
+Month 4-6: Form licensed NJ brokerage entity with broker of record.
+Month 6+: Pay-per-lease billing launches through licensed entity.
+Year 2+: Full revenue model at scale across multiple campuses.
+
+### WHAT TO TELL THE AGENT FRIEND
+"I did legal research and the commission split we have been doing could
+put your license at risk under N.J.S.A. 45:15-17(k). I don't want to
+do that to you. From now on you keep 100% of your commission. I will
+invoice landlords separately for the platform fee. Our partnership still
+makes sense — you bring listings, I bring students, you earn your full
+commission, I earn my advertising fee. Nobody's license is at risk."
+
+### PENALTIES FOR GETTING THIS WRONG
+- Agent: fines, license suspension, probation, possible revocation
+- HouseRush: up to $5,000 first violation, up to $10,000 each subsequent
+  violation, each transaction treated as a separate offense
+- Criminal exposure (portable app fee before lease): minimum $200 fine,
+  up to 30 days imprisonment under N.J.S.A. 45:15-1.2
+- Jeffrey Ray precedent: $10,000 fine, restitution, cease-and-desist
+
+### NATIONAL EXPANSION NOTE
+NJ is one of the strictest states. Once licensed brokerage entity is
+formed in NJ, research each new state before launching:
+- Texas: apartment locating treated as licensed brokerage activity
+- New York: strict commission splitting prohibitions, misdemeanor violations
+- California: broad broker definition covers leasing/renting for compensation
+- Each state requires individual legal review before pay-per-lease launches
 
 ## Claude API Integration Plan (Decided April 2026)
 
