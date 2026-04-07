@@ -41,7 +41,7 @@ export default function Footer() {
         </div>
 
         <div className="border-t border-slate-800 mt-10 pt-6 text-center text-sm">
-          <p>&copy; 2026 HouseRush. All rights reserved. Built for Monmouth University students.</p>
+          <p>&copy; 2026 HouseRush. All rights reserved. Built for college students across America.</p>
         </div>
       </div>
     </footer>

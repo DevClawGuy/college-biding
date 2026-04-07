@@ -42,7 +42,7 @@ export default function HomePage() {
             </h1>
 
             <p className="text-lg md:text-xl text-slate-500 mt-6 mb-10 max-w-2xl mx-auto leading-relaxed">
-              The fastest way to secure off-campus student housing. Browse verified homes near your campus, place bids, and move in with confidence.
+              The smartest way to find off-campus housing near your campus. Browse verified homes, find their perfect home, and move in with confidence.
             </p>
 
             {/* Search bar */}
@@ -86,9 +86,9 @@ export default function HomePage() {
         </div>
         <div className="grid md:grid-cols-3 gap-6">
           {[
-            { icon: Search, title: 'Browse Listings', desc: 'Find apartments and rooms near your campus. Filter by price, size, distance, and amenities.', step: '01' },
-            { icon: TrendingUp, title: 'Place Your Bid', desc: 'Bid on properties you love. Set auto-bid to stay competitive without constant monitoring.', step: '02' },
-            { icon: Shield, title: 'Win & Move In', desc: 'When the auction ends, connect with landlords to finalize the lease. Secure and transparent.', step: '03' },
+            { icon: Search, title: 'Browse Listings', desc: 'Search verified properties near your campus. Filter by price, size, distance, and amenities.', step: '01' },
+            { icon: TrendingUp, title: 'Express Interest', desc: 'Tell landlords you\'re interested. Submit your move-in date, group size, and a note. No binding commitment required.', step: '02' },
+            { icon: Shield, title: 'Connect & Move In', desc: 'Landlords review interested students and reach out directly to finalize the lease. Simple, transparent, and fair.', step: '03' },
           ].map(({ icon: Icon, title, desc, step }) => (
             <div key={title} className="bg-white rounded-2xl p-7 card-shadow hover:card-shadow-hover transition-all duration-300 group relative overflow-hidden">
               <div className="absolute top-5 right-5 text-4xl font-black text-slate-100 group-hover:text-brand-100 transition-colors">{step}</div>
@@ -163,7 +163,7 @@ export default function HomePage() {
         <div className="max-w-3xl mx-auto text-center px-4 py-20 relative">
           <div className="mx-auto mb-5 w-fit"><Logo size={48} /></div>
           <h2 className="text-3xl md:text-4xl font-bold text-white mb-4 tracking-tight">Ready to find your place?</h2>
-          <p className="text-brand-200 mb-8 text-lg">Join thousands of students already bidding on the best off-campus housing.</p>
+          <p className="text-brand-200 mb-8 text-lg">Join students finding off-campus housing near their campus.</p>
           <Link
             to="/signup"
             className="inline-flex items-center gap-2 bg-white text-brand-700 px-8 py-4 rounded-xl font-semibold text-base hover:bg-brand-50 transition-all hover:shadow-xl active:scale-[0.98]"

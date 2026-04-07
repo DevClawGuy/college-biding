@@ -3,9 +3,9 @@ import { UserPlus, Search, TrendingUp, Trophy, FileText, Building, Clock, Dollar
 
 const studentSteps = [
   { icon: UserPlus, title: 'Create Your Free Account', desc: 'Sign up with your .edu email to get a verified student badge. It takes less than a minute.' },
-  { icon: Search, title: 'Browse Verified Listings', desc: 'Explore apartments, houses, and studios near Monmouth University. Filter by price, bedrooms, town, and amenities.' },
-  { icon: TrendingUp, title: 'Place Your Bid', desc: 'Found a place you love? Bid at least $25 above the current highest bid. Set up auto-bid to stay competitive automatically.' },
-  { icon: Trophy, title: 'Win the Auction', desc: 'When the auction closes, the highest bidder wins. You\'ll receive a notification and the landlord\'s contact info.' },
+  { icon: Search, title: 'Browse Verified Listings', desc: 'Search verified properties near your campus. Filter by price, size, distance, and amenities.' },
+  { icon: TrendingUp, title: 'Express Interest', desc: 'Tell landlords you\'re interested. Submit your move-in date, group size, and a note. No binding commitment required.' },
+  { icon: Trophy, title: 'Connect & Move In', desc: 'Landlords review interested students and reach out directly to finalize the lease. Simple, transparent, and fair.' },
   { icon: FileText, title: 'Sign Your Lease & Move In', desc: 'Connect with the landlord, finalize your lease, and move into your new off-campus home.' },
 ];
 
