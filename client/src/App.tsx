@@ -94,6 +94,7 @@ function shouldBypassMaintenance(): boolean {
   if (path.startsWith('/admin')) return true;
   if (path.startsWith('/parent-view')) return true;
   if (path.startsWith('/guides')) return true;
+  if (path.startsWith('/create-listing')) return true;
 
   // Check for ?preview=houserush2024 and persist in sessionStorage
   const params = new URLSearchParams(window.location.search);

@@ -11,16 +11,16 @@ const studentSteps = [
 
 const landlordSteps = [
   { icon: Building, title: 'Post Your Listing', desc: 'Sign up as a landlord, then create a listing with photos, description, amenities, and address.' },
-  { icon: DollarSign, title: 'Set Your Price & Auction Date', desc: 'Choose a starting bid and an auction end date. Students will compete to offer you the best monthly rent.' },
-  { icon: Clock, title: 'Watch Students Compete', desc: 'Bids come in real-time. Our anti-snipe feature extends auctions if last-minute bids arrive.' },
-  { icon: Users, title: 'Receive Winner Details', desc: 'When the auction closes, you get the winner\'s name, email, and phone number to finalize the lease.' },
+  { icon: DollarSign, title: 'Set Your Price', desc: 'Set your monthly rent price and list your property. Students will reach out directly when they are interested.' },
+  { icon: Clock, title: 'Review Interested Students', desc: 'See exactly which students are interested, their move-in dates, group size, and a personal note. You choose who to contact.' },
+  { icon: Users, title: 'Connect With Your Tenant', desc: 'Reach out directly to the student you want. No middleman, no fees, no commission.' },
   { icon: FileText, title: 'Sign the Lease', desc: 'Contact the winning student, sign the lease agreement, and welcome your new tenant.' },
 ];
 
 const whyReasons = [
-  { icon: TrendingUp, title: 'Fair Market Pricing', desc: 'Competitive bidding ensures rent reflects real demand — no overpaying, no guesswork.' },
-  { icon: Shield, title: 'Verified Student Bidders', desc: 'Every .edu email is verified. Landlords can trust that bidders are real students.' },
-  { icon: Eye, title: 'Real-Time Transparency', desc: 'See every bid as it happens. Full bid history is visible to all participants.' },
+  { icon: TrendingUp, title: 'See Real Demand', desc: 'See exactly how many students are interested in your property before you choose a tenant.' },
+  { icon: Shield, title: 'Verified Student Renters', desc: 'Every .edu email is verified. Landlords can trust that interested students are real.' },
+  { icon: Eye, title: 'Free to List', desc: 'Listing your property on HouseRush is completely free. No subscription, no commission, no hidden fees.' },
   { icon: Zap, title: 'Free for Students', desc: 'Creating an account, browsing listings, and placing bids is completely free for students.' },
 ];
 
@@ -30,7 +30,7 @@ export default function HowItWorksPage() {
       {/* Header */}
       <div className="text-center mb-14">
         <h1 className="text-3xl sm:text-4xl font-bold text-slate-900 tracking-tight">How HouseRush Works</h1>
-        <p className="text-slate-500 mt-3 max-w-xl mx-auto">The fastest way to secure off-campus student housing near Monmouth University.</p>
+        <p className="text-slate-500 mt-3 max-w-xl mx-auto">The smartest way to find and fill off-campus housing near your campus.</p>
       </div>
 
       {/* For Students */}

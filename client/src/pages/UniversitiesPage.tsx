@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { Search, GraduationCap, MapPin, ArrowRight, X } from 'lucide-react';
 import { motion } from 'framer-motion';
 import api from '../lib/api';
+import { useAuthStore } from '../store/authStore';
 
 interface University {
   id: number;
@@ -18,6 +19,7 @@ interface University {
 }
 
 export default function UniversitiesPage() {
+  const { user } = useAuthStore();
   const [universities, setUniversities] = useState<University[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
@@ -140,6 +142,8 @@ export default function UniversitiesPage() {
                     <span className="text-sm font-medium text-emerald-600">
                       {uni.activeListingCount} listing{uni.activeListingCount !== 1 ? 's' : ''} near campus
                     </span>
+                  ) : user?.role === 'student' ? (
+                    <span className="text-sm text-slate-400">No listings yet</span>
                   ) : (
                     <span className="text-sm text-slate-400">Be the first to list</span>
                   )}
