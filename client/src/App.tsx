@@ -20,6 +20,7 @@ import AdminDashboardPage from './pages/AdminDashboardPage';
 import ParentViewPage from './pages/ParentViewPage';
 import GuidesPage from './pages/GuidesPage';
 import UniversitiesPage from './pages/UniversitiesPage';
+import UniversityPortalPage from './pages/UniversityPortalPage';
 import Logo from './components/Logo';
 import { useAuthStore } from './store/authStore';
 import { getSocket } from './lib/socket';
@@ -67,6 +68,7 @@ function AppContent() {
               <Route path="/contact" element={<ContactPage />} />
               <Route path="/guides" element={<GuidesPage />} />
               <Route path="/universities" element={<UniversitiesPage />} />
+              <Route path="/universities/:slug" element={<UniversityPortalPage />} />
             </Routes>
           </main>
           <Footer />
@@ -95,6 +97,7 @@ function shouldBypassMaintenance(): boolean {
   if (path.startsWith('/parent-view')) return true;
   if (path.startsWith('/guides')) return true;
   if (path.startsWith('/create-listing')) return true;
+  if (path.startsWith('/universities')) return true;
 
   // Check for ?preview=houserush2024 and persist in sessionStorage
   const params = new URLSearchParams(window.location.search);
