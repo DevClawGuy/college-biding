@@ -11,7 +11,7 @@ const sections = [
   },
   {
     title: '3. Information Sharing',
-    content: 'We share your information only in limited circumstances. When you win an auction, we share your name, email address, and phone number with the listing landlord so they can contact you to finalize the lease. During active auctions, we display anonymized bid information (university affiliation and bid amount) to other bidders. We do not sell your personal information to third parties. We may share data with service providers who help us operate the Platform (hosting, email delivery, analytics), subject to confidentiality agreements.',
+    content: 'We share your information only in limited circumstances. When you win an auction, we share your name, email address, and phone number with the listing landlord so they can contact you to finalize the lease. During active auctions, we display anonymized bid information (university affiliation and bid amount) to other bidders. We do not sell your personal information to third parties. We may share data with service providers who help us operate the Platform (hosting, email delivery, analytics), subject to confidentiality agreements.\n\nWhen students submit an expression of interest on a listing, the information provided — including preferred move-in date, number of occupants, and any personal note — is shared with the landlord who posted that listing for the purpose of rental inquiries. Do not include sensitive personal information such as Social Security numbers, financial account details, or medical information in your notes.',
   },
   {
     title: '4. Data Security',

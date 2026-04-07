@@ -13,7 +13,7 @@ export default function Footer() {
               <span className="text-lg font-bold text-white">HouseRush</span>
             </div>
             <p className="text-sm leading-relaxed max-w-sm">
-              The fastest way to find off-campus housing near Monmouth University. Browse verified listings, place competitive bids, and move in with confidence.
+              HouseRush is an online listing and information platform. We are not a real estate broker, agent, or property manager. We are not a party to any lease or transaction between students and landlords.
             </p>
           </div>
 

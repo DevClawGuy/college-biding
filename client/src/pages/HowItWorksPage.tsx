@@ -19,8 +19,8 @@ const landlordSteps = [
 
 const whyReasons = [
   { icon: TrendingUp, title: 'See Real Demand', desc: 'See exactly how many students are interested in your property before you choose a tenant.' },
-  { icon: Shield, title: 'Verified Student Renters', desc: 'Every .edu email is verified. Landlords can trust that interested students are real.' },
-  { icon: Eye, title: 'Free to List', desc: 'Listing your property on HouseRush is completely free. No subscription, no commission, no hidden fees.' },
+  { icon: Shield, title: 'Verified Student Accounts', desc: 'Verification confirms a .edu email domain. We do not perform background checks or credit checks. Landlords can trust that interested students are real college students.' },
+  { icon: Eye, title: 'Free to List', desc: 'Listing your property on HouseRush is completely free. No commissions on leases. Optional paid tools available for landlords in Year 2.' },
   { icon: Zap, title: 'Free for Students', desc: 'Creating an account, browsing listings, and placing bids is completely free for students.' },
 ];
 
