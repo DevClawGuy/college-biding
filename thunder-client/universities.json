@@ -1,0 +1,26 @@
+{
+  "collectionName": "HouseRush — Universities",
+  "requests": [
+    {
+      "name": "List Universities",
+      "method": "GET",
+      "url": "{{baseUrl}}/api/universities?search=&state=NJ&page=1&limit=20",
+      "notes": "List universities with optional search, state filter, and pagination. Returns active_listing_count per university. No auth required."
+    },
+    {
+      "name": "Get University Detail",
+      "method": "GET",
+      "url": "{{baseUrl}}/api/universities/monmouth-university",
+      "notes": "Get university by slug with market_data (HUD FMR rent by bedroom count). No auth required."
+    },
+    {
+      "name": "Get Nearby Listings",
+      "method": "GET",
+      "url": "{{baseUrl}}/api/universities/monmouth-university/listings",
+      "notes": "Get active approved listings within ~3 miles of the university. No auth required."
+    }
+  ],
+  "variables": [
+    { "name": "baseUrl", "value": "http://localhost:3001" }
+  ]
+}

@@ -134,3 +134,32 @@ export const favorites = sqliteTable('favorites', {
   userId: text('user_id').notNull().references(() => users.id),
   listingId: text('listing_id').notNull().references(() => listings.id),
 });
+
+export const universities = sqliteTable('universities', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  ipedsId: text('ipeds_id').notNull().unique(),
+  name: text('name').notNull(),
+  city: text('city').notNull(),
+  state: text('state').notNull(),
+  zip: text('zip'),
+  latitude: real('latitude'),
+  longitude: real('longitude'),
+  enrollment: integer('enrollment'),
+  slug: text('slug').notNull().unique(),
+  countyFips: text('county_fips'),
+  portalActive: integer('portal_active').notNull().default(1),
+  createdAt: text('created_at').notNull().default(''),
+});
+
+export const universityMarketData = sqliteTable(
+  'university_market_data',
+  {
+    id: integer('id').primaryKey({ autoIncrement: true }),
+    universityId: integer('university_id').notNull(),
+    bedroomCount: integer('bedroom_count').notNull(),
+    medianRent: integer('median_rent'),
+    dataYear: integer('data_year'),
+    dataSource: text('data_source'),
+    updatedAt: text('updated_at').notNull().default(''),
+  }
+);
