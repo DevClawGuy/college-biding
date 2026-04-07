@@ -71,6 +71,29 @@ const TABLE_STATEMENTS = [
     user_id TEXT NOT NULL,
     listing_id TEXT NOT NULL
   )`,
+  `CREATE TABLE IF NOT EXISTS universities (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    ipeds_id TEXT UNIQUE NOT NULL,
+    name TEXT NOT NULL,
+    city TEXT NOT NULL,
+    state TEXT NOT NULL,
+    zip TEXT,
+    latitude REAL,
+    longitude REAL,
+    enrollment INTEGER,
+    slug TEXT UNIQUE NOT NULL,
+    portal_active INTEGER NOT NULL DEFAULT 1,
+    created_at TEXT NOT NULL DEFAULT ''
+  )`,
+  `CREATE TABLE IF NOT EXISTS university_market_data (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    university_id INTEGER NOT NULL,
+    bedroom_count INTEGER NOT NULL,
+    median_rent INTEGER,
+    data_year INTEGER,
+    data_source TEXT,
+    updated_at TEXT NOT NULL DEFAULT ''
+  )`,
 ];
 
 export async function initializeDatabase(): Promise<void> {
