@@ -1,6 +1,6 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
-import { Search, LayoutDashboard, PlusCircle, Bell, LogOut, Menu, X, MessageCircle } from 'lucide-react';
+import { Search, LayoutDashboard, PlusCircle, Bell, LogOut, Menu, X, MessageCircle, GraduationCap } from 'lucide-react';
 import Logo from './Logo';
 import { useState, useEffect, useCallback } from 'react';
 import api from '../lib/api';
@@ -72,6 +72,10 @@ export default function Navbar() {
             <Link to="/listings" className="flex items-center gap-1.5 px-3.5 py-2 text-sm font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition-all">
               <Search className="w-4 h-4" />
               Browse
+            </Link>
+            <Link to="/universities" className="flex items-center gap-1.5 px-3.5 py-2 text-sm font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition-all">
+              <GraduationCap className="w-4 h-4" />
+              Universities
             </Link>
             {user && (
               <>
@@ -161,6 +165,7 @@ export default function Navbar() {
       {menuOpen && (
         <div className="md:hidden glass border-t border-slate-200/60 px-4 py-3 space-y-1">
           <Link to="/listings" onClick={() => setMenuOpen(false)} className="block py-2.5 px-3 text-sm font-medium text-slate-700 hover:bg-slate-100 rounded-lg">Browse Listings</Link>
+          <Link to="/universities" onClick={() => setMenuOpen(false)} className="block py-2.5 px-3 text-sm font-medium text-slate-700 hover:bg-slate-100 rounded-lg">Universities</Link>
           {user ? (
             <>
               <Link to="/dashboard" onClick={() => setMenuOpen(false)} className="block py-2.5 px-3 text-sm font-medium text-slate-700 hover:bg-slate-100 rounded-lg">Dashboard</Link>

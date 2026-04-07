@@ -19,6 +19,7 @@ import ContactPage from './pages/ContactPage';
 import AdminDashboardPage from './pages/AdminDashboardPage';
 import ParentViewPage from './pages/ParentViewPage';
 import GuidesPage from './pages/GuidesPage';
+import UniversitiesPage from './pages/UniversitiesPage';
 import Logo from './components/Logo';
 import { useAuthStore } from './store/authStore';
 import { getSocket } from './lib/socket';
@@ -65,6 +66,7 @@ function AppContent() {
               <Route path="/how-it-works" element={<HowItWorksPage />} />
               <Route path="/contact" element={<ContactPage />} />
               <Route path="/guides" element={<GuidesPage />} />
+              <Route path="/universities" element={<UniversitiesPage />} />
             </Routes>
           </main>
           <Footer />
