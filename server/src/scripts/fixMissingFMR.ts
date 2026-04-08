@@ -12,6 +12,18 @@ function padFips(val: string | number | undefined, len: number): string {
   return String(val ?? '').padStart(len, '0');
 }
 
+// Connecticut FY2026 planning region remap (old county FIPS → new region FIPS)
+const CT_FIPS_REMAP: Record<string, string> = {
+  '09001': '09120',
+  '09003': '09110',
+  '09005': '09160',
+  '09007': '09130',
+  '09009': '09170',
+  '09011': '09180',
+  '09013': '09150',
+  '09015': '09150',
+};
+
 // Manual overrides for known problem cases — ipeds_id → county_fips
 const manualOverrides: Record<string, string> = {
   '009214': '06085', // San Jose State — Santa Clara County
@@ -148,6 +160,12 @@ async function run() {
       strategy = 'manual override';
     }
 
+    // Name-based override for Illinois State University
+    if (!countyFips && inst.name === 'Illinois State University' && inst.state === 'IL') {
+      countyFips = '17113'; // McLean County IL
+      strategy = 'manual override (name)';
+    }
+
     // Strategy 1: Strip ZIP+4 suffix
     if (!countyFips && inst.zip.includes('-')) {
       const baseZip = padFips(inst.zip.split('-')[0], 5);
@@ -199,15 +217,18 @@ async function run() {
     // ═══════════════════════════════════════════
     // STEP 6 — Apply fix
     // ═══════════════════════════════════════════
+    // Apply CT FIPS remap if applicable
+    const lookupFips = CT_FIPS_REMAP[countyFips] ?? countyFips;
+
     try {
-      // Update county_fips
+      // Update county_fips (use remapped value)
       await client.execute({
         sql: 'UPDATE universities SET county_fips = ? WHERE ipeds_id = ?',
-        args: [countyFips, inst.ipeds_id],
+        args: [lookupFips, inst.ipeds_id],
       });
 
-      // Look up FMR
-      const fmr = fmrByCounty.get(countyFips);
+      // Look up FMR using remapped FIPS
+      const fmr = fmrByCounty.get(lookupFips);
       if (fmr) {
         const uniRow = await client.execute({
           sql: 'SELECT id FROM universities WHERE ipeds_id = ?',
