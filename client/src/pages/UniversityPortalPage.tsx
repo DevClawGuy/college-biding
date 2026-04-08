@@ -220,7 +220,7 @@ export default function UniversityPortalPage() {
             {university.enrollment != null && ` · ${university.enrollment.toLocaleString()} students`}
           </p>
 
-          <div className={`mt-5 inline-flex items-center gap-2 text-sm font-medium px-4 py-2 rounded-full ${isLight ? 'bg-slate-800/10 text-slate-800' : 'bg-white/95 text-brand-700'}`}>
+          <div className={`mt-5 inline-flex items-center gap-2 text-sm font-medium px-4 py-2 rounded-full ${isLight ? 'bg-slate-800/10 text-slate-800' : 'bg-white/95'}`} style={!isLight && university.primaryColor ? { color: university.primaryColor } : {}}>
             <span>✓</span> University portal — at no cost to {university.name}
           </div>
 
@@ -249,7 +249,7 @@ export default function UniversityPortalPage() {
                     className="min-w-[180px] snap-start bg-white rounded-2xl p-5 card-shadow flex-shrink-0"
                   >
                     <p className="text-sm text-slate-500">{bedroomLabel(d.bedroomCount)}</p>
-                    <p className="text-2xl font-bold text-brand-700 mt-1">${(d.medianRent ?? 0).toLocaleString()}<span className="text-sm font-normal text-slate-400">/mo</span></p>
+                    <p className="text-2xl font-bold mt-1" style={{ color: university.primaryColor ?? undefined }}>${(d.medianRent ?? 0).toLocaleString()}<span className="text-sm font-normal text-slate-400">/mo</span></p>
                     <p className="text-xs text-slate-400 mt-2">Estimated area rent (HUD FMR, FY2026)</p>
                   </motion.div>
                 ))}
