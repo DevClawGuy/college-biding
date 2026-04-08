@@ -351,6 +351,7 @@ async function seed() {
         withFmr++;
       } catch (err) {
         console.error(`  Failed FMR for ${inst.name}: ${err}`);
+        missingFmr.push({ ipeds_id: inst.unitId, name: inst.name, city: inst.city, state: inst.state, zip: inst.zip });
         withoutFmr++;
       }
     }
