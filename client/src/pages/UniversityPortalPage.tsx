@@ -83,6 +83,23 @@ export default function UniversityPortalPage() {
 
   const showLandlordCTA = !user || user.role === 'landlord';
 
+  // Add noindex for non-NJ portals
+  useEffect(() => {
+    if (!university) return;
+    const existing = document.querySelector('meta[name="robots"]');
+    if (existing) existing.remove();
+    if (university.state !== 'NJ') {
+      const meta = document.createElement('meta');
+      meta.name = 'robots';
+      meta.content = 'noindex, nofollow';
+      document.head.appendChild(meta);
+    }
+    return () => {
+      const el = document.querySelector('meta[name="robots"]');
+      if (el) el.remove();
+    };
+  }, [university]);
+
   // Loading state
   if (loading) {
     return (
