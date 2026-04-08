@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
 import { ChevronLeft, Plus, X as XIcon } from 'lucide-react';
@@ -14,9 +14,8 @@ const amenityOptions = [
 
 const tagOptions = ['Pet Friendly', 'Utilities Included', 'Furnished', 'Parking Included'];
 
-const universityCoords: Record<string, { lat: number; lng: number }> = {
-  'Monmouth University': { lat: 40.2773, lng: -74.0048 },
-};
+// Default coords used when university not found in API data
+const DEFAULT_COORDS = { lat: 40.2773, lng: -74.0048 };
 
 function getDefaultAuctionEnd(): string {
   return new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().slice(0, 16);
@@ -41,6 +40,13 @@ export default function CreateListingPage() {
   });
 
   const [photoUrls, setPhotoUrls] = useState<string[]>(['']);
+  const [universities, setUniversities] = useState<{ name: string; city: string; latitude: number | null; longitude: number | null }[]>([]);
+
+  useEffect(() => {
+    api.get('/universities?limit=50&state=NJ')
+      .then(({ data }) => setUniversities(data.universities ?? []))
+      .catch(() => {});
+  }, []);
 
   const update = (field: string, value: any) => setForm(prev => ({ ...prev, [field]: value }));
   const toggleAmenity = (a: string) => setForm(prev => ({ ...prev, amenities: prev.amenities.includes(a) ? prev.amenities.filter(x => x !== a) : [...prev.amenities, a] }));
@@ -61,7 +67,8 @@ export default function CreateListingPage() {
     setError('');
     setLoading(true);
 
-    const coords = universityCoords[form.nearestUniversity] || { lat: 40.2773, lng: -74.0048 };
+    const uniMatch = universities.find(u => u.name === form.nearestUniversity);
+    const coords = uniMatch?.latitude && uniMatch?.longitude ? { lat: uniMatch.latitude, lng: uniMatch.longitude } : DEFAULT_COORDS;
     const offset = (Math.random() - 0.5) * 0.01;
     const auctionEnd = new Date(form.auctionEnd).toISOString();
 
@@ -166,7 +173,7 @@ export default function CreateListingPage() {
               <div><label className={labelClass}>State</label><input type="text" value={form.state} onChange={(e) => update('state', e.target.value)} className={inputClass} placeholder="e.g. NJ" required maxLength={2} /></div>
             </div>
             <div className="grid grid-cols-2 gap-4">
-              <div><label className={labelClass}>Nearest University</label><select value={form.nearestUniversity} onChange={(e) => update('nearestUniversity', e.target.value)} className={selectClass} required><option value="">Select</option>{Object.keys(universityCoords).map(u => <option key={u} value={u}>{u}</option>)}</select></div>
+              <div><label className={labelClass}>Nearest University</label><select value={form.nearestUniversity} onChange={(e) => update('nearestUniversity', e.target.value)} className={selectClass} required><option value="">Select university</option>{universities.map(u => <option key={u.name} value={u.name}>{u.name}</option>)}</select></div>
               <div><label className={labelClass}>Distance to Campus (mi)</label><input type="number" value={form.distanceToCampus} onChange={(e) => update('distanceToCampus', Number(e.target.value))} className={inputClass} step="0.1" min="0" /></div>
             </div>
           </div>
@@ -185,7 +192,7 @@ export default function CreateListingPage() {
             </div>
           </div>
           <div className="mt-5 pt-5 border-t border-slate-100">
-            <label className={labelClass}>Secure Lease Now Price (optional)</label>
+            <label className={labelClass}>Rent Now Price (optional)</label>
             <input type="number" value={form.secureLeasePrice} onChange={(e) => update('secureLeasePrice', e.target.value === '' ? '' : Number(e.target.value))} className={inputClass} min={form.startingBid + 1} step={25} placeholder="e.g. 2000" />
             <p className="text-xs text-slate-400 mt-1">Set a price students can pay to secure the property immediately without waiting. Must be higher than your asking rent.</p>
           </div>
