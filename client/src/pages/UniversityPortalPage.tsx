@@ -25,6 +25,8 @@ interface UniversityDetail {
   slug: string;
   latitude: number | null;
   longitude: number | null;
+  primaryColor: string | null;
+  secondaryColor: string | null;
   marketData: MarketDataItem[];
 }
 
@@ -32,6 +34,35 @@ function bedroomLabel(n: number): string {
   if (n === 0) return 'Studio';
   if (n === 1) return '1 Bedroom';
   return `${n} Bedrooms`;
+}
+
+function hexToRgb(hex: string): { r: number; g: number; b: number } | null {
+  const clean = hex.replace('#', '');
+  const full = clean.length === 3
+    ? clean.split('').map(c => c + c).join('')
+    : clean;
+  if (full.length !== 6) return null;
+  return {
+    r: parseInt(full.slice(0, 2), 16),
+    g: parseInt(full.slice(2, 4), 16),
+    b: parseInt(full.slice(4, 6), 16),
+  };
+}
+
+function isLightColor(hex: string): boolean {
+  const rgb = hexToRgb(hex);
+  if (!rgb) return false;
+  const luminance = 0.2126 * (rgb.r / 255) + 0.7152 * (rgb.g / 255) + 0.0722 * (rgb.b / 255);
+  return luminance > 0.5;
+}
+
+function darkenHex(hex: string, amount = 40): string {
+  const rgb = hexToRgb(hex);
+  if (!rgb) return hex;
+  const r = Math.max(0, rgb.r - amount);
+  const g = Math.max(0, rgb.g - amount);
+  const b = Math.max(0, rgb.b - amount);
+  return '#' + [r, g, b].map(v => v.toString(16).padStart(2, '0')).join('');
 }
 
 export default function UniversityPortalPage() {
@@ -82,6 +113,14 @@ export default function UniversityPortalPage() {
   };
 
   const showLandlordCTA = !user || user.role === 'landlord';
+
+  const heroBackground = university?.primaryColor
+    ? `linear-gradient(135deg, ${university.primaryColor} 0%, ${darkenHex(university.primaryColor)} 100%)`
+    : null;
+
+  const isLight = university?.primaryColor
+    ? isLightColor(university.primaryColor)
+    : false;
 
   // Add noindex for non-NJ portals
   useEffect(() => {
@@ -162,29 +201,32 @@ export default function UniversityPortalPage() {
     <div>
       {/* Section 1 — Hero */}
       <section className="relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-brand-700 to-brand-900" />
+        <div
+          className="absolute inset-0 bg-gradient-to-br from-brand-700 to-brand-900"
+          style={heroBackground ? { background: heroBackground } : {}}
+        />
         <div className="absolute inset-0 opacity-10">
           <div className="absolute top-10 left-10 w-60 h-60 bg-white rounded-full blur-[80px]" />
           <div className="absolute bottom-10 right-10 w-80 h-80 bg-white rounded-full blur-[100px]" />
         </div>
         <div className="max-w-5xl mx-auto px-4 sm:px-6 py-12 sm:py-16 relative">
-          <Link to="/universities" className="inline-flex items-center gap-1 text-brand-200 hover:text-white text-sm font-medium mb-6 transition-colors">
+          <Link to="/universities" className={`inline-flex items-center gap-1 text-sm font-medium mb-6 transition-colors ${isLight ? 'text-slate-700 hover:text-slate-900' : 'text-brand-200 hover:text-white'}`}>
             <ChevronLeft className="w-4 h-4" /> All Universities
           </Link>
 
-          <h1 className="text-3xl sm:text-4xl font-bold text-white tracking-tight">{university.name}</h1>
-          <p className="text-brand-200 mt-2 text-base sm:text-lg">
+          <h1 className={`text-3xl sm:text-4xl font-bold tracking-tight ${isLight ? 'text-slate-900' : 'text-white'}`}>{university.name}</h1>
+          <p className={`mt-2 text-base sm:text-lg ${isLight ? 'text-slate-700' : 'text-brand-200'}`}>
             Off-Campus Housing Portal · {university.city}, {university.state}
             {university.enrollment != null && ` · ${university.enrollment.toLocaleString()} students`}
           </p>
 
-          <div className="mt-5 inline-flex items-center gap-2 bg-white/95 text-brand-700 text-sm font-medium px-4 py-2 rounded-full">
+          <div className={`mt-5 inline-flex items-center gap-2 text-sm font-medium px-4 py-2 rounded-full ${isLight ? 'bg-slate-800/10 text-slate-800' : 'bg-white/95 text-brand-700'}`}>
             <span>✓</span> University portal — at no cost to {university.name}
           </div>
 
           {showLandlordCTA && (
             <div className="mt-6">
-              <Link to="/create-listing" className="inline-flex items-center gap-2 border border-white/40 text-white hover:bg-white/10 px-6 py-2.5 rounded-xl font-semibold text-sm transition-all">
+              <Link to="/create-listing" className={`inline-flex items-center gap-2 border px-6 py-2.5 rounded-xl font-semibold text-sm transition-all ${isLight ? 'border-slate-800/30 text-slate-800 hover:bg-slate-800/10' : 'border-white/40 text-white hover:bg-white/10'}`}>
                 List Your Property Free <ArrowRight className="w-4 h-4" />
               </Link>
             </div>
@@ -280,7 +322,10 @@ export default function UniversityPortalPage() {
         {/* Section 5 — Landlord Footer CTA */}
         {showLandlordCTA && (
           <section className="relative overflow-hidden rounded-2xl">
-            <div className="absolute inset-0 bg-gradient-to-br from-brand-600 to-brand-800" />
+            <div
+              className="absolute inset-0 bg-gradient-to-br from-brand-600 to-brand-800"
+              style={heroBackground ? { background: heroBackground } : {}}
+            />
             <div className="relative px-6 sm:px-10 py-10 text-center">
               <p className="text-xl sm:text-2xl font-bold text-white">Are you a landlord with property near {university.name}?</p>
               <p className="text-brand-200 mt-2 text-sm sm:text-base">List free. Reach verified students directly. No commissions, no fees.</p>

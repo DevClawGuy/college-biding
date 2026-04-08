@@ -187,6 +187,8 @@ export async function initializeDatabase(): Promise<void> {
     `CREATE UNIQUE INDEX IF NOT EXISTS idx_eoi_unique ON expressions_of_interest(listing_id, user_id)`,
     `CREATE INDEX IF NOT EXISTS idx_universities_lat ON universities(latitude)`,
     `CREATE INDEX IF NOT EXISTS idx_universities_lng ON universities(longitude)`,
+    `ALTER TABLE universities ADD COLUMN primary_color TEXT`,
+    `ALTER TABLE universities ADD COLUMN secondary_color TEXT`,
   ];
   for (const sql of migrations) {
     try {

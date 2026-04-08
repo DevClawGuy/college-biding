@@ -148,6 +148,8 @@ export const universities = sqliteTable('universities', {
   slug: text('slug').notNull().unique(),
   countyFips: text('county_fips'),
   portalActive: integer('portal_active').notNull().default(1),
+  primaryColor: text('primary_color'),
+  secondaryColor: text('secondary_color'),
   createdAt: text('created_at').notNull().default(''),
 });
 
