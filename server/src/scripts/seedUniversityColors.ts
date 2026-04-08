@@ -31,6 +31,36 @@ function ensureHash(hex: string): string {
   return '#' + clean;
 }
 
+const chainColors: Record<string, string> = {
+  'devry': '#C8102E',
+  'strayer': '#002F6C',
+  'chamberlain': '#003087',
+  'south': '#002F6C',
+  'herzing': '#003087',
+  'galen college': '#003087',
+  'galen health': '#003087',
+  'platt college': '#003087',
+  'broadview': '#003087',
+  'argosy': '#003087',
+  'phoenix': '#990000',
+  'kaplan': '#003087',
+  'national': '#003087',
+  'grand canyon': '#522398',
+  'western governors': '#004B87',
+  'american public': '#003087',
+  'american military': '#003087',
+  'post': '#003087',
+  'capella': '#003087',
+  'walden': '#003087',
+  'liberty': '#990000',
+  'regent': '#003087',
+  'concordia': '#003087',
+  'ashford': '#003087',
+};
+
+// Chain keys sorted longest-first so "galen college" matches before "galen"
+const chainKeys = Object.keys(chainColors).sort((a, b) => b.length - a.length);
+
 async function run() {
   const colorMap = new Map<string, string>();
 
@@ -128,21 +158,57 @@ async function run() {
   // STEP 6 — Match and upsert colors
   // ═══════════════════════════════════════════
   console.log('\nSTEP 6: Matching colors...\n');
-  let matched = 0;
+  let matchedDataset = 0;
+  let matchedChain = 0;
+  let matchedParent = 0;
   const unmatched: Array<{ id: number; name: string }> = [];
 
   for (const uni of universities) {
     const normName = normalize(uni.name);
     let color: string | undefined;
+    let strategy = '';
 
-    // Exact match
+    // Strategy 1: Exact match from datasets
     color = colorMap.get(normName);
+    if (color) strategy = 'dataset exact';
 
-    // Partial match: DB name startsWith map key or map key startsWith DB name
+    // Strategy 2: Partial match — startsWith in either direction
     if (!color) {
       for (const key of mapKeys) {
         if (normName.startsWith(key) || key.startsWith(normName)) {
           color = colorMap.get(key);
+          strategy = 'dataset partial';
+          break;
+        }
+      }
+    }
+
+    // Strategy 3: Strip hyphen location suffix and try parent name
+    if (!color && uni.name.includes('-')) {
+      const parentName = normalize(uni.name.substring(0, uni.name.lastIndexOf('-')));
+      if (parentName) {
+        color = colorMap.get(parentName);
+        if (color) {
+          strategy = `parent: ${parentName}`;
+        } else {
+          // Also try partial match with parent name
+          for (const key of mapKeys) {
+            if (parentName.startsWith(key) || key.startsWith(parentName)) {
+              color = colorMap.get(key);
+              strategy = `parent partial: ${parentName}`;
+              break;
+            }
+          }
+        }
+      }
+    }
+
+    // Strategy 4: Chain colors — normalized name starts with chain key
+    if (!color) {
+      for (const chainKey of chainKeys) {
+        if (normName.startsWith(chainKey)) {
+          color = chainColors[chainKey];
+          strategy = `chain: ${chainKey}`;
           break;
         }
       }
@@ -154,8 +220,10 @@ async function run() {
           sql: 'UPDATE universities SET primary_color = ? WHERE id = ?',
           args: [color, uni.id],
         });
-        console.log(`  ${uni.name} → ${color}`);
-        matched++;
+        console.log(`  ${uni.name} → ${color} (${strategy})`);
+        if (strategy.startsWith('chain')) matchedChain++;
+        else if (strategy.startsWith('parent')) matchedParent++;
+        else matchedDataset++;
       } catch (err) {
         console.error(`  ${uni.name} — update failed: ${err}`);
         unmatched.push({ id: uni.id, name: uni.name });
@@ -169,12 +237,16 @@ async function run() {
   // STEP 7 — Summary
   // ═══════════════════════════════════════════
   const total = universities.length;
-  const coverage = total > 0 ? ((matched / total) * 100).toFixed(1) : '0';
+  const totalMatched = matchedDataset + matchedChain + matchedParent;
+  const coverage = total > 0 ? ((totalMatched / total) * 100).toFixed(1) : '0';
 
   console.log('\n=== COLOR SEED SUMMARY ===');
   console.log(`Total universities: ${total}`);
-  console.log(`Colors matched: ${matched}`);
-  console.log(`Unmatched: ${unmatched.length}`);
+  console.log(`Matched via datasets: ${matchedDataset}`);
+  console.log(`Matched via parent campus strip: ${matchedParent}`);
+  console.log(`Matched via chain colors: ${matchedChain}`);
+  console.log(`Total matched: ${totalMatched}`);
+  console.log(`Still unmatched: ${unmatched.length}`);
   console.log(`Coverage: ${coverage}%`);
 
   if (unmatched.length > 0) {
