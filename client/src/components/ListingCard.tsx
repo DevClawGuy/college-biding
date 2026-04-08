@@ -206,7 +206,7 @@ export default function ListingCard({ listing, onFavorite, isFavorited }: Listin
             </div>
           </div>
           <span className="text-sm font-semibold text-brand-600 bg-brand-50 hover:bg-brand-100 px-4 py-2 rounded-xl transition-colors">
-            Bid Now
+            View Property
           </span>
         </div>
       </Link>
