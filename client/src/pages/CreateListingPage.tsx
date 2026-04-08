@@ -193,7 +193,7 @@ export default function CreateListingPage() {
           </div>
           <div className="mt-5 pt-5 border-t border-slate-100">
             <label className={labelClass}>Rent Now Price (optional)</label>
-            <input type="number" value={form.secureLeasePrice} onChange={(e) => update('secureLeasePrice', e.target.value === '' ? '' : Number(e.target.value))} className={inputClass} min={1} step={1} placeholder="e.g. 2000" />
+            <input type="number" value={form.secureLeasePrice} onChange={(e) => update('secureLeasePrice', e.target.value === '' ? '' : Number(e.target.value))} className={inputClass} min={0} step={25} placeholder="e.g. 2000" />
             <p className="text-xs text-slate-400 mt-1">Set a price students can pay to secure the property immediately without waiting. Must be higher than your asking rent.</p>
           </div>
         </section>
