@@ -185,6 +185,8 @@ export async function initializeDatabase(): Promise<void> {
     // Note: pending_landlord_confirmation status is handled at application level — SQLite TEXT column already accepts it
     `ALTER TABLE universities ADD COLUMN county_fips TEXT`,
     `CREATE UNIQUE INDEX IF NOT EXISTS idx_eoi_unique ON expressions_of_interest(listing_id, user_id)`,
+    `CREATE INDEX IF NOT EXISTS idx_universities_lat ON universities(latitude)`,
+    `CREATE INDEX IF NOT EXISTS idx_universities_lng ON universities(longitude)`,
   ];
   for (const sql of migrations) {
     try {
