@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { useEffect } from 'react';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
@@ -68,6 +68,35 @@ function AppContent() {
               <Route path="/contact" element={<ContactPage />} />
               <Route path="/guides" element={<GuidesPage />} />
               <Route path="/universities" element={<UniversitiesPage />} />
+              {/* NJ slug redirects — old URLs without -nj suffix */}
+              <Route path="/universities/rutgers-new-brunswick" element={<Navigate to="/universities/rutgers-new-brunswick-nj" replace />} />
+              <Route path="/universities/rowan-university" element={<Navigate to="/universities/rowan-university-nj" replace />} />
+              <Route path="/universities/montclair-state-university" element={<Navigate to="/universities/montclair-state-university-nj" replace />} />
+              <Route path="/universities/ramapo-college" element={<Navigate to="/universities/ramapo-college-nj" replace />} />
+              <Route path="/universities/stockton-university" element={<Navigate to="/universities/stockton-university-nj" replace />} />
+              <Route path="/universities/college-of-new-jersey" element={<Navigate to="/universities/college-of-new-jersey-nj" replace />} />
+              <Route path="/universities/william-paterson-university" element={<Navigate to="/universities/william-paterson-university-nj" replace />} />
+              <Route path="/universities/fairleigh-dickinson-university" element={<Navigate to="/universities/fairleigh-dickinson-university-nj" replace />} />
+              <Route path="/universities/seton-hall-university" element={<Navigate to="/universities/seton-hall-university-nj" replace />} />
+              <Route path="/universities/njit" element={<Navigate to="/universities/njit-nj" replace />} />
+              <Route path="/universities/kean-university" element={<Navigate to="/universities/kean-university-nj" replace />} />
+              <Route path="/universities/monmouth-university" element={<Navigate to="/universities/monmouth-university-nj" replace />} />
+              <Route path="/universities/rider-university" element={<Navigate to="/universities/rider-university-nj" replace />} />
+              <Route path="/universities/stevens-institute-of-technology" element={<Navigate to="/universities/stevens-institute-of-technology-nj" replace />} />
+              <Route path="/universities/saint-peters-university" element={<Navigate to="/universities/saint-peters-university-nj" replace />} />
+              <Route path="/universities/rutgers-newark" element={<Navigate to="/universities/rutgers-newark-nj" replace />} />
+              <Route path="/universities/rutgers-camden" element={<Navigate to="/universities/rutgers-camden-nj" replace />} />
+              <Route path="/universities/nj-city-university" element={<Navigate to="/universities/nj-city-university-nj" replace />} />
+              <Route path="/universities/felician-university" element={<Navigate to="/universities/felician-university-nj" replace />} />
+              <Route path="/universities/drew-university" element={<Navigate to="/universities/drew-university-nj" replace />} />
+              <Route path="/universities/georgian-court-university" element={<Navigate to="/universities/georgian-court-university-nj" replace />} />
+              <Route path="/universities/caldwell-university" element={<Navigate to="/universities/caldwell-university-nj" replace />} />
+              <Route path="/universities/bloomfield-college" element={<Navigate to="/universities/bloomfield-college-nj" replace />} />
+              <Route path="/universities/centenary-university" element={<Navigate to="/universities/centenary-university-nj" replace />} />
+              <Route path="/universities/saint-elizabeth-university" element={<Navigate to="/universities/saint-elizabeth-university-nj" replace />} />
+              <Route path="/universities/berkeley-college" element={<Navigate to="/universities/berkeley-college-nj" replace />} />
+              <Route path="/universities/pillar-college" element={<Navigate to="/universities/pillar-college-nj" replace />} />
+              <Route path="/universities/princeton-university" element={<Navigate to="/universities/princeton-university-nj" replace />} />
               <Route path="/universities/:slug" element={<UniversityPortalPage />} />
             </Routes>
           </main>
