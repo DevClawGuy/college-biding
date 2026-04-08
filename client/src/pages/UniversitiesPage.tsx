@@ -18,19 +18,75 @@ interface University {
   activeListingCount: number;
 }
 
+const US_STATES = [
+  { value: '', label: 'All States' },
+  { value: 'AL', label: 'Alabama' },
+  { value: 'AK', label: 'Alaska' },
+  { value: 'AZ', label: 'Arizona' },
+  { value: 'AR', label: 'Arkansas' },
+  { value: 'CA', label: 'California' },
+  { value: 'CO', label: 'Colorado' },
+  { value: 'CT', label: 'Connecticut' },
+  { value: 'DE', label: 'Delaware' },
+  { value: 'DC', label: 'Washington D.C.' },
+  { value: 'FL', label: 'Florida' },
+  { value: 'GA', label: 'Georgia' },
+  { value: 'HI', label: 'Hawaii' },
+  { value: 'ID', label: 'Idaho' },
+  { value: 'IL', label: 'Illinois' },
+  { value: 'IN', label: 'Indiana' },
+  { value: 'IA', label: 'Iowa' },
+  { value: 'KS', label: 'Kansas' },
+  { value: 'KY', label: 'Kentucky' },
+  { value: 'LA', label: 'Louisiana' },
+  { value: 'ME', label: 'Maine' },
+  { value: 'MD', label: 'Maryland' },
+  { value: 'MA', label: 'Massachusetts' },
+  { value: 'MI', label: 'Michigan' },
+  { value: 'MN', label: 'Minnesota' },
+  { value: 'MS', label: 'Mississippi' },
+  { value: 'MO', label: 'Missouri' },
+  { value: 'MT', label: 'Montana' },
+  { value: 'NE', label: 'Nebraska' },
+  { value: 'NV', label: 'Nevada' },
+  { value: 'NH', label: 'New Hampshire' },
+  { value: 'NJ', label: 'New Jersey' },
+  { value: 'NM', label: 'New Mexico' },
+  { value: 'NY', label: 'New York' },
+  { value: 'NC', label: 'North Carolina' },
+  { value: 'ND', label: 'North Dakota' },
+  { value: 'OH', label: 'Ohio' },
+  { value: 'OK', label: 'Oklahoma' },
+  { value: 'OR', label: 'Oregon' },
+  { value: 'PA', label: 'Pennsylvania' },
+  { value: 'RI', label: 'Rhode Island' },
+  { value: 'SC', label: 'South Carolina' },
+  { value: 'SD', label: 'South Dakota' },
+  { value: 'TN', label: 'Tennessee' },
+  { value: 'TX', label: 'Texas' },
+  { value: 'UT', label: 'Utah' },
+  { value: 'VT', label: 'Vermont' },
+  { value: 'VA', label: 'Virginia' },
+  { value: 'WA', label: 'Washington' },
+  { value: 'WV', label: 'West Virginia' },
+  { value: 'WI', label: 'Wisconsin' },
+  { value: 'WY', label: 'Wyoming' },
+];
+
 export default function UniversitiesPage() {
   const { user } = useAuthStore();
   const [universities, setUniversities] = useState<University[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
+  const [selectedState, setSelectedState] = useState('');
   const debounceRef = useRef<ReturnType<typeof setTimeout>>(undefined);
 
-  const fetchUniversities = async (searchTerm: string) => {
+  const fetchUniversities = async (searchTerm: string, state: string) => {
     setLoading(true);
     try {
-      const { data } = await api.get('/universities', {
-        params: { search: searchTerm, state: 'NJ', page: 1, limit: 28 },
-      });
+      const params: Record<string, string | number> = { search: searchTerm, page: 1, limit: 100 };
+      if (state) params.state = state;
+      const { data } = await api.get('/universities', { params });
       setUniversities(data.universities ?? []);
     } catch { /* */ } finally {
       setLoading(false);
@@ -38,20 +94,20 @@ export default function UniversitiesPage() {
   };
 
   useEffect(() => {
-    fetchUniversities('');
+    fetchUniversities('', selectedState);
   }, []);
 
   useEffect(() => {
     if (debounceRef.current) clearTimeout(debounceRef.current);
-    debounceRef.current = setTimeout(() => fetchUniversities(search), 300);
+    debounceRef.current = setTimeout(() => fetchUniversities(search, selectedState), 300);
     return () => { if (debounceRef.current) clearTimeout(debounceRef.current); };
-  }, [search]);
+  }, [search, selectedState]);
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
       <div className="mb-5 sm:mb-6">
         <h1 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">Find Housing Near Your University</h1>
-        <p className="text-slate-500 text-sm mt-1">Browse rental market data and available listings near every NJ campus</p>
+        <p className="text-slate-500 text-sm mt-1">Browse rental market data and available listings near every campus</p>
       </div>
 
       {/* Search & State Filter */}
@@ -71,12 +127,14 @@ export default function UniversitiesPage() {
             </button>
           )}
         </div>
-        {/* TODO: enable state filter when national expansion adds other states */}
         <select
-          disabled
-          className="px-3 sm:px-4 py-3 border border-slate-200 rounded-2xl bg-white card-shadow text-sm min-w-0 opacity-60 cursor-not-allowed"
+          value={selectedState}
+          onChange={(e) => setSelectedState(e.target.value)}
+          className="px-3 py-3 border border-slate-200 rounded-2xl bg-white focus:ring-2 focus:ring-brand-500/20 card-shadow text-sm"
         >
-          <option value="NJ">New Jersey</option>
+          {US_STATES.map(s => (
+            <option key={s.value} value={s.value}>{s.label}</option>
+          ))}
         </select>
       </div>
 
