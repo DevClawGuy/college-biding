@@ -313,7 +313,7 @@ export default function ListingDetailPage() {
             {(listing.viewCount ?? 0) > 0 && (
               <div className={`flex items-center gap-1.5 mt-3 text-sm font-medium ${listing.viewCount > 100 ? 'text-rose-600' : listing.viewCount > 50 ? 'text-amber-600' : 'text-slate-500'}`}>
                 <Eye className="w-4 h-4" />
-                <span>{listing.viewCount} students viewed this{listing.viewCount > 100 ? ' — high demand!' : ''}</span>
+                <span>{listing.viewCount} student{listing.viewCount !== 1 ? 's' : ''} viewed this{listing.viewCount > 100 ? ' — high demand!' : ''}</span>
               </div>
             )}
           </div>
