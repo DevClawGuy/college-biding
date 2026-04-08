@@ -1,13 +1,12 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { useSearchParams, Link, useNavigate } from 'react-router-dom';
-import { Gavel, Home, Heart, Bell, Clock, Trophy, XCircle, Check, ChevronRight, Phone, Mail, Trash2, Lock, Users, MessageCircle, Send } from 'lucide-react';
-import confetti from 'canvas-confetti';
+import { Home, Heart, Bell, Clock, Trophy, Check, ChevronRight, Phone, Mail, Trash2, MessageCircle, Send } from 'lucide-react';
 import { useAuthStore } from '../store/authStore';
 import { useCountdown } from '../hooks/useCountdown';
 import api from '../lib/api';
 
 const studentTabs = [
-  { id: 'bids', label: 'My Bids', icon: Gavel },
+  { id: 'interests', label: 'My Interests', icon: Heart },
   { id: 'messages', label: 'Messages', icon: MessageCircle },
   { id: 'favorites', label: 'Saved', icon: Heart },
   { id: 'notifications', label: 'Notifications', icon: Bell },
@@ -18,29 +17,6 @@ const landlordTabs = [
   { id: 'messages', label: 'Messages', icon: MessageCircle },
   { id: 'notifications', label: 'Notifications', icon: Bell },
 ];
-
-function BidStatusBadge({ bid, userId }: { bid: any; userId?: string }) {
-  const countdown = useCountdown(bid.auctionEnd || '');
-  const isHighestBidder = bid.amount >= (bid.currentBid || 0);
-  const ended = bid.listingStatus === 'ended' || countdown.isExpired;
-
-  if (ended) {
-    if (bid.winnerId && userId) {
-      if (bid.winnerId === userId) {
-        return bid.isSecureLease
-          ? <span className="flex items-center gap-1 text-xs font-semibold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-100"><Lock className="w-3 h-3" /> Secured</span>
-          : <span className="flex items-center gap-1 text-xs font-semibold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-100"><Trophy className="w-3 h-3" /> Won</span>;
-      }
-      return <span className="flex items-center gap-1 text-xs font-semibold text-rose-700 bg-rose-50 px-2.5 py-1 rounded-lg border border-rose-100"><XCircle className="w-3 h-3" /> Lost</span>;
-    }
-    return isHighestBidder
-      ? <span className="flex items-center gap-1 text-xs font-semibold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-100"><Trophy className="w-3 h-3" /> Won</span>
-      : <span className="flex items-center gap-1 text-xs font-semibold text-rose-700 bg-rose-50 px-2.5 py-1 rounded-lg border border-rose-100"><XCircle className="w-3 h-3" /> Lost</span>;
-  }
-  return isHighestBidder
-    ? <span className="flex items-center gap-1 text-xs font-semibold text-brand-700 bg-brand-50 px-2.5 py-1 rounded-lg border border-brand-100"><Clock className="w-3 h-3" /> Winning</span>
-    : <span className="flex items-center gap-1 text-xs font-semibold text-amber-700 bg-amber-50 px-2.5 py-1 rounded-lg border border-amber-100"><Clock className="w-3 h-3" /> Outbid</span>;
-}
 
 function ListingStatusBadge({ listing }: { listing: any }) {
   const countdown = useCountdown(listing.auctionEnd || '');
@@ -62,13 +38,14 @@ export default function DashboardPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const { user } = useAuthStore();
   const tabs = user?.role === 'landlord' ? landlordTabs : studentTabs;
-  const defaultTab = user?.role === 'landlord' ? 'listings' : 'bids';
+  const defaultTab = user?.role === 'landlord' ? 'listings' : 'interests';
   const rawTab = searchParams.get('tab');
   const activeTab = rawTab && tabs.some(t => t.id === rawTab) ? rawTab : defaultTab;
   const navigate = useNavigate();
 
-  const [bids, setBids] = useState<any[]>([]);
+  const [interests, setInterests] = useState<any[]>([]);
   const [listings, setListings] = useState<any[]>([]);
+  const [interestCounts, setInterestCounts] = useState<Record<string, number>>({});
   const [favorites, setFavorites] = useState<any[]>([]);
   const [notifications, setNotifications] = useState<any[]>([]);
   const [conversations, setConversations] = useState<any[]>([]);
@@ -78,7 +55,6 @@ export default function DashboardPage() {
   const [convMsgSending, setConvMsgSending] = useState(false);
   const [unreadMsgCount, setUnreadMsgCount] = useState(0);
   const [loading, setLoading] = useState(true);
-  const winConfettiFired = useRef(false);
 
   useEffect(() => {
     if (!user) { navigate('/login'); return; }
@@ -91,16 +67,25 @@ export default function DashboardPage() {
     setLoading(true);
     try {
       switch (activeTab) {
-        case 'bids': {
-          const bidsData = (await api.get('/bids/my/bids')).data;
-          setBids(bidsData);
-          if (!winConfettiFired.current && user) {
-            const hasWon = bidsData.some((b: any) => (b.listingStatus === 'ended' && b.winnerId === user.id) || (b.listingStatus === 'ended' && b.amount >= (b.currentBid || 0)));
-            if (hasWon) { winConfettiFired.current = true; setTimeout(() => confetti({ particleCount: 80, spread: 60, origin: { y: 0.7 } }), 500); }
-          }
+        case 'interests': {
+          const data = (await api.get('/interest/my')).data;
+          setInterests(data);
           break;
         }
-        case 'listings': setListings((await api.get('/listings/my/listings')).data); break;
+        case 'listings': {
+          const listData = (await api.get('/listings/my/listings')).data;
+          setListings(listData);
+          // Fetch interest counts for each listing
+          const counts: Record<string, number> = {};
+          for (const l of listData) {
+            try {
+              const { data: ic } = await api.get(`/interest/${l.id}`);
+              counts[l.id] = ic.count ?? 0;
+            } catch { counts[l.id] = 0; }
+          }
+          setInterestCounts(counts);
+          break;
+        }
         case 'messages': {
           const convData = (await api.get('/messages/conversations')).data;
           setConversations(convData);
@@ -162,22 +147,22 @@ export default function DashboardPage() {
         </div>
       ) : (
         <>
-          {/* MY BIDS */}
-          {activeTab === 'bids' && (
+          {/* MY INTERESTS */}
+          {activeTab === 'interests' && (
             <div className="space-y-3">
-              {bids.length === 0 ? <EmptyState icon={Gavel} title="No bids yet" desc="Start browsing listings and place your first bid!" /> : bids.map(bid => (
-                <Link key={bid.id} to={`/listing/${bid.listingId}`}
+              {interests.length === 0 ? <EmptyState icon={Heart} title="No interests yet" desc="Browse listings and express interest to see them here." /> : interests.map((item: any) => (
+                <Link key={item.expressionId} to={`/listing/${item.listingId}`}
                   className="flex items-center gap-4 bg-white rounded-2xl p-4 card-shadow hover:card-shadow-hover transition-all border border-slate-100 group">
-                  <img src={bid.listingPhoto ? JSON.parse(bid.listingPhoto)[0] : ''} alt="" className="w-20 h-20 rounded-xl object-cover bg-slate-100" />
+                  <img src={item.listing?.photos?.[0] || ''} alt="" className="w-20 h-20 rounded-xl object-cover bg-slate-100" />
                   <div className="flex-1 min-w-0">
-                    <h3 className="font-semibold text-slate-900 truncate group-hover:text-brand-600 transition-colors">{bid.listingTitle}</h3>
-                    <p className="text-sm text-slate-500 mt-0.5">Your bid: <span className="font-semibold text-slate-900">${bid.amount?.toLocaleString()}/mo</span>
-                      {bid.groupId && <span className="inline-flex items-center gap-1 ml-2 text-xs font-medium text-brand-600 bg-brand-50 px-2 py-0.5 rounded-md border border-brand-100"><Users className="w-3 h-3" />Group Bid</span>}
-                    </p>
-                    <p className="text-xs text-slate-400 mt-0.5">Current: ${bid.currentBid?.toLocaleString()}/mo</p>
+                    <h3 className="font-semibold text-slate-900 truncate group-hover:text-brand-600 transition-colors">{item.listing?.title}</h3>
+                    <p className="text-sm text-slate-500 mt-0.5">{item.listing?.address}, {item.listing?.city}</p>
+                    {item.moveInDate && <p className="text-xs text-slate-400 mt-0.5">Move-in: {item.moveInDate}</p>}
                   </div>
-                  <div className="flex flex-col items-end gap-2.5">
-                    <BidStatusBadge bid={bid} userId={user?.id} />
+                  <div className="flex flex-col items-end gap-2">
+                    <span className="text-xs font-medium text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-100 flex items-center gap-1">
+                      <Check className="w-3 h-3" /> Interested
+                    </span>
                     <ChevronRight className="w-4 h-4 text-slate-300" />
                   </div>
                 </Link>
@@ -202,7 +187,9 @@ export default function DashboardPage() {
                       <p className="text-sm text-slate-500 mt-0.5">{listing.address}, {listing.city}</p>
                       <div className="flex items-center gap-3 mt-1.5 flex-wrap">
                         <span className="text-sm font-semibold text-slate-900">${listing.currentBid?.toLocaleString()}/mo</span>
-                        <span className="text-xs text-slate-400">{listing.bidCount} bid{listing.bidCount !== 1 ? 's' : ''}</span>
+                        {(interestCounts[listing.id] ?? 0) > 0 && (
+                          <span className="text-xs font-medium text-emerald-600">{interestCounts[listing.id]} interested</span>
+                        )}
                         <ListingStatusBadge listing={listing} />
                         <CountdownText endDate={listing.auctionEnd} />
                       </div>

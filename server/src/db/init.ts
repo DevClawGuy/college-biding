@@ -71,6 +71,16 @@ const TABLE_STATEMENTS = [
     user_id TEXT NOT NULL,
     listing_id TEXT NOT NULL
   )`,
+  `CREATE TABLE IF NOT EXISTS expressions_of_interest (
+    id TEXT PRIMARY KEY,
+    listing_id TEXT NOT NULL,
+    user_id TEXT NOT NULL,
+    move_in_date TEXT,
+    occupants INTEGER,
+    note TEXT,
+    rent_suggestion INTEGER,
+    created_at TEXT NOT NULL DEFAULT ''
+  )`,
   `CREATE TABLE IF NOT EXISTS universities (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     ipeds_id TEXT UNIQUE NOT NULL,
@@ -174,6 +184,7 @@ export async function initializeDatabase(): Promise<void> {
     `ALTER TABLE listings ADD COLUMN property_type TEXT DEFAULT 'apartment'`,
     // Note: pending_landlord_confirmation status is handled at application level — SQLite TEXT column already accepts it
     `ALTER TABLE universities ADD COLUMN county_fips TEXT`,
+    `CREATE UNIQUE INDEX IF NOT EXISTS idx_eoi_unique ON expressions_of_interest(listing_id, user_id)`,
   ];
   for (const sql of migrations) {
     try {

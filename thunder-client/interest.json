@@ -1,0 +1,56 @@
+{
+  "collectionName": "HouseRush — Interest Expression",
+  "requests": [
+    {
+      "name": "Express Interest",
+      "method": "POST",
+      "url": "{{baseUrl}}/api/interest/:listingId",
+      "headers": [
+        { "name": "Authorization", "value": "Bearer {{token}}" },
+        { "name": "Content-Type", "value": "application/json" }
+      ],
+      "body": {
+        "moveInDate": "2026-09-01",
+        "occupants": 2,
+        "note": "Interested in the fall semester. We are two junior students.",
+        "rentSuggestion": 1400
+      },
+      "params": [{ "name": "listingId", "value": "<listing-id>" }],
+      "notes": "Students only. All fields optional. Note max 280 chars. Occupants 1-6."
+    },
+    {
+      "name": "Withdraw Interest",
+      "method": "DELETE",
+      "url": "{{baseUrl}}/api/interest/:listingId",
+      "headers": [{ "name": "Authorization", "value": "Bearer {{token}}" }],
+      "params": [{ "name": "listingId", "value": "<listing-id>" }],
+      "notes": "Students only. Removes expression of interest."
+    },
+    {
+      "name": "Get Interest Count",
+      "method": "GET",
+      "url": "{{baseUrl}}/api/interest/:listingId",
+      "params": [{ "name": "listingId", "value": "<listing-id>" }],
+      "notes": "Public. Returns count + userHasExpressed (if auth header present)."
+    },
+    {
+      "name": "Get Interested Students (Landlord)",
+      "method": "GET",
+      "url": "{{baseUrl}}/api/interest/:listingId/details",
+      "headers": [{ "name": "Authorization", "value": "Bearer {{token}}" }],
+      "params": [{ "name": "listingId", "value": "<listing-id>" }],
+      "notes": "Landlord only (must own listing). Returns student details."
+    },
+    {
+      "name": "My Interests (Student)",
+      "method": "GET",
+      "url": "{{baseUrl}}/api/interest/my",
+      "headers": [{ "name": "Authorization", "value": "Bearer {{token}}" }],
+      "notes": "Students only. Returns all listings where student expressed interest."
+    }
+  ],
+  "variables": [
+    { "name": "baseUrl", "value": "http://localhost:3001" },
+    { "name": "token", "value": "<paste-jwt-token>" }
+  ]
+}

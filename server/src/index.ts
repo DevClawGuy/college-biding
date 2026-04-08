@@ -17,6 +17,7 @@ import parentAccessRoutes from './routes/parentAccess';
 import messageRoutes, { setMessageSocket } from './routes/messages';
 import aiRoutes from './routes/ai';
 import universitiesRoutes from './routes/universities';
+import interestRoutes, { setInterestSocket } from './routes/interest';
 import { setAuctionSocket, startAuctionCloseJob } from './jobs/auctionClose';
 
 // Prevent crashes from killing the process
@@ -68,6 +69,7 @@ setBidSocket(io);
 setAuctionSocket(io);
 setGroupBidSocket(io);
 setMessageSocket(io);
+setInterestSocket(io);
 
 // Routes
 app.use('/api/auth', authRoutes);
@@ -82,6 +84,7 @@ app.use('/api/parent-access', parentAccessRoutes);
 app.use('/api/messages', messageRoutes);
 app.use('/api/ai', aiRoutes);
 app.use('/api/universities', universitiesRoutes);
+app.use('/api/interest', interestRoutes);
 
 app.get('/api/health', (_req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });

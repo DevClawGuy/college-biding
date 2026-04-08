@@ -163,3 +163,17 @@ export const universityMarketData = sqliteTable(
     updatedAt: text('updated_at').notNull().default(''),
   }
 );
+
+export const expressionsOfInterest = sqliteTable(
+  'expressions_of_interest',
+  {
+    id: text('id').primaryKey(),
+    listingId: text('listing_id').notNull().references(() => listings.id),
+    userId: text('user_id').notNull().references(() => users.id),
+    moveInDate: text('move_in_date'),
+    occupants: integer('occupants'),
+    note: text('note'),
+    rentSuggestion: integer('rent_suggestion'),
+    createdAt: text('created_at').notNull().default(''),
+  }
+);
