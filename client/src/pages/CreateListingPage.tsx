@@ -74,7 +74,7 @@ export default function CreateListingPage() {
     // Validate secure lease price
     const slp = form.secureLeasePrice !== '' ? Number(form.secureLeasePrice) : null;
     if (slp !== null && slp <= form.startingBid) {
-      setError('Secure lease price must be higher than the starting bid');
+      setError('Secure lease price must be higher than the asking rent');
       setLoading(false);
       return;
     }
@@ -112,7 +112,7 @@ export default function CreateListingPage() {
       </Link>
 
       <h1 className="text-2xl font-bold text-slate-900 tracking-tight mb-1">Create New Listing</h1>
-      <p className="text-slate-500 text-sm mb-8">Fill in the details to list your property for auction.</p>
+      <p className="text-slate-500 text-sm mb-8">Fill in the details to list your property.</p>
 
       {error && <div className="bg-rose-50 border border-rose-200 text-rose-600 rounded-xl px-4 py-3 text-sm mb-6">{error}</div>}
 
@@ -174,12 +174,12 @@ export default function CreateListingPage() {
 
         {/* Auction Settings */}
         <section className="bg-white rounded-2xl border border-slate-200 p-6 card-shadow">
-          <h2 className="text-base font-semibold text-slate-900 mb-5">Auction Settings</h2>
+          <h2 className="text-base font-semibold text-slate-900 mb-5">Rental Settings</h2>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-            <div><label className={labelClass}>Starting Bid ($/mo)</label><input type="number" value={form.startingBid} onChange={(e) => update('startingBid', Number(e.target.value))} className={inputClass} min={100} step={25} required /></div>
-            <div><label className={labelClass}>Reserve Price ($/mo)</label><input type="number" value={form.reservePrice} onChange={(e) => update('reservePrice', Number(e.target.value))} className={inputClass} min={100} step={25} required /></div>
+            <div><label className={labelClass}>Monthly Rent (Asking) ($/mo)</label><input type="number" value={form.startingBid} onChange={(e) => update('startingBid', Number(e.target.value))} className={inputClass} min={100} step={25} required /></div>
+            <div><label className={labelClass}>Minimum Acceptable Rent ($/mo)</label><input type="number" value={form.reservePrice} onChange={(e) => update('reservePrice', Number(e.target.value))} className={inputClass} min={100} step={25} required /></div>
             <div className="col-span-2 md:col-span-1">
-              <label className={labelClass}>Auction End Date</label>
+              <label className={labelClass}>Listing Expiry Date</label>
               <input type="datetime-local" value={form.auctionEnd} onChange={(e) => update('auctionEnd', e.target.value)} className={inputClass} min={getMinAuctionEnd()} required />
               <p className="text-xs text-slate-400 mt-1">Must be at least 24 hours from now</p>
             </div>
@@ -187,7 +187,7 @@ export default function CreateListingPage() {
           <div className="mt-5 pt-5 border-t border-slate-100">
             <label className={labelClass}>Secure Lease Now Price (optional)</label>
             <input type="number" value={form.secureLeasePrice} onChange={(e) => update('secureLeasePrice', e.target.value === '' ? '' : Number(e.target.value))} className={inputClass} min={form.startingBid + 1} step={25} placeholder="e.g. 2000" />
-            <p className="text-xs text-slate-400 mt-1">Set a premium price students can pay to skip the auction and lock in the lease immediately. Must be higher than your starting bid.</p>
+            <p className="text-xs text-slate-400 mt-1">Set a price students can pay to secure the property immediately without waiting. Must be higher than your asking rent.</p>
           </div>
         </section>
 
