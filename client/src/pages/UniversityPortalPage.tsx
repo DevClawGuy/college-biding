@@ -1,9 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { ChevronLeft, ArrowRight, ShieldCheck, FileText, DollarSign, Users } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { ChevronLeft, ArrowRight, ShieldCheck, FileText, DollarSign, Users, AlertTriangle, Eye, MapPin, Bed, Bath } from 'lucide-react';
 import api from '../lib/api';
-import ListingCard from '../components/ListingCard';
 import { useAuthStore } from '../store/authStore';
 
 interface MarketDataItem {
@@ -35,8 +33,8 @@ interface UniversityDetail {
 
 function bedroomLabel(n: number): string {
   if (n === 0) return 'Studio';
-  if (n === 1) return '1 Bedroom';
-  return `${n} Bedrooms`;
+  if (n === 1) return '1BR';
+  return `${n}BR`;
 }
 
 function hexToRgb(hex: string): { r: number; g: number; b: number } | null {
@@ -66,6 +64,14 @@ function darkenHex(hex: string, amount = 40): string {
   const g = Math.max(0, rgb.g - amount);
   const b = Math.max(0, rgb.b - amount);
   return '#' + [r, g, b].map(v => v.toString(16).padStart(2, '0')).join('');
+}
+
+function getRentCheckDisplay(_score: number, label: string) {
+  const labelMap: Record<string, string> = {
+    great_deal: 'Great deal', good_value: 'Good value', at_market: 'Fair price',
+    above_market: 'Above market', expensive: 'Expensive',
+  };
+  return labelMap[label] ?? '';
 }
 
 export default function UniversityPortalPage() {
@@ -156,11 +162,11 @@ export default function UniversityPortalPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-10">
           <div>
             <div className="h-6 skeleton rounded-lg w-1/3 mb-4" />
-            <div className="flex gap-4 overflow-hidden">
-              {[...Array(5)].map((_, i) => (
-                <div key={i} className="min-w-[180px] bg-white rounded-2xl card-shadow p-5 space-y-3">
-                  <div className="h-4 skeleton rounded w-2/3" />
-                  <div className="h-8 skeleton rounded w-1/2" />
+            <div className="grid grid-cols-3 gap-4">
+              {[...Array(3)].map((_, i) => (
+                <div key={i} className="bg-white rounded-lg p-4 space-y-3" style={{ border: '0.5px solid #e2e8f0' }}>
+                  <div className="h-3 skeleton rounded w-1/2" />
+                  <div className="h-7 skeleton rounded w-2/3" />
                   <div className="h-3 skeleton rounded w-full" />
                 </div>
               ))}
@@ -168,25 +174,14 @@ export default function UniversityPortalPage() {
           </div>
           <div>
             <div className="h-6 skeleton rounded-lg w-1/4 mb-4" />
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-              {[...Array(6)].map((_, i) => (
-                <div key={i} className="bg-white rounded-2xl card-shadow overflow-hidden">
-                  <div className="h-48 sm:h-52 skeleton" />
-                  <div className="p-4 sm:p-5 space-y-3">
-                    <div className="h-5 skeleton rounded-lg w-3/4" />
-                    <div className="h-4 skeleton rounded-lg w-1/2" />
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {[...Array(3)].map((_, i) => (
+                <div key={i} className="bg-white rounded-lg overflow-hidden" style={{ border: '0.5px solid #e2e8f0' }}>
+                  <div className="h-44 skeleton" />
+                  <div className="p-3 space-y-2">
+                    <div className="h-4 skeleton rounded w-3/4" />
+                    <div className="h-3 skeleton rounded w-1/2" />
                   </div>
-                </div>
-              ))}
-            </div>
-          </div>
-          <div>
-            <div className="h-6 skeleton rounded-lg w-1/3 mb-4" />
-            <div className="grid sm:grid-cols-2 gap-4">
-              {[...Array(4)].map((_, i) => (
-                <div key={i} className="bg-white rounded-2xl card-shadow p-5 space-y-3">
-                  <div className="h-5 skeleton rounded w-1/3" />
-                  <div className="h-4 skeleton rounded w-2/3" />
                 </div>
               ))}
             </div>
@@ -199,10 +194,30 @@ export default function UniversityPortalPage() {
   if (!university) return null;
 
   const marketItems = university.marketData.filter(d => d.medianRent != null);
+  const fmr2br = marketItems.find(d => d.bedroomCount === 2);
+  const primaryColor = university.primaryColor ?? '#4f46e5';
+
+  // Insight text computation
+  let insightText: string | null = null;
+  if (fmr2br?.medianRent && university.ipedsHousingOffcampus) {
+    const uniEst = university.ipedsHousingOffcampus;
+    const fmr = fmr2br.medianRent;
+    const pctDiff = Math.round(Math.abs(uniEst - fmr) / fmr * 100);
+    if (uniEst > fmr * 1.10) {
+      insightText = `This university overestimates off-campus housing costs by ${pctDiff}% vs HUD benchmarks — students may have more aid budget remaining than they think.`;
+    } else if (uniEst < fmr * 0.90) {
+      insightText = `This university underestimates off-campus housing costs by ${pctDiff}% vs HUD benchmarks — students should budget more than the university suggests.`;
+    }
+  }
+
+  // Average rent from listings
+  const avgRent = listings.length > 0
+    ? Math.round(listings.reduce((sum: number, l: any) => sum + (l.startingBid ?? 0), 0) / listings.length)
+    : null;
 
   return (
     <div>
-      {/* Section 1 — Hero */}
+      {/* ═══ HERO ═══ */}
       <section className="relative overflow-hidden">
         <div
           className="absolute inset-0 bg-gradient-to-br from-brand-700 to-brand-900"
@@ -212,209 +227,313 @@ export default function UniversityPortalPage() {
           <div className="absolute top-10 left-10 w-60 h-60 bg-white rounded-full blur-[80px]" />
           <div className="absolute bottom-10 right-10 w-80 h-80 bg-white rounded-full blur-[100px]" />
         </div>
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 py-12 sm:py-16 relative">
-          <Link to="/universities" className={`inline-flex items-center gap-1 text-sm font-medium mb-6 transition-colors ${isLight ? 'text-slate-700 hover:text-slate-900' : 'text-brand-200 hover:text-white'}`}>
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 py-10 sm:py-14 relative">
+          {/* Breadcrumb */}
+          <Link to="/universities" className={`inline-flex items-center gap-1 text-sm font-medium mb-5 transition-colors ${isLight ? 'text-slate-700 hover:text-slate-900' : 'text-white/70 hover:text-white'}`}>
             <ChevronLeft className="w-4 h-4" /> All Universities
           </Link>
 
+          {/* Badge */}
+          <div
+            className="inline-flex items-center gap-2 text-xs font-medium px-3 py-1.5 rounded-full mb-4"
+            style={{ background: 'rgba(255,255,255,0.15)', color: isLight ? '#1e293b' : '#fff' }}
+          >
+            <span>✓</span> University portal — at no cost to {university.name}
+          </div>
+
+          {/* Title */}
           <h1 className={`text-3xl sm:text-4xl font-bold tracking-tight ${isLight ? 'text-slate-900' : 'text-white'}`}>{university.name}</h1>
-          <p className={`mt-2 text-base sm:text-lg ${isLight ? 'text-slate-700' : 'text-brand-200'}`}>
+          <p className={`mt-1.5 text-sm sm:text-base ${isLight ? 'text-slate-700' : 'text-white/75'}`}>
             Off-Campus Housing Portal · {university.city}, {university.state}
             {university.enrollment != null && ` · ${university.enrollment.toLocaleString()} students`}
           </p>
 
-          <div className={`mt-5 inline-flex items-center gap-2 text-sm font-medium px-4 py-2 rounded-full ${isLight ? 'bg-slate-800/10 text-slate-800' : 'bg-white/95'}`} style={!isLight && university.primaryColor ? { color: university.primaryColor } : {}}>
-            <span>✓</span> University portal — at no cost to {university.name}
-          </div>
+          {/* Insight callout in hero */}
+          {insightText && (
+            <div
+              className="mt-5 flex items-start gap-3"
+              style={{ background: 'rgba(255,255,255,0.12)', border: '1px solid rgba(255,255,255,0.25)', borderRadius: '10px', padding: '1rem 1.25rem' }}
+            >
+              <div className="flex-shrink-0 flex items-center justify-center" style={{ width: 32, height: 32, background: 'rgba(255,255,255,0.2)', borderRadius: 8 }}>
+                <AlertTriangle className="w-4 h-4" style={{ color: isLight ? '#1e293b' : '#fff' }} />
+              </div>
+              <div>
+                <p style={{ fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.05em', opacity: 0.7, color: isLight ? '#1e293b' : '#fff', marginBottom: 4, fontWeight: 600 }}>Heads up</p>
+                <p style={{ fontSize: 14, fontWeight: 500, color: isLight ? '#1e293b' : '#fff', lineHeight: 1.45 }}>{insightText}</p>
+              </div>
+            </div>
+          )}
 
+          {/* FMR pills in hero */}
+          {marketItems.length > 0 && (
+            <div className="mt-5">
+              <div className="flex gap-2 overflow-x-auto" style={{ scrollbarWidth: 'none' }}>
+                {marketItems.map(d => (
+                  <div
+                    key={d.id}
+                    className="flex-shrink-0 text-center"
+                    style={{ background: 'rgba(255,255,255,0.12)', border: '1px solid rgba(255,255,255,0.2)', borderRadius: 8, padding: '8px 14px' }}
+                  >
+                    <p style={{ fontSize: 10, opacity: 0.65, color: isLight ? '#1e293b' : '#fff' }}>{bedroomLabel(d.bedroomCount)}</p>
+                    <p style={{ fontSize: 15, fontWeight: 500, color: isLight ? '#1e293b' : '#fff' }}>${(d.medianRent ?? 0).toLocaleString()}</p>
+                  </div>
+                ))}
+              </div>
+              <p style={{ fontSize: 10, opacity: 0.55, color: isLight ? '#1e293b' : '#fff', marginTop: 6 }}>HUD Fair Market Rents (FY2026) — 40th percentile including utilities</p>
+            </div>
+          )}
+
+          {/* Landlord CTA in hero */}
           {showLandlordCTA && (
             <div className="mt-6">
-              <Link to="/create-listing" className={`inline-flex items-center gap-2 border px-6 py-2.5 rounded-xl font-semibold text-sm transition-all ${isLight ? 'border-slate-800/30 text-slate-800 hover:bg-slate-800/10' : 'border-white/40 text-white hover:bg-white/10'}`}>
-                List Your Property Free <ArrowRight className="w-4 h-4" />
+              <Link
+                to="/create-listing"
+                className="inline-flex items-center gap-2 transition-all hover:opacity-90"
+                style={{ background: 'transparent', border: '1.5px solid rgba(255,255,255,0.7)', color: isLight ? '#1e293b' : '#fff', borderRadius: 8, padding: '9px 18px', fontSize: 13, fontWeight: 500 }}
+              >
+                List Your Property Free <ArrowRight className="w-3.5 h-3.5" />
               </Link>
             </div>
           )}
         </div>
       </section>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-12">
-        {/* Section 2 — Market Data */}
-        <section>
-          <h2 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight mb-1">Rental Market Near {university.name}</h2>
-          {marketItems.length > 0 ? (
-            <>
-              <div className="flex gap-4 overflow-x-auto pb-2 mt-5 snap-x snap-mandatory">
-                {marketItems.map(d => (
-                  <motion.div
-                    key={d.id}
-                    initial={{ opacity: 0, y: 16 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="min-w-[180px] snap-start bg-white rounded-2xl p-5 card-shadow flex-shrink-0"
+      {/* ═══ BODY ═══ */}
+      <div style={{ background: '#f8f9fb', padding: '0 1.5rem 2rem' }}>
+        <div className="max-w-5xl mx-auto">
+
+          {/* ═══ THREE-WAY COMPARISON ═══ */}
+          {university.ipedsHousingOffcampus != null && (
+            <section style={{ paddingTop: '1.75rem' }}>
+              <h2 className="text-lg font-semibold text-slate-900 tracking-tight">How does {university.name} compare?</h2>
+              <p className="text-xs text-slate-500 mt-0.5 mb-4">University estimate vs federal benchmark vs active listings</p>
+
+              <div className="grid sm:grid-cols-3 gap-3">
+                {/* University estimate */}
+                <div className="bg-white rounded-lg p-4" style={{ border: '0.5px solid #e2e8f0' }}>
+                  <p style={{ fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.05em', color: '#888', fontWeight: 600 }}>University says</p>
+                  <p className="mt-2" style={{ fontSize: 22, fontWeight: 500, color: '#1e293b' }}>
+                    ${university.ipedsHousingOffcampus.toLocaleString()}<span style={{ fontSize: 12, fontWeight: 400, color: '#94a3b8' }}>/mo</span>
+                  </p>
+                  <p style={{ fontSize: 11, color: '#64748b', lineHeight: 1.4, marginTop: 4 }}>What {university.name} reports to the federal government as off-campus housing cost</p>
+                  {fmr2br?.medianRent && university.ipedsHousingOffcampus < fmr2br.medianRent * 0.90 && (
+                    <span className="inline-block mt-2" style={{ background: '#FCEBEB', color: '#A32D2D', fontSize: 10, padding: '3px 8px', borderRadius: 6, fontWeight: 500 }}>Likely too low</span>
+                  )}
+                </div>
+
+                {/* HUD benchmark */}
+                {fmr2br?.medianRent != null && (
+                  <div className="bg-white rounded-lg p-4" style={{ border: '0.5px solid #e2e8f0' }}>
+                    <p style={{ fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.05em', color: '#185FA5', fontWeight: 600 }}>HUD benchmark</p>
+                    <p className="mt-2" style={{ fontSize: 22, fontWeight: 500, color: '#1e293b' }}>
+                      ${fmr2br.medianRent.toLocaleString()}<span style={{ fontSize: 12, fontWeight: 400, color: '#94a3b8' }}>/mo</span>
+                    </p>
+                    <p style={{ fontSize: 11, color: '#64748b', lineHeight: 1.4, marginTop: 4 }}>Federal fair rent standard for a 2-bedroom in this county (FY2026)</p>
+                  </div>
+                )}
+
+                {/* HouseRush */}
+                <div className="bg-white rounded-lg p-4" style={{ border: `2px solid ${primaryColor}` }}>
+                  <p style={{ fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.05em', color: primaryColor, fontWeight: 600 }}>On HouseRush</p>
+                  {avgRent != null ? (
+                    <>
+                      <p className="mt-2" style={{ fontSize: 22, fontWeight: 500, color: '#1e293b' }}>
+                        ${avgRent.toLocaleString()}<span style={{ fontSize: 12, fontWeight: 400, color: '#94a3b8' }}>/mo</span>
+                      </p>
+                      <p style={{ fontSize: 11, color: '#64748b', lineHeight: 1.4, marginTop: 4 }}>Average asking rent from {listings.length} active listing{listings.length !== 1 ? 's' : ''}</p>
+                      {fmr2br?.medianRent && avgRent < fmr2br.medianRent && (
+                        <span className="inline-block mt-2" style={{ background: '#EAF3DE', color: '#3B6D11', fontSize: 10, padding: '3px 8px', borderRadius: 6, fontWeight: 500 }}>Great deal</span>
+                      )}
+                    </>
+                  ) : (
+                    <>
+                      <p className="mt-2 text-slate-400" style={{ fontSize: 16, fontWeight: 500 }}>No listings yet</p>
+                      <p style={{ fontSize: 11, color: '#64748b', lineHeight: 1.4, marginTop: 4 }}>Be the first to list near {university.name}</p>
+                    </>
+                  )}
+                </div>
+              </div>
+
+              <p className="text-xs text-slate-500 italic mt-3">University off-campus estimates are reported annually to the US Department of Education. HUD Fair Market Rents represent the 40th percentile of actual market rents. HouseRush figures reflect active listings only.</p>
+            </section>
+          )}
+
+          {/* Divider */}
+          <div style={{ height: '0.5px', background: '#e2e8f0', marginTop: '1.75rem' }} />
+
+          {/* ═══ LISTINGS ═══ */}
+          <section style={{ paddingTop: '1.75rem' }}>
+            <h2 className="text-lg font-semibold text-slate-900 tracking-tight">Housing Near {university.name}</h2>
+            {listings.length > 0 ? (
+              <>
+                <p className="text-xs text-slate-500 mt-0.5 mb-4">{listings.length} propert{listings.length !== 1 ? 'ies' : 'y'} available near campus</p>
+                <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                  {listings.map((listing: any) => {
+                    const rcLabel = listing.rentcheckScore != null && listing.rentcheckLabel ? getRentCheckDisplay(listing.rentcheckScore, listing.rentcheckLabel) : null;
+                    const ppb = listing.pricePerBed as number | null;
+                    const fmrBeds = listing.fmrForBeds as number | null;
+                    const beds = listing.beds ?? 1;
+                    let fmrPctText: string | null = null;
+                    let fmrPctBelow = false;
+                    if (ppb != null && fmrBeds != null) {
+                      const fmrPerBed = Math.round(fmrBeds / Math.max(beds, 1));
+                      if (fmrPerBed > 0) {
+                        const pct = Math.round(Math.abs(ppb - fmrPerBed) / fmrPerBed * 100);
+                        fmrPctBelow = ppb < fmrPerBed * 0.98;
+                        fmrPctText = ppb < fmrPerBed * 0.98 ? `${pct}% below FMR` : ppb > fmrPerBed * 1.02 ? `${pct}% above FMR` : 'At market';
+                      }
+                    }
+
+                    return (
+                      <Link key={listing.id} to={`/listing/${listing.id}`} className="bg-white rounded-lg overflow-hidden transition-all hover:shadow-md" style={{ border: '0.5px solid #e2e8f0' }}>
+                        {/* Image with price overlay */}
+                        <div className="relative" style={{ height: 176 }}>
+                          <img
+                            src={listing.photos?.[0] || 'https://picsum.photos/800/600?grayscale'}
+                            alt={listing.title}
+                            className="w-full h-full object-cover"
+                          />
+                          <div className="absolute bottom-0 left-0 right-0 flex items-end justify-between" style={{ padding: '8px 12px', background: 'linear-gradient(transparent, rgba(0,0,0,0.65))' }}>
+                            <p style={{ fontSize: 20, fontWeight: 500, color: '#fff' }}>
+                              ${(listing.currentBid ?? listing.startingBid ?? 0).toLocaleString()}<span style={{ fontSize: 12, fontWeight: 400 }}>/mo</span>
+                            </p>
+                            {rcLabel && (
+                              <span style={{ background: 'rgba(59,109,17,0.9)', color: '#fff', fontSize: 10, fontWeight: 500, padding: '3px 8px', borderRadius: 6 }}>{rcLabel}</span>
+                            )}
+                          </div>
+                          {/* Favorite */}
+                          {user?.role === 'student' && (
+                            <button
+                              onClick={(e) => { e.preventDefault(); toggleFavorite(listing.id); }}
+                              className="absolute top-2 right-2 p-1.5 rounded-full bg-white/90 hover:bg-white transition-all"
+                            >
+                              <svg width="14" height="14" viewBox="0 0 24 24" fill={favorites.has(listing.id) ? '#f43f5e' : 'none'} stroke={favorites.has(listing.id) ? '#f43f5e' : '#64748b'} strokeWidth="2">
+                                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+                              </svg>
+                            </button>
+                          )}
+                        </div>
+
+                        {/* Card body */}
+                        <div className="p-3">
+                          <h3 className="text-sm font-medium text-slate-900 truncate">{listing.title}</h3>
+                          <div className="flex items-center gap-1 mt-1" style={{ fontSize: 12, color: '#64748b' }}>
+                            <MapPin className="w-3 h-3" />
+                            <span className="truncate">{listing.address}, {listing.city}</span>
+                          </div>
+                          <div className="flex items-center gap-1.5 mt-1.5" style={{ fontSize: 12, color: '#64748b' }}>
+                            <Bed className="w-3 h-3" /> {listing.beds} bed{listing.beds !== 1 ? 's' : ''}
+                            <span>·</span>
+                            <Bath className="w-3 h-3" /> {listing.baths} bath{listing.baths !== 1 ? 's' : ''}
+                            <span>·</span>
+                            {listing.sqft} sqft
+                          </div>
+                          <div className="flex items-center justify-between mt-3 pt-2.5" style={{ borderTop: '0.5px solid #e2e8f0' }}>
+                            <div className="flex items-center gap-1.5" style={{ fontSize: 11, color: '#64748b' }}>
+                              {ppb != null && <span>${ppb}/bed</span>}
+                              {fmrPctText && (
+                                <>
+                                  <span>·</span>
+                                  <span style={{ color: fmrPctBelow ? '#3B6D11' : '#64748b', fontWeight: fmrPctBelow ? 500 : 400 }}>{fmrPctText}</span>
+                                </>
+                              )}
+                              {(listing.viewCount ?? 0) > 0 && (
+                                <>
+                                  <span>·</span>
+                                  <Eye className="w-3 h-3" /> {listing.viewCount}
+                                </>
+                              )}
+                            </div>
+                            <span style={{ background: primaryColor, color: '#fff', border: 'none', borderRadius: 6, padding: '7px 14px', fontSize: 12, fontWeight: 500 }}>View</span>
+                          </div>
+                        </div>
+                      </Link>
+                    );
+                  })}
+                </div>
+              </>
+            ) : (
+              <div className="text-center py-12 bg-white rounded-lg mt-4" style={{ border: '0.5px solid #e2e8f0' }}>
+                <p className="text-base font-medium text-slate-700">No listings yet near {university.name}</p>
+                {showLandlordCTA && (
+                  <>
+                    <p className="text-slate-500 mt-1.5 text-xs">Are you a landlord with property near here?</p>
+                    <Link
+                      to="/create-listing"
+                      className="inline-flex items-center gap-2 mt-4 text-white transition-all"
+                      style={{ background: primaryColor, padding: '9px 20px', borderRadius: 8, fontSize: 13, fontWeight: 500 }}
+                    >
+                      List Your Property Free <ArrowRight className="w-3.5 h-3.5" />
+                    </Link>
+                  </>
+                )}
+              </div>
+            )}
+          </section>
+
+          {/* Divider */}
+          <div style={{ height: '0.5px', background: '#e2e8f0', marginTop: '1.75rem' }} />
+
+          {/* ═══ RESOURCES ═══ */}
+          <section style={{ paddingTop: '1.75rem' }}>
+            <h2 className="text-lg font-semibold text-slate-900 tracking-tight">Resources for {university.name} Students</h2>
+            <p className="text-xs text-slate-500 mt-0.5 mb-4">Everything you need to navigate off-campus housing with confidence.</p>
+            <div className="grid sm:grid-cols-2 gap-3">
+              {[
+                { icon: ShieldCheck, title: 'Avoiding Rental Scams', desc: 'Learn how to spot fake listings and protect yourself from fraudulent landlords.', link: '/guides' },
+                { icon: FileText, title: 'Lease Red Flags', desc: 'Common lease clauses that have cost students thousands of dollars.', link: '/guides' },
+                { icon: DollarSign, title: 'Budgeting for Off-Campus Housing', desc: 'How to calculate your true cost of living off campus including utilities and fees.', link: '/guides' },
+              ].map(card => (
+                <Link key={card.title} to={card.link} className="bg-white rounded-lg p-4 flex gap-2.5 items-start transition-all hover:shadow-sm cursor-pointer" style={{ border: '0.5px solid #e2e8f0' }}>
+                  <div className="flex-shrink-0 flex items-center justify-center" style={{ width: 32, height: 32, borderRadius: 8, background: '#f1f5f9' }}>
+                    <card.icon className="w-4 h-4 text-slate-600" />
+                  </div>
+                  <div>
+                    <h3 style={{ fontSize: 13, fontWeight: 500, color: '#1e293b' }}>{card.title}</h3>
+                    <p style={{ fontSize: 11, color: '#64748b', lineHeight: 1.4, marginTop: 2 }}>{card.desc}</p>
+                  </div>
+                </Link>
+              ))}
+              <div className="bg-white rounded-lg p-4 flex gap-2.5 items-start" style={{ border: '0.5px solid #e2e8f0' }}>
+                <div className="flex-shrink-0 flex items-center justify-center" style={{ width: 32, height: 32, borderRadius: 8, background: '#f1f5f9' }}>
+                  <Users className="w-4 h-4 text-slate-400" />
+                </div>
+                <div>
+                  <h3 style={{ fontSize: 13, fontWeight: 500, color: '#1e293b' }}>Roommate Matching</h3>
+                  <p style={{ fontSize: 11, color: '#64748b', lineHeight: 1.4, marginTop: 2 }}>Find compatible roommates near {university.name}.</p>
+                  <span className="inline-block mt-2 text-xs font-semibold text-amber-700 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-100" style={{ fontSize: 10 }}>Coming Fall 2026</span>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          {/* Divider */}
+          <div style={{ height: '0.5px', background: '#e2e8f0', marginTop: '1.75rem' }} />
+
+          {/* ═══ LANDLORD CTA ═══ */}
+          {showLandlordCTA && (
+            <section style={{ paddingTop: '1.75rem' }}>
+              <div className="relative overflow-hidden rounded-lg text-center" style={{ padding: '1.5rem' }}>
+                <div
+                  className="absolute inset-0 bg-gradient-to-br from-brand-600 to-brand-800"
+                  style={heroBackground ? { background: heroBackground } : {}}
+                />
+                <div className="relative">
+                  <p style={{ fontSize: 16, fontWeight: 500, color: '#fff' }}>Are you a landlord with property near {university.name}?</p>
+                  <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.75)', marginTop: 4 }}>List free. Reach verified students directly. No commissions, no fees.</p>
+                  <Link
+                    to="/create-listing"
+                    className="inline-flex items-center gap-2 mt-4 transition-all hover:opacity-90"
+                    style={{ background: '#fff', color: primaryColor, border: 'none', borderRadius: 8, padding: '9px 20px', fontSize: 13, fontWeight: 500 }}
                   >
-                    <p className="text-sm text-slate-500">{bedroomLabel(d.bedroomCount)}</p>
-                    <p className="text-2xl font-bold mt-1" style={{ color: university.primaryColor ?? undefined }}>${(d.medianRent ?? 0).toLocaleString()}<span className="text-sm font-normal text-slate-400">/mo</span></p>
-                    <p className="text-xs text-slate-400 mt-2">Estimated area rent (HUD FMR, FY2026)</p>
-                  </motion.div>
-                ))}
-              </div>
-              <p className="text-xs text-slate-400 mt-3">HUD Fair Market Rents (FY2026) represent the 40th percentile of gross rent including utilities for this county. RentCheck scores are calculated per bed, not per unit.</p>
-            </>
-          ) : (
-            <p className="text-sm text-slate-400 mt-4">Market data coming soon for this area.</p>
-          )}
-        </section>
-
-        {marketItems.length > 0 && (
-          <p className="text-sm text-slate-500 italic mt-2 mb-4">RentCheck scores compare each listing's price per bed against HUD Fair Market Rents for this area. Higher scores mean better value for students.</p>
-        )}
-
-        {/* Section 2b — Housing Cost Comparison */}
-        {university.ipedsHousingOffcampus != null && (
-          <section>
-            <h2 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight mb-1">Housing Cost Comparison</h2>
-            <div className="flex gap-4 overflow-x-auto pb-2 mt-5 snap-x snap-mandatory">
-              <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} className="min-w-[200px] snap-start bg-white rounded-2xl p-5 card-shadow flex-shrink-0">
-                <p className="text-sm text-slate-500">University estimate</p>
-                <p className="text-2xl font-bold text-slate-700 mt-1">${university.ipedsHousingOffcampus.toLocaleString()}<span className="text-sm font-normal text-slate-400">/mo</span></p>
-                <p className="text-xs text-slate-400 mt-2">Off-campus allowance per month</p>
-                <p className="text-xs text-slate-400">What {university.name} reports to the federal government</p>
-              </motion.div>
-
-              {(() => {
-                const fmr2br = marketItems.find(d => d.bedroomCount === 2);
-                return fmr2br?.medianRent != null ? (
-                  <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} className="min-w-[200px] snap-start bg-white rounded-2xl p-5 card-shadow flex-shrink-0">
-                    <p className="text-sm text-slate-500">Fair Market Rent</p>
-                    <p className="text-2xl font-bold text-blue-600 mt-1">${fmr2br.medianRent.toLocaleString()}<span className="text-sm font-normal text-slate-400">/mo</span></p>
-                    <p className="text-xs text-slate-400 mt-2">HUD benchmark per month (2BR)</p>
-                    <p className="text-xs text-slate-400">Federal fair rent standard for this county</p>
-                  </motion.div>
-                ) : null;
-              })()}
-
-              {listings.length > 0 ? (() => {
-                const avgRent = Math.round(listings.reduce((sum: number, l: any) => sum + (l.startingBid ?? 0), 0) / listings.length);
-                const aboveEstimate = university.ipedsHousingOffcampus != null && avgRent > university.ipedsHousingOffcampus;
-                return (
-                  <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} className="min-w-[200px] snap-start bg-white rounded-2xl p-5 card-shadow flex-shrink-0">
-                    <p className="text-sm text-slate-500">Listed on HouseRush</p>
-                    <p className={`text-2xl font-bold mt-1 ${aboveEstimate ? 'text-amber-600' : 'text-green-600'}`}>${avgRent.toLocaleString()}<span className="text-sm font-normal text-slate-400">/mo</span></p>
-                    <p className="text-xs text-slate-400 mt-2">Average asking rent</p>
-                    <p className="text-xs text-slate-400">From active listings on HouseRush</p>
-                  </motion.div>
-                );
-              })() : (
-                <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} className="min-w-[200px] snap-start bg-white rounded-2xl p-5 card-shadow flex-shrink-0">
-                  <p className="text-sm text-slate-500">Listed on HouseRush</p>
-                  <p className="text-lg font-semibold text-slate-400 mt-1">No listings yet</p>
-                  <p className="text-xs text-slate-400 mt-2">Average asking rent</p>
-                  <p className="text-xs text-slate-400">From active listings on HouseRush</p>
-                </motion.div>
-              )}
-            </div>
-
-            {/* Insight callout */}
-            {(() => {
-              const fmr2br = marketItems.find(d => d.bedroomCount === 2);
-              if (!fmr2br?.medianRent || !university.ipedsHousingOffcampus) return null;
-              const uniEst = university.ipedsHousingOffcampus;
-              const fmr = fmr2br.medianRent;
-              const pctDiff = Math.round(Math.abs(uniEst - fmr) / fmr * 100);
-              if (uniEst > fmr * 1.10) {
-                return (
-                  <div className="bg-green-50 border border-green-200 text-green-800 rounded-lg p-3 text-sm mt-4">
-                    This university overestimates off-campus housing costs by {pctDiff}% vs HUD benchmarks — students may have more aid budget remaining than they think.
-                  </div>
-                );
-              }
-              if (uniEst < fmr * 0.90) {
-                return (
-                  <div className="bg-amber-50 border border-amber-200 text-amber-800 rounded-lg p-3 text-sm mt-4">
-                    This university underestimates off-campus housing costs by {pctDiff}% vs HUD benchmarks — students should budget more than the university suggests.
-                  </div>
-                );
-              }
-              return null;
-            })()}
-
-            <p className="text-sm text-slate-500 italic mt-3">University off-campus estimates are reported annually to the US Department of Education. HUD Fair Market Rents represent the 40th percentile of actual market rents. HouseRush figures reflect active listings only.</p>
-          </section>
-        )}
-
-        {/* Section 3 — Listings */}
-        <section>
-          <h2 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight mb-1">Housing Near {university.name}</h2>
-          {listings.length > 0 ? (
-            <>
-              <p className="text-slate-500 text-sm mt-1 mb-5">{listings.length} propert{listings.length !== 1 ? 'ies' : 'y'} available near campus</p>
-              <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-                {listings.map((listing: any) => (
-                  <ListingCard
-                    key={listing.id}
-                    listing={listing}
-                    onFavorite={user?.role === 'student' ? toggleFavorite : undefined}
-                    isFavorited={favorites.has(listing.id)}
-                  />
-                ))}
-              </div>
-            </>
-          ) : (
-            <div className="text-center py-16 bg-white rounded-2xl card-shadow border border-slate-100 mt-5">
-              <p className="text-lg font-semibold text-slate-700">No listings yet near {university.name}</p>
-              {showLandlordCTA && (
-                <>
-                  <p className="text-slate-500 mt-2 text-sm">Are you a landlord with property near here?</p>
-                  <p className="text-slate-500 text-sm">List free on HouseRush and reach verified students directly.</p>
-                  <Link to="/create-listing" className="inline-flex items-center gap-2 mt-5 bg-brand-600 hover:bg-brand-700 text-white px-6 py-2.5 rounded-xl font-semibold text-sm transition-all">
-                    List Your Property Free <ArrowRight className="w-4 h-4" />
+                    List Your Property Free <ArrowRight className="w-3.5 h-3.5" />
                   </Link>
-                </>
-              )}
-            </div>
+                </div>
+              </div>
+            </section>
           )}
-        </section>
 
-        {/* Section 4 — Student Resources */}
-        <section>
-          <h2 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight mb-1">Resources for {university.name} Students</h2>
-          <p className="text-slate-500 text-sm mt-1 mb-5">Everything you need to navigate off-campus housing with confidence.</p>
-          <div className="grid sm:grid-cols-2 gap-4">
-            {[
-              { icon: ShieldCheck, title: 'Avoiding Rental Scams', desc: 'Learn how to spot fake listings and protect yourself from fraudulent landlords.', link: '/guides' },
-              { icon: FileText, title: 'Lease Red Flags', desc: 'Common lease clauses that have cost students thousands of dollars.', link: '/guides' },
-              { icon: DollarSign, title: 'Budgeting for Off-Campus Housing', desc: 'How to calculate your true cost of living off campus including utilities and fees.', link: '/guides' },
-            ].map(card => (
-              <Link key={card.title} to={card.link} className="bg-white rounded-2xl p-5 card-shadow hover:card-shadow-hover transition-all group">
-                <card.icon className="w-6 h-6 text-brand-600 mb-3" />
-                <h3 className="font-semibold text-slate-900 group-hover:text-brand-600 transition-colors">{card.title}</h3>
-                <p className="text-sm text-slate-500 mt-1 leading-relaxed">{card.desc}</p>
-              </Link>
-            ))}
-            <div className="bg-white rounded-2xl p-5 card-shadow">
-              <Users className="w-6 h-6 text-slate-400 mb-3" />
-              <h3 className="font-semibold text-slate-900">Roommate Matching</h3>
-              <p className="text-sm text-slate-500 mt-1 leading-relaxed">Find compatible roommates near {university.name}.</p>
-              <span className="inline-block mt-3 text-xs font-semibold text-amber-700 bg-amber-50 px-2.5 py-1 rounded-full border border-amber-100">Coming Fall 2026</span>
-            </div>
-          </div>
-        </section>
-
-        {/* Section 5 — Landlord Footer CTA */}
-        {showLandlordCTA && (
-          <section className="relative overflow-hidden rounded-2xl">
-            <div
-              className="absolute inset-0 bg-gradient-to-br from-brand-600 to-brand-800"
-              style={heroBackground ? { background: heroBackground } : {}}
-            />
-            <div className="relative px-6 sm:px-10 py-10 text-center">
-              <p className="text-xl sm:text-2xl font-bold text-white">Are you a landlord with property near {university.name}?</p>
-              <p className="text-brand-200 mt-2 text-sm sm:text-base">List free. Reach verified students directly. No commissions, no fees.</p>
-              <Link to="/create-listing" className="inline-flex items-center gap-2 mt-6 bg-white text-brand-700 hover:bg-brand-50 px-8 py-3.5 rounded-xl font-semibold text-base transition-all active:scale-[0.98]">
-                List Your Property Free <ArrowRight className="w-4 h-4" />
-              </Link>
-            </div>
-          </section>
-        )}
+        </div>
       </div>
     </div>
   );
