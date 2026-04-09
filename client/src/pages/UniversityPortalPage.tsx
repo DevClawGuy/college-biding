@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { ChevronLeft, ArrowRight, ShieldCheck, FileText, DollarSign, Users, AlertTriangle, Eye, MapPin, Bed, Bath } from 'lucide-react';
+import { ChevronLeft, ArrowRight, ShieldCheck, FileText, DollarSign, Users, Info, Eye, MapPin, Bed, Bath } from 'lucide-react';
 import api from '../lib/api';
 import { useAuthStore } from '../store/authStore';
 
@@ -197,19 +197,6 @@ export default function UniversityPortalPage() {
   const fmr2br = marketItems.find(d => d.bedroomCount === 2);
   const primaryColor = university.primaryColor ?? '#4f46e5';
 
-  // Insight text computation
-  let insightText: string | null = null;
-  if (fmr2br?.medianRent && university.ipedsHousingOffcampus) {
-    const uniEst = university.ipedsHousingOffcampus;
-    const fmr = fmr2br.medianRent;
-    const pctDiff = Math.round(Math.abs(uniEst - fmr) / fmr * 100);
-    if (uniEst > fmr * 1.10) {
-      insightText = `Heads up: ${university.name}'s official housing estimate is ${pctDiff}% higher than federal rent data for this area. You may have more aid budget remaining than you think.`;
-    } else if (uniEst < fmr * 0.90) {
-      insightText = `Heads up: ${university.name}'s official housing estimate is ${pctDiff}% lower than federal rent data for this area. Budget more than your financial aid letter suggests.`;
-    }
-  }
-
   // Average rent from listings
   const avgRent = listings.length > 0
     ? Math.round(listings.reduce((sum: number, l: any) => sum + (l.startingBid ?? 0), 0) / listings.length)
@@ -250,18 +237,18 @@ export default function UniversityPortalPage() {
             {university.enrollment != null && ` · ${university.enrollment.toLocaleString()} students`}
           </p>
 
-          {/* Insight callout in hero */}
-          {insightText && (
+          {/* How to read these numbers */}
+          {university.ipedsHousingOffcampus != null && university.ipedsHousingOffcampus > 0 && (
             <div
               className="mt-5 flex items-start gap-3"
               style={{ background: 'rgba(255,255,255,0.12)', border: '1px solid rgba(255,255,255,0.25)', borderRadius: '10px', padding: '1rem 1.25rem' }}
             >
               <div className="flex-shrink-0 flex items-center justify-center" style={{ width: 32, height: 32, background: 'rgba(255,255,255,0.2)', borderRadius: 8 }}>
-                <AlertTriangle className="w-4 h-4" style={{ color: isLight ? '#1e293b' : '#fff' }} />
+                <Info className="w-4 h-4" style={{ color: isLight ? '#1e293b' : '#fff' }} />
               </div>
               <div>
                 <p style={{ fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.05em', opacity: 0.7, color: isLight ? '#1e293b' : '#fff', marginBottom: 4, fontWeight: 600 }}>Good to know</p>
-                <p style={{ fontSize: 15, fontWeight: 500, color: isLight ? '#1e293b' : '#fff', lineHeight: 1.45 }}>{insightText}</p>
+                <p style={{ fontSize: 15, fontWeight: 500, color: isLight ? '#1e293b' : '#fff', lineHeight: 1.45 }}>{university.name} estimates ${university.ipedsHousingOffcampus.toLocaleString()}/mo for a student's off-campus housing and food combined. The federal rent guide below shows rent-only costs for this area. Your actual rent will likely fall somewhere in between — use both numbers to build your budget.</p>
               </div>
             </div>
           )}
@@ -308,7 +295,7 @@ export default function UniversityPortalPage() {
           {university.ipedsHousingOffcampus != null && (
             <section style={{ paddingTop: '1.75rem' }}>
               <h2 className="font-semibold text-slate-900 tracking-tight" style={{ fontSize: 20 }}>How does {university.name} compare?</h2>
-              <p className="text-slate-500 mt-0.5 mb-4" style={{ fontSize: 13 }}>University estimate vs federal benchmark vs active listings</p>
+              <p className="text-slate-500 mt-0.5 mb-4" style={{ fontSize: 13 }}>What does off-campus housing actually cost near {university.name}?</p>
 
               <div className="grid sm:grid-cols-3 gap-3">
                 {/* University estimate */}
@@ -317,10 +304,7 @@ export default function UniversityPortalPage() {
                   <p className="mt-2" style={{ fontSize: 24, fontWeight: 500, color: '#1e293b' }}>
                     ${university.ipedsHousingOffcampus.toLocaleString()}<span style={{ fontSize: 12, fontWeight: 400, color: '#94a3b8' }}>/mo</span>
                   </p>
-                  <p style={{ fontSize: 12, color: '#64748b', lineHeight: 1.4, marginTop: 4 }}>This is what {university.name} reports to the government as the typical cost of off-campus housing per month.</p>
-                  {fmr2br?.medianRent && university.ipedsHousingOffcampus < fmr2br.medianRent * 0.90 && (
-                    <span className="inline-block mt-2" style={{ background: '#FCEBEB', color: '#A32D2D', fontSize: 10, padding: '3px 8px', borderRadius: 6, fontWeight: 500 }}>Probably underestimated</span>
-                  )}
+                  <p style={{ fontSize: 12, color: '#64748b', lineHeight: 1.4, marginTop: 4 }}>{university.name}'s estimate of monthly housing AND food costs combined for an off-campus student. Reported to the federal government annually.</p>
                 </div>
 
                 {/* HUD benchmark */}
@@ -330,7 +314,7 @@ export default function UniversityPortalPage() {
                     <p className="mt-2" style={{ fontSize: 24, fontWeight: 500, color: '#1e293b' }}>
                       ${fmr2br.medianRent.toLocaleString()}<span style={{ fontSize: 12, fontWeight: 400, color: '#94a3b8' }}>/mo</span>
                     </p>
-                    <p style={{ fontSize: 12, color: '#64748b', lineHeight: 1.4, marginTop: 4 }}>The federal government's estimate of fair rent for a 2-bedroom in this area. A reliable reality check.</p>
+                    <p style={{ fontSize: 12, color: '#64748b', lineHeight: 1.4, marginTop: 4 }}>Rent-only estimate for a 2-bedroom in this county. Does not include food or utilities. Updated annually by the federal government.</p>
                   </div>
                 )}
 
@@ -356,7 +340,7 @@ export default function UniversityPortalPage() {
                 </div>
               </div>
 
-              <p className="text-xs text-slate-500 italic mt-3">University estimates are self-reported to the US Department of Education each year. Federal rent data represents the 40th percentile of actual rents in this county. HouseRush figures reflect active listings only.</p>
+              <p className="text-xs text-slate-500 italic mt-3">University figures include housing and food costs combined. Federal rent data covers rent only. These are estimates — actual costs vary by landlord, unit size, and lifestyle.</p>
             </section>
           )}
 
