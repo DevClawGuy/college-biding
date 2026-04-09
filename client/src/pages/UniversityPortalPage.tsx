@@ -204,9 +204,9 @@ export default function UniversityPortalPage() {
     const fmr = fmr2br.medianRent;
     const pctDiff = Math.round(Math.abs(uniEst - fmr) / fmr * 100);
     if (uniEst > fmr * 1.10) {
-      insightText = `This university overestimates off-campus housing costs by ${pctDiff}% vs HUD benchmarks — students may have more aid budget remaining than they think.`;
+      insightText = `Heads up: ${university.name}'s official housing estimate is ${pctDiff}% higher than federal rent data for this area. You may have more aid budget remaining than you think.`;
     } else if (uniEst < fmr * 0.90) {
-      insightText = `This university underestimates off-campus housing costs by ${pctDiff}% vs HUD benchmarks — students should budget more than the university suggests.`;
+      insightText = `Heads up: ${university.name}'s official housing estimate is ${pctDiff}% lower than federal rent data for this area. Budget more than your financial aid letter suggests.`;
     }
   }
 
@@ -234,16 +234,18 @@ export default function UniversityPortalPage() {
           </Link>
 
           {/* Badge */}
-          <div
-            className="inline-flex items-center gap-2 text-xs font-medium px-3 py-1.5 rounded-full mb-4"
-            style={{ background: 'rgba(255,255,255,0.15)', color: isLight ? '#1e293b' : '#fff' }}
-          >
-            <span>✓</span> University portal — at no cost to {university.name}
+          <div className="text-center mb-4">
+            <div
+              className="inline-flex items-center gap-2 text-xs font-medium px-3 py-1.5 rounded-full"
+              style={{ background: 'rgba(255,255,255,0.15)', color: isLight ? '#1e293b' : '#fff' }}
+            >
+              <span>✓</span> University portal — at no cost to {university.name}
+            </div>
           </div>
 
           {/* Title */}
-          <h1 className={`text-3xl sm:text-4xl font-bold tracking-tight ${isLight ? 'text-slate-900' : 'text-white'}`}>{university.name}</h1>
-          <p className={`mt-1.5 text-sm sm:text-base ${isLight ? 'text-slate-700' : 'text-white/75'}`}>
+          <h1 className={`font-bold tracking-tight ${isLight ? 'text-slate-900' : 'text-white'}`} style={{ fontSize: 32 }}>{university.name}</h1>
+          <p className={`mt-1.5 ${isLight ? 'text-slate-700' : 'text-white/75'}`} style={{ fontSize: 14 }}>
             Off-Campus Housing Portal · {university.city}, {university.state}
             {university.enrollment != null && ` · ${university.enrollment.toLocaleString()} students`}
           </p>
@@ -258,8 +260,8 @@ export default function UniversityPortalPage() {
                 <AlertTriangle className="w-4 h-4" style={{ color: isLight ? '#1e293b' : '#fff' }} />
               </div>
               <div>
-                <p style={{ fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.05em', opacity: 0.7, color: isLight ? '#1e293b' : '#fff', marginBottom: 4, fontWeight: 600 }}>Heads up</p>
-                <p style={{ fontSize: 14, fontWeight: 500, color: isLight ? '#1e293b' : '#fff', lineHeight: 1.45 }}>{insightText}</p>
+                <p style={{ fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.05em', opacity: 0.7, color: isLight ? '#1e293b' : '#fff', marginBottom: 4, fontWeight: 600 }}>Good to know</p>
+                <p style={{ fontSize: 15, fontWeight: 500, color: isLight ? '#1e293b' : '#fff', lineHeight: 1.45 }}>{insightText}</p>
               </div>
             </div>
           )}
@@ -274,12 +276,12 @@ export default function UniversityPortalPage() {
                     className="flex-shrink-0 text-center"
                     style={{ background: 'rgba(255,255,255,0.12)', border: '1px solid rgba(255,255,255,0.2)', borderRadius: 8, padding: '8px 14px' }}
                   >
-                    <p style={{ fontSize: 10, opacity: 0.65, color: isLight ? '#1e293b' : '#fff' }}>{bedroomLabel(d.bedroomCount)}</p>
-                    <p style={{ fontSize: 15, fontWeight: 500, color: isLight ? '#1e293b' : '#fff' }}>${(d.medianRent ?? 0).toLocaleString()}</p>
+                    <p style={{ fontSize: 11, opacity: 0.65, color: isLight ? '#1e293b' : '#fff' }}>{bedroomLabel(d.bedroomCount)}</p>
+                    <p style={{ fontSize: 16, fontWeight: 500, color: isLight ? '#1e293b' : '#fff' }}>${(d.medianRent ?? 0).toLocaleString()}</p>
                   </div>
                 ))}
               </div>
-              <p style={{ fontSize: 10, opacity: 0.55, color: isLight ? '#1e293b' : '#fff', marginTop: 6 }}>HUD Fair Market Rents (FY2026) — 40th percentile including utilities</p>
+              <p style={{ fontSize: 10, opacity: 0.55, color: isLight ? '#1e293b' : '#fff', marginTop: 6 }}>Federal rent data (FY2026) — 40th percentile including utilities</p>
             </div>
           )}
 
@@ -305,42 +307,42 @@ export default function UniversityPortalPage() {
           {/* ═══ THREE-WAY COMPARISON ═══ */}
           {university.ipedsHousingOffcampus != null && (
             <section style={{ paddingTop: '1.75rem' }}>
-              <h2 className="text-lg font-semibold text-slate-900 tracking-tight">How does {university.name} compare?</h2>
-              <p className="text-xs text-slate-500 mt-0.5 mb-4">University estimate vs federal benchmark vs active listings</p>
+              <h2 className="font-semibold text-slate-900 tracking-tight" style={{ fontSize: 20 }}>How does {university.name} compare?</h2>
+              <p className="text-slate-500 mt-0.5 mb-4" style={{ fontSize: 13 }}>University estimate vs federal benchmark vs active listings</p>
 
               <div className="grid sm:grid-cols-3 gap-3">
                 {/* University estimate */}
                 <div className="bg-white rounded-lg p-4" style={{ border: '0.5px solid #e2e8f0' }}>
-                  <p style={{ fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.05em', color: '#888', fontWeight: 600 }}>University says</p>
-                  <p className="mt-2" style={{ fontSize: 22, fontWeight: 500, color: '#1e293b' }}>
+                  <p style={{ fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.05em', color: '#888', fontWeight: 600 }}>What {university.name} estimates</p>
+                  <p className="mt-2" style={{ fontSize: 24, fontWeight: 500, color: '#1e293b' }}>
                     ${university.ipedsHousingOffcampus.toLocaleString()}<span style={{ fontSize: 12, fontWeight: 400, color: '#94a3b8' }}>/mo</span>
                   </p>
-                  <p style={{ fontSize: 11, color: '#64748b', lineHeight: 1.4, marginTop: 4 }}>What {university.name} reports to the federal government as off-campus housing cost</p>
+                  <p style={{ fontSize: 12, color: '#64748b', lineHeight: 1.4, marginTop: 4 }}>This is what {university.name} reports to the government as the typical cost of off-campus housing per month.</p>
                   {fmr2br?.medianRent && university.ipedsHousingOffcampus < fmr2br.medianRent * 0.90 && (
-                    <span className="inline-block mt-2" style={{ background: '#FCEBEB', color: '#A32D2D', fontSize: 10, padding: '3px 8px', borderRadius: 6, fontWeight: 500 }}>Likely too low</span>
+                    <span className="inline-block mt-2" style={{ background: '#FCEBEB', color: '#A32D2D', fontSize: 10, padding: '3px 8px', borderRadius: 6, fontWeight: 500 }}>Probably underestimated</span>
                   )}
                 </div>
 
                 {/* HUD benchmark */}
                 {fmr2br?.medianRent != null && (
                   <div className="bg-white rounded-lg p-4" style={{ border: '0.5px solid #e2e8f0' }}>
-                    <p style={{ fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.05em', color: '#185FA5', fontWeight: 600 }}>HUD benchmark</p>
-                    <p className="mt-2" style={{ fontSize: 22, fontWeight: 500, color: '#1e293b' }}>
+                    <p style={{ fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.05em', color: '#185FA5', fontWeight: 600 }}>Federal rent guide</p>
+                    <p className="mt-2" style={{ fontSize: 24, fontWeight: 500, color: '#1e293b' }}>
                       ${fmr2br.medianRent.toLocaleString()}<span style={{ fontSize: 12, fontWeight: 400, color: '#94a3b8' }}>/mo</span>
                     </p>
-                    <p style={{ fontSize: 11, color: '#64748b', lineHeight: 1.4, marginTop: 4 }}>Federal fair rent standard for a 2-bedroom in this county (FY2026)</p>
+                    <p style={{ fontSize: 12, color: '#64748b', lineHeight: 1.4, marginTop: 4 }}>The federal government's estimate of fair rent for a 2-bedroom in this area. A reliable reality check.</p>
                   </div>
                 )}
 
                 {/* HouseRush */}
                 <div className="bg-white rounded-lg p-4" style={{ border: `2px solid ${primaryColor}` }}>
-                  <p style={{ fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.05em', color: primaryColor, fontWeight: 600 }}>On HouseRush</p>
+                  <p style={{ fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.05em', color: primaryColor, fontWeight: 600 }}>Listed on HouseRush</p>
                   {avgRent != null ? (
                     <>
-                      <p className="mt-2" style={{ fontSize: 22, fontWeight: 500, color: '#1e293b' }}>
+                      <p className="mt-2" style={{ fontSize: 24, fontWeight: 500, color: '#1e293b' }}>
                         ${avgRent.toLocaleString()}<span style={{ fontSize: 12, fontWeight: 400, color: '#94a3b8' }}>/mo</span>
                       </p>
-                      <p style={{ fontSize: 11, color: '#64748b', lineHeight: 1.4, marginTop: 4 }}>Average asking rent from {listings.length} active listing{listings.length !== 1 ? 's' : ''}</p>
+                      <p style={{ fontSize: 12, color: '#64748b', lineHeight: 1.4, marginTop: 4 }}>Average rent from properties currently listed near campus on HouseRush.</p>
                       {fmr2br?.medianRent && avgRent < fmr2br.medianRent && (
                         <span className="inline-block mt-2" style={{ background: '#EAF3DE', color: '#3B6D11', fontSize: 10, padding: '3px 8px', borderRadius: 6, fontWeight: 500 }}>Great deal</span>
                       )}
@@ -348,13 +350,13 @@ export default function UniversityPortalPage() {
                   ) : (
                     <>
                       <p className="mt-2 text-slate-400" style={{ fontSize: 16, fontWeight: 500 }}>No listings yet</p>
-                      <p style={{ fontSize: 11, color: '#64748b', lineHeight: 1.4, marginTop: 4 }}>Be the first to list near {university.name}</p>
+                      <p style={{ fontSize: 12, color: '#64748b', lineHeight: 1.4, marginTop: 4 }}>Be the first to list near {university.name}</p>
                     </>
                   )}
                 </div>
               </div>
 
-              <p className="text-xs text-slate-500 italic mt-3">University off-campus estimates are reported annually to the US Department of Education. HUD Fair Market Rents represent the 40th percentile of actual market rents. HouseRush figures reflect active listings only.</p>
+              <p className="text-xs text-slate-500 italic mt-3">University estimates are self-reported to the US Department of Education each year. Federal rent data represents the 40th percentile of actual rents in this county. HouseRush figures reflect active listings only.</p>
             </section>
           )}
 
@@ -363,10 +365,10 @@ export default function UniversityPortalPage() {
 
           {/* ═══ LISTINGS ═══ */}
           <section style={{ paddingTop: '1.75rem' }}>
-            <h2 className="text-lg font-semibold text-slate-900 tracking-tight">Housing Near {university.name}</h2>
+            <h2 className="font-semibold text-slate-900 tracking-tight" style={{ fontSize: 20 }}>Housing Near {university.name}</h2>
             {listings.length > 0 ? (
               <>
-                <p className="text-xs text-slate-500 mt-0.5 mb-4">{listings.length} propert{listings.length !== 1 ? 'ies' : 'y'} available near campus</p>
+                <p className="text-slate-500 mt-0.5 mb-4" style={{ fontSize: 13 }}>{listings.length} propert{listings.length !== 1 ? 'ies' : 'y'} available near campus</p>
                 <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
                   {listings.map((listing: any) => {
                     const rcLabel = listing.rentcheckScore != null && listing.rentcheckLabel ? getRentCheckDisplay(listing.rentcheckScore, listing.rentcheckLabel) : null;
@@ -380,7 +382,7 @@ export default function UniversityPortalPage() {
                       if (fmrPerBed > 0) {
                         const pct = Math.round(Math.abs(ppb - fmrPerBed) / fmrPerBed * 100);
                         fmrPctBelow = ppb < fmrPerBed * 0.98;
-                        fmrPctText = ppb < fmrPerBed * 0.98 ? `${pct}% below FMR` : ppb > fmrPerBed * 1.02 ? `${pct}% above FMR` : 'At market';
+                        fmrPctText = ppb < fmrPerBed * 0.98 ? `${pct}% below average rent` : ppb > fmrPerBed * 1.02 ? `${pct}% above average rent` : 'At market';
                       }
                     }
 
@@ -416,12 +418,12 @@ export default function UniversityPortalPage() {
 
                         {/* Card body */}
                         <div className="p-3">
-                          <h3 className="text-sm font-medium text-slate-900 truncate">{listing.title}</h3>
-                          <div className="flex items-center gap-1 mt-1" style={{ fontSize: 12, color: '#64748b' }}>
+                          <h3 className="font-medium text-slate-900 truncate" style={{ fontSize: 15 }}>{listing.title}</h3>
+                          <div className="flex items-center gap-1 mt-1" style={{ fontSize: 13, color: '#64748b' }}>
                             <MapPin className="w-3 h-3" />
                             <span className="truncate">{listing.address}, {listing.city}</span>
                           </div>
-                          <div className="flex items-center gap-1.5 mt-1.5" style={{ fontSize: 12, color: '#64748b' }}>
+                          <div className="flex items-center gap-1.5 mt-1.5" style={{ fontSize: 13, color: '#64748b' }}>
                             <Bed className="w-3 h-3" /> {listing.beds} bed{listing.beds !== 1 ? 's' : ''}
                             <span>·</span>
                             <Bath className="w-3 h-3" /> {listing.baths} bath{listing.baths !== 1 ? 's' : ''}
@@ -476,8 +478,8 @@ export default function UniversityPortalPage() {
 
           {/* ═══ RESOURCES ═══ */}
           <section style={{ paddingTop: '1.75rem' }}>
-            <h2 className="text-lg font-semibold text-slate-900 tracking-tight">Resources for {university.name} Students</h2>
-            <p className="text-xs text-slate-500 mt-0.5 mb-4">Everything you need to navigate off-campus housing with confidence.</p>
+            <h2 className="font-semibold text-slate-900 tracking-tight" style={{ fontSize: 20 }}>Resources for {university.name} Students</h2>
+            <p className="text-slate-500 mt-0.5 mb-4" style={{ fontSize: 13 }}>Everything you need to navigate off-campus housing with confidence.</p>
             <div className="grid sm:grid-cols-2 gap-3">
               {[
                 { icon: ShieldCheck, title: 'Avoiding Rental Scams', desc: 'Learn how to spot fake listings and protect yourself from fraudulent landlords.', link: '/guides' },
@@ -489,8 +491,8 @@ export default function UniversityPortalPage() {
                     <card.icon className="w-4 h-4 text-slate-600" />
                   </div>
                   <div>
-                    <h3 style={{ fontSize: 13, fontWeight: 500, color: '#1e293b' }}>{card.title}</h3>
-                    <p style={{ fontSize: 11, color: '#64748b', lineHeight: 1.4, marginTop: 2 }}>{card.desc}</p>
+                    <h3 style={{ fontSize: 14, fontWeight: 500, color: '#1e293b' }}>{card.title}</h3>
+                    <p style={{ fontSize: 12, color: '#64748b', lineHeight: 1.4, marginTop: 2 }}>{card.desc}</p>
                   </div>
                 </Link>
               ))}
@@ -499,8 +501,8 @@ export default function UniversityPortalPage() {
                   <Users className="w-4 h-4 text-slate-400" />
                 </div>
                 <div>
-                  <h3 style={{ fontSize: 13, fontWeight: 500, color: '#1e293b' }}>Roommate Matching</h3>
-                  <p style={{ fontSize: 11, color: '#64748b', lineHeight: 1.4, marginTop: 2 }}>Find compatible roommates near {university.name}.</p>
+                  <h3 style={{ fontSize: 14, fontWeight: 500, color: '#1e293b' }}>Roommate Matching</h3>
+                  <p style={{ fontSize: 12, color: '#64748b', lineHeight: 1.4, marginTop: 2 }}>Find compatible roommates near {university.name}.</p>
                   <span className="inline-block mt-2 text-xs font-semibold text-amber-700 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-100" style={{ fontSize: 10 }}>Coming Fall 2026</span>
                 </div>
               </div>
