@@ -53,6 +53,10 @@ export const listings = sqliteTable('listings', {
   recommendationCachedAt: integer('recommendation_cached_at'),
   propertyType: text('property_type').default('apartment'),
   tags: text('tags').notNull().default('[]'), // JSON array
+  pricePerBed: integer('price_per_bed'),
+  fmrForBeds: integer('fmr_for_beds'),
+  rentcheckScore: real('rentcheck_score'),
+  rentcheckLabel: text('rentcheck_label'),
   createdAt: text('created_at').notNull().default(''),
 });
 

@@ -4,6 +4,7 @@ import jwt from 'jsonwebtoken';
 import { db, schema } from '../db';
 import { eq, and, like, gte, lte, asc, desc, sql } from 'drizzle-orm';
 import { authenticateToken, AuthRequest, JWT_SECRET } from '../middleware/auth';
+import { calculateRentCheck } from '../lib/rentcheck';
 
 const router = Router();
 
@@ -217,6 +218,38 @@ router.post('/', authenticateToken, async (req: AuthRequest, res: Response) => {
       createdAt: new Date().toISOString(),
     }).run();
 
+    // Compute RentCheck score (non-blocking)
+    try {
+      const uni = await db.select({ id: schema.universities.id })
+        .from(schema.universities)
+        .where(eq(schema.universities.name, nearestUniversity))
+        .get();
+      if (uni) {
+        const marketRows = await db.select()
+          .from(schema.universityMarketData)
+          .where(eq(schema.universityMarketData.universityId, uni.id));
+        if (marketRows.length > 0) {
+          const fmrData = { fmr_0br: 0, fmr_1br: 0, fmr_2br: 0, fmr_3br: 0, fmr_4br: 0 };
+          for (const row of marketRows) {
+            if (row.bedroomCount === 0) fmrData.fmr_0br = row.medianRent ?? 0;
+            else if (row.bedroomCount === 1) fmrData.fmr_1br = row.medianRent ?? 0;
+            else if (row.bedroomCount === 2) fmrData.fmr_2br = row.medianRent ?? 0;
+            else if (row.bedroomCount === 3) fmrData.fmr_3br = row.medianRent ?? 0;
+            else if (row.bedroomCount === 4) fmrData.fmr_4br = row.medianRent ?? 0;
+          }
+          const rc = calculateRentCheck(startingBid, beds, fmrData);
+          await db.update(schema.listings).set({
+            pricePerBed: rc.pricePerBed,
+            fmrForBeds: rc.fmrForBeds,
+            rentcheckScore: rc.rentcheckScore,
+            rentcheckLabel: rc.rentcheckLabel,
+          }).where(eq(schema.listings.id, id)).run();
+        }
+      }
+    } catch (rcErr) {
+      console.error('RentCheck compute error (non-fatal):', rcErr);
+    }
+
     const listing = await db.select().from(schema.listings).where(eq(schema.listings.id, id)).get();
     res.status(201).json(parseListing(listing!));
   } catch (error) {
@@ -273,6 +306,42 @@ router.put('/:id', authenticateToken, async (req: AuthRequest, res: Response) =>
     }
 
     await db.update(schema.listings).set(updates).where(eq(schema.listings.id, String(req.params.id))).run();
+
+    // Recompute RentCheck if price or beds changed (non-blocking)
+    try {
+      const current = await db.select().from(schema.listings).where(eq(schema.listings.id, String(req.params.id))).get();
+      if (current) {
+        const uni = await db.select({ id: schema.universities.id })
+          .from(schema.universities)
+          .where(eq(schema.universities.name, current.nearestUniversity))
+          .get();
+        if (uni) {
+          const marketRows = await db.select()
+            .from(schema.universityMarketData)
+            .where(eq(schema.universityMarketData.universityId, uni.id));
+          if (marketRows.length > 0) {
+            const fmrData = { fmr_0br: 0, fmr_1br: 0, fmr_2br: 0, fmr_3br: 0, fmr_4br: 0 };
+            for (const row of marketRows) {
+              if (row.bedroomCount === 0) fmrData.fmr_0br = row.medianRent ?? 0;
+              else if (row.bedroomCount === 1) fmrData.fmr_1br = row.medianRent ?? 0;
+              else if (row.bedroomCount === 2) fmrData.fmr_2br = row.medianRent ?? 0;
+              else if (row.bedroomCount === 3) fmrData.fmr_3br = row.medianRent ?? 0;
+              else if (row.bedroomCount === 4) fmrData.fmr_4br = row.medianRent ?? 0;
+            }
+            const rc = calculateRentCheck(current.startingBid, current.beds, fmrData);
+            await db.update(schema.listings).set({
+              pricePerBed: rc.pricePerBed,
+              fmrForBeds: rc.fmrForBeds,
+              rentcheckScore: rc.rentcheckScore,
+              rentcheckLabel: rc.rentcheckLabel,
+            }).where(eq(schema.listings.id, current.id)).run();
+          }
+        }
+      }
+    } catch (rcErr) {
+      console.error('RentCheck recompute error (non-fatal):', rcErr);
+    }
+
     const updated = await db.select().from(schema.listings).where(eq(schema.listings.id, String(req.params.id))).get();
     res.json(parseListing(updated!));
   } catch (error) {

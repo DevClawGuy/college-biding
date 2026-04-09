@@ -254,12 +254,16 @@ export default function UniversityPortalPage() {
                   </motion.div>
                 ))}
               </div>
-              <p className="text-xs text-slate-400 mt-3">HUD Fair Market Rents are annual estimates of typical rent plus utilities for standard units in this area. Actual asking rents for specific properties may differ.</p>
+              <p className="text-xs text-slate-400 mt-3">HUD Fair Market Rents (FY2026) represent the 40th percentile of gross rent including utilities for this county. RentCheck scores are calculated per bed, not per unit.</p>
             </>
           ) : (
             <p className="text-sm text-slate-400 mt-4">Market data coming soon for this area.</p>
           )}
         </section>
+
+        {marketItems.length > 0 && (
+          <p className="text-sm text-slate-500 italic mt-2 mb-4">RentCheck scores compare each listing's price per bed against HUD Fair Market Rents for this area. Higher scores mean better value for students.</p>
+        )}
 
         {/* Section 3 — Listings */}
         <section>

@@ -50,6 +50,45 @@ const HEAT_GLOW: Record<Exclude<HeatTier, 'none'>, { border: string; duration: s
   fire: { border: 'border-red-500',    duration: '0.8s' },
 };
 
+function getRentCheckBadge(
+  score: number,
+  label: string,
+  pricePerBed: number,
+  beds: number,
+  fmrForBeds: number
+) {
+  const stars = Math.round(score);
+
+  const labelMap: Record<string, string> = {
+    great_deal: 'Great deal', good_value: 'Good value', at_market: 'Fair price',
+    above_market: 'Above market', expensive: 'Expensive',
+  };
+  const colorMap: Record<string, string> = {
+    great_deal: 'text-green-700', good_value: 'text-green-600', at_market: 'text-slate-500',
+    above_market: 'text-amber-600', expensive: 'text-red-600',
+  };
+  const bgMap: Record<string, string> = {
+    great_deal: 'bg-green-50', good_value: 'bg-green-50', at_market: 'bg-slate-50',
+    above_market: 'bg-amber-50', expensive: 'bg-red-50',
+  };
+
+  const fmrPerBed = Math.round(fmrForBeds / Math.max(beds, 1));
+  const pctDiff = fmrPerBed > 0 ? Math.round(Math.abs(pricePerBed - fmrPerBed) / fmrPerBed * 100) : 0;
+
+  let priceDiff: string;
+  if (pricePerBed < fmrPerBed * 0.98) priceDiff = `${pctDiff}% below FMR`;
+  else if (pricePerBed > fmrPerBed * 1.02) priceDiff = `${pctDiff}% above FMR`;
+  else priceDiff = 'At market rate';
+
+  return {
+    stars,
+    labelText: labelMap[label] ?? 'Unknown',
+    colorClass: colorMap[label] ?? 'text-slate-500',
+    bgClass: bgMap[label] ?? 'bg-slate-50',
+    priceDiff,
+  };
+}
+
 interface ListingCardProps {
   listing: {
     id: string;
@@ -69,6 +108,10 @@ interface ListingCardProps {
     tags: string[];
     startingBid: number;
     viewCount?: number;
+    rentcheckScore?: number | null;
+    rentcheckLabel?: string | null;
+    pricePerBed?: number | null;
+    fmrForBeds?: number | null;
   };
   onFavorite?: (id: string) => void;
   isFavorited?: boolean;
@@ -204,6 +247,28 @@ export default function ListingCard({ listing, onFavorite, isFavorited }: Listin
                 <span className="flex items-center gap-0.5"><Eye className="w-3 h-3" />{listing.viewCount}</span>
               )}
             </div>
+            {listing.rentcheckScore != null && listing.rentcheckLabel && listing.pricePerBed != null && listing.fmrForBeds != null && (() => {
+              const rc = getRentCheckBadge(listing.rentcheckScore, listing.rentcheckLabel, listing.pricePerBed, listing.beds, listing.fmrForBeds);
+              return (
+                <div className={`inline-flex items-center gap-1.5 px-2 py-1 rounded-md text-xs font-medium mt-1.5 ${rc.bgClass}`}>
+                  <span className={`flex items-center gap-0.5 ${rc.colorClass}`}>
+                    {[...Array(5)].map((_, i) => (
+                      <svg key={i} width="8" height="8" viewBox="0 0 8 8">
+                        {i < rc.stars
+                          ? <circle cx="4" cy="4" r="3" fill="currentColor" />
+                          : <circle cx="4" cy="4" r="3" fill="none" stroke="currentColor" strokeWidth="1.5" />
+                        }
+                      </svg>
+                    ))}
+                  </span>
+                  <span className={rc.colorClass}>{rc.labelText}</span>
+                  <span className="text-slate-400">&middot;</span>
+                  <span className="text-slate-600">${listing.pricePerBed}/bed</span>
+                  <span className="text-slate-400">&middot;</span>
+                  <span className={rc.colorClass}>{rc.priceDiff}</span>
+                </div>
+              );
+            })()}
           </div>
           <span className="text-sm font-semibold text-brand-600 bg-brand-50 hover:bg-brand-100 px-4 py-2 rounded-xl transition-colors">
             View Property

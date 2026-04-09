@@ -189,6 +189,10 @@ export async function initializeDatabase(): Promise<void> {
     `CREATE INDEX IF NOT EXISTS idx_universities_lng ON universities(longitude)`,
     `ALTER TABLE universities ADD COLUMN primary_color TEXT`,
     `ALTER TABLE universities ADD COLUMN secondary_color TEXT`,
+    `ALTER TABLE listings ADD COLUMN price_per_bed INTEGER`,
+    `ALTER TABLE listings ADD COLUMN fmr_for_beds INTEGER`,
+    `ALTER TABLE listings ADD COLUMN rentcheck_score REAL`,
+    `ALTER TABLE listings ADD COLUMN rentcheck_label TEXT`,
   ];
   for (const sql of migrations) {
     try {
