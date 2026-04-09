@@ -241,12 +241,11 @@ export default function ListingCard({ listing, onFavorite, isFavorited }: Listin
             <div className="text-xl font-bold text-slate-900 tracking-tight">
               ${listing.currentBid.toLocaleString()}<span className="text-sm font-normal text-slate-400">/mo</span>
             </div>
-            <div className="flex items-center gap-2 text-xs text-slate-400 mt-0.5">
-              <span>{listing.bidCount} bid{listing.bidCount !== 1 ? 's' : ''}</span>
-              {(listing.viewCount ?? 0) > 0 && (
+            {(listing.viewCount ?? 0) > 0 && (
+              <div className="flex items-center gap-2 text-xs text-slate-400 mt-0.5">
                 <span className="flex items-center gap-0.5"><Eye className="w-3 h-3" />{listing.viewCount}</span>
-              )}
-            </div>
+              </div>
+            )}
             {listing.rentcheckScore != null && listing.rentcheckLabel && listing.pricePerBed != null && listing.fmrForBeds != null && (() => {
               const rc = getRentCheckBadge(listing.rentcheckScore, listing.rentcheckLabel, listing.pricePerBed, listing.beds, listing.fmrForBeds);
               return (

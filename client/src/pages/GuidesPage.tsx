@@ -315,14 +315,14 @@ DOCUMENT EVERYTHING:
   {
     slug: 'after-winning-auction',
     icon: Trophy,
-    title: 'What Happens After You Win a HouseRush Auction',
-    description: "You won — now what? Here's exactly what happens next and what to expect from your agent.",
+    title: 'What Happens After You Express Interest',
+    description: "You expressed interest — now what? Here's exactly what happens next and what to expect from the landlord.",
     bullets: [
-      'You receive a winner confirmation email',
-      'Your agent contacts you within 24 hours',
-      'Lease review and signing process',
-      'Security deposit and move-in date',
-      'What to do if you change your mind',
+      'You receive a confirmation email',
+      'The landlord reviews your interest and contact details',
+      'The landlord reaches out directly within 48 hours',
+      "You'll discuss move-in date, lease terms, and next steps",
+      'No commitment is made until you sign a lease',
     ],
     content: `WHAT HAPPENS AFTER YOU WIN A HOUSERUSH AUCTION
 By HouseRush — houserush.vercel.app
@@ -393,7 +393,7 @@ export default function GuidesPage() {
         <div className="max-w-4xl mx-auto text-center px-4 py-16 sm:py-20 relative">
           <h1 className="text-3xl sm:text-4xl font-bold text-white tracking-tight">Student Housing Guides & Checklists</h1>
           <p className="text-brand-200 mt-4 max-w-2xl mx-auto text-base sm:text-lg leading-relaxed">
-            Everything you need to find, secure, and move into your perfect off-campus home near Monmouth University.
+            Everything you need to find, secure, and move into your perfect off-campus home.
           </p>
         </div>
       </section>
@@ -434,7 +434,7 @@ export default function GuidesPage() {
       {/* Bottom CTA */}
       <section className="max-w-3xl mx-auto text-center px-4 pb-16 sm:pb-20">
         <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight">Ready to find your place?</h2>
-        <p className="text-slate-500 mt-3 max-w-lg mx-auto">Browse verified listings near Monmouth University and start bidding today.</p>
+        <p className="text-slate-500 mt-3 max-w-lg mx-auto">Browse verified listings near your campus and find your next home.</p>
         <Link
           to="/listings"
           className="inline-flex items-center gap-2 bg-brand-600 hover:bg-brand-700 text-white px-8 py-3.5 rounded-xl font-semibold text-base mt-8 transition-all hover:shadow-xl hover:shadow-brand-600/20 active:scale-[0.98]"
