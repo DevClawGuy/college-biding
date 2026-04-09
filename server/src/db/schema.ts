@@ -154,6 +154,9 @@ export const universities = sqliteTable('universities', {
   portalActive: integer('portal_active').notNull().default(1),
   primaryColor: text('primary_color'),
   secondaryColor: text('secondary_color'),
+  ipedsRoomBoardOncampus: integer('ipeds_room_board_oncampus'),
+  ipedsHousingOffcampus: integer('ipeds_housing_offcampus'),
+  ipedsDataYear: integer('ipeds_data_year'),
   createdAt: text('created_at').notNull().default(''),
 });
 

@@ -27,6 +27,9 @@ interface UniversityDetail {
   longitude: number | null;
   primaryColor: string | null;
   secondaryColor: string | null;
+  ipedsRoomBoardOncampus: number | null;
+  ipedsHousingOffcampus: number | null;
+  ipedsDataYear: number | null;
   marketData: MarketDataItem[];
 }
 
@@ -263,6 +266,79 @@ export default function UniversityPortalPage() {
 
         {marketItems.length > 0 && (
           <p className="text-sm text-slate-500 italic mt-2 mb-4">RentCheck scores compare each listing's price per bed against HUD Fair Market Rents for this area. Higher scores mean better value for students.</p>
+        )}
+
+        {/* Section 2b — Housing Cost Comparison */}
+        {university.ipedsHousingOffcampus != null && (
+          <section>
+            <h2 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight mb-1">Housing Cost Comparison</h2>
+            <div className="flex gap-4 overflow-x-auto pb-2 mt-5 snap-x snap-mandatory">
+              <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} className="min-w-[200px] snap-start bg-white rounded-2xl p-5 card-shadow flex-shrink-0">
+                <p className="text-sm text-slate-500">University estimate</p>
+                <p className="text-2xl font-bold text-slate-700 mt-1">${university.ipedsHousingOffcampus.toLocaleString()}<span className="text-sm font-normal text-slate-400">/mo</span></p>
+                <p className="text-xs text-slate-400 mt-2">Off-campus allowance per month</p>
+                <p className="text-xs text-slate-400">What {university.name} reports to the federal government</p>
+              </motion.div>
+
+              {(() => {
+                const fmr2br = marketItems.find(d => d.bedroomCount === 2);
+                return fmr2br?.medianRent != null ? (
+                  <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} className="min-w-[200px] snap-start bg-white rounded-2xl p-5 card-shadow flex-shrink-0">
+                    <p className="text-sm text-slate-500">Fair Market Rent</p>
+                    <p className="text-2xl font-bold text-blue-600 mt-1">${fmr2br.medianRent.toLocaleString()}<span className="text-sm font-normal text-slate-400">/mo</span></p>
+                    <p className="text-xs text-slate-400 mt-2">HUD benchmark per month (2BR)</p>
+                    <p className="text-xs text-slate-400">Federal fair rent standard for this county</p>
+                  </motion.div>
+                ) : null;
+              })()}
+
+              {listings.length > 0 ? (() => {
+                const avgRent = Math.round(listings.reduce((sum: number, l: any) => sum + (l.startingBid ?? 0), 0) / listings.length);
+                const aboveEstimate = university.ipedsHousingOffcampus != null && avgRent > university.ipedsHousingOffcampus;
+                return (
+                  <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} className="min-w-[200px] snap-start bg-white rounded-2xl p-5 card-shadow flex-shrink-0">
+                    <p className="text-sm text-slate-500">Listed on HouseRush</p>
+                    <p className={`text-2xl font-bold mt-1 ${aboveEstimate ? 'text-amber-600' : 'text-green-600'}`}>${avgRent.toLocaleString()}<span className="text-sm font-normal text-slate-400">/mo</span></p>
+                    <p className="text-xs text-slate-400 mt-2">Average asking rent</p>
+                    <p className="text-xs text-slate-400">From active listings on HouseRush</p>
+                  </motion.div>
+                );
+              })() : (
+                <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} className="min-w-[200px] snap-start bg-white rounded-2xl p-5 card-shadow flex-shrink-0">
+                  <p className="text-sm text-slate-500">Listed on HouseRush</p>
+                  <p className="text-lg font-semibold text-slate-400 mt-1">No listings yet</p>
+                  <p className="text-xs text-slate-400 mt-2">Average asking rent</p>
+                  <p className="text-xs text-slate-400">From active listings on HouseRush</p>
+                </motion.div>
+              )}
+            </div>
+
+            {/* Insight callout */}
+            {(() => {
+              const fmr2br = marketItems.find(d => d.bedroomCount === 2);
+              if (!fmr2br?.medianRent || !university.ipedsHousingOffcampus) return null;
+              const uniEst = university.ipedsHousingOffcampus;
+              const fmr = fmr2br.medianRent;
+              const pctDiff = Math.round(Math.abs(uniEst - fmr) / fmr * 100);
+              if (uniEst > fmr * 1.10) {
+                return (
+                  <div className="bg-green-50 border border-green-200 text-green-800 rounded-lg p-3 text-sm mt-4">
+                    This university overestimates off-campus housing costs by {pctDiff}% vs HUD benchmarks — students may have more aid budget remaining than they think.
+                  </div>
+                );
+              }
+              if (uniEst < fmr * 0.90) {
+                return (
+                  <div className="bg-amber-50 border border-amber-200 text-amber-800 rounded-lg p-3 text-sm mt-4">
+                    This university underestimates off-campus housing costs by {pctDiff}% vs HUD benchmarks — students should budget more than the university suggests.
+                  </div>
+                );
+              }
+              return null;
+            })()}
+
+            <p className="text-sm text-slate-500 italic mt-3">University off-campus estimates are reported annually to the US Department of Education. HUD Fair Market Rents represent the 40th percentile of actual market rents. HouseRush figures reflect active listings only.</p>
+          </section>
         )}
 
         {/* Section 3 — Listings */}
