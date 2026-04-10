@@ -161,56 +161,11 @@ export default function UniversityPortalPage() {
     };
   }, [university]);
 
-  // Loading state
-  if (loading) {
-    return (
-      <div>
-        <div className="bg-gradient-to-br from-brand-700 to-brand-900 py-16 px-4">
-          <div className="max-w-5xl mx-auto space-y-4">
-            <div className="h-4 skeleton rounded w-24 opacity-30" />
-            <div className="h-10 skeleton rounded-lg w-2/3 opacity-30" />
-            <div className="h-5 skeleton rounded w-1/2 opacity-30" />
-          </div>
-        </div>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-10">
-          <div>
-            <div className="h-6 skeleton rounded-lg w-1/3 mb-4" />
-            <div className="grid grid-cols-3 gap-4">
-              {[...Array(3)].map((_, i) => (
-                <div key={i} className="bg-white rounded-lg p-4 space-y-3" style={{ border: '0.5px solid #e2e8f0' }}>
-                  <div className="h-3 skeleton rounded w-1/2" />
-                  <div className="h-7 skeleton rounded w-2/3" />
-                  <div className="h-3 skeleton rounded w-full" />
-                </div>
-              ))}
-            </div>
-          </div>
-          <div>
-            <div className="h-6 skeleton rounded-lg w-1/4 mb-4" />
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {[...Array(3)].map((_, i) => (
-                <div key={i} className="bg-white rounded-lg overflow-hidden" style={{ border: '0.5px solid #e2e8f0' }}>
-                  <div className="h-44 skeleton" />
-                  <div className="p-3 space-y-2">
-                    <div className="h-4 skeleton rounded w-3/4" />
-                    <div className="h-3 skeleton rounded w-1/2" />
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  if (!university) return null;
-
-  const marketItems = university.marketData.filter(d => d.medianRent != null);
+  // Derived values (safe to compute even when university is null)
+  const marketItems = university?.marketData.filter(d => d.medianRent != null) ?? [];
   const fmr2br = marketItems.find(d => d.bedroomCount === 2);
-  const primaryColor = university.primaryColor ?? '#4f46e5';
+  const primaryColor = university?.primaryColor ?? '#4f46e5';
 
-  // Average rent from listings
   const avgRent = listings.length > 0
     ? Math.round(listings.reduce((sum: number, l: any) => sum + (l.startingBid ?? 0), 0) / listings.length)
     : null;
@@ -265,6 +220,51 @@ export default function UniversityPortalPage() {
 
     return result;
   }, [listings, searchQuery, selectedBeds, minPrice, maxPrice, selectedAmenities, sortBy]);
+
+  // Loading state
+  if (loading) {
+    return (
+      <div>
+        <div className="bg-gradient-to-br from-brand-700 to-brand-900 py-16 px-4">
+          <div className="max-w-5xl mx-auto space-y-4">
+            <div className="h-4 skeleton rounded w-24 opacity-30" />
+            <div className="h-10 skeleton rounded-lg w-2/3 opacity-30" />
+            <div className="h-5 skeleton rounded w-1/2 opacity-30" />
+          </div>
+        </div>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-10">
+          <div>
+            <div className="h-6 skeleton rounded-lg w-1/3 mb-4" />
+            <div className="grid grid-cols-3 gap-4">
+              {[...Array(3)].map((_, i) => (
+                <div key={i} className="bg-white rounded-lg p-4 space-y-3" style={{ border: '0.5px solid #e2e8f0' }}>
+                  <div className="h-3 skeleton rounded w-1/2" />
+                  <div className="h-7 skeleton rounded w-2/3" />
+                  <div className="h-3 skeleton rounded w-full" />
+                </div>
+              ))}
+            </div>
+          </div>
+          <div>
+            <div className="h-6 skeleton rounded-lg w-1/4 mb-4" />
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {[...Array(3)].map((_, i) => (
+                <div key={i} className="bg-white rounded-lg overflow-hidden" style={{ border: '0.5px solid #e2e8f0' }}>
+                  <div className="h-44 skeleton" />
+                  <div className="p-3 space-y-2">
+                    <div className="h-4 skeleton rounded w-3/4" />
+                    <div className="h-3 skeleton rounded w-1/2" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!university) return null;
 
   return (
     <div>
