@@ -68,8 +68,26 @@ export default function CreateListingPage() {
     setLoading(true);
 
     const uniMatch = universities.find(u => u.name === form.nearestUniversity);
-    const coords = uniMatch?.latitude && uniMatch?.longitude ? { lat: uniMatch.latitude, lng: uniMatch.longitude } : DEFAULT_COORDS;
-    const offset = (Math.random() - 0.5) * 0.01;
+    const fallbackCoords = uniMatch?.latitude && uniMatch?.longitude ? { lat: uniMatch.latitude, lng: uniMatch.longitude } : DEFAULT_COORDS;
+
+    // Geocode the listing address via Nominatim
+    let coords = fallbackCoords;
+    try {
+      const addrQuery = `${form.address} ${form.city} ${form.state}`;
+      const geoRes = await fetch(
+        `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(addrQuery)}&format=json&limit=1&countrycodes=us`,
+        { headers: { 'User-Agent': 'HouseRush/1.0 (houserush.app)' }, signal: AbortSignal.timeout(5000) }
+      );
+      const geoData = await geoRes.json();
+      if (Array.isArray(geoData) && geoData.length > 0 && geoData[0].lat && geoData[0].lon) {
+        coords = { lat: parseFloat(geoData[0].lat), lng: parseFloat(geoData[0].lon) };
+      } else {
+        console.warn('Nominatim returned no results, using university coordinates');
+      }
+    } catch (geoErr) {
+      console.warn('Geocoding failed, using university coordinates:', geoErr);
+    }
+
     const auctionEnd = new Date(form.auctionEnd).toISOString();
 
     // Filter out empty URLs, fallback to placeholder if none provided
@@ -88,7 +106,7 @@ export default function CreateListingPage() {
 
     try {
       const { data } = await api.post('/listings', {
-        ...form, secureLeasePrice: slp, lat: coords.lat + offset, lng: coords.lng + offset, auctionEnd, photos,
+        ...form, secureLeasePrice: slp, lat: coords.lat, lng: coords.lng, auctionEnd, photos,
       });
       navigate(`/listing/${data.id}`);
     } catch (err: any) {
