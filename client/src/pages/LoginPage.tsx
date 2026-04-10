@@ -17,7 +17,8 @@ export default function LoginPage() {
     setError('');
     try {
       await login(email, password);
-      navigate('/listings');
+      const loggedInUser = useAuthStore.getState().user;
+      navigate(loggedInUser?.role === 'landlord' ? '/dashboard' : '/universities');
     } catch (err: any) {
       setError(typeof err?.message === 'string' ? err.message : 'Login failed');
     }
@@ -40,7 +41,7 @@ export default function LoginPage() {
             The fastest way to find off-campus housing.
           </h2>
           <p className="text-brand-200 text-lg leading-relaxed">
-            Browse verified homes near your campus, place competitive bids in real-time, and secure your perfect place.
+            Browse verified homes near your campus, compare rent data, and find your perfect place.
           </p>
         </div>
       </div>
@@ -54,7 +55,7 @@ export default function LoginPage() {
           </Link>
 
           <h2 className="text-2xl font-bold text-slate-900 mb-1">Welcome back</h2>
-          <p className="text-slate-500 text-sm mb-8">Sign in to continue bidding</p>
+          <p className="text-slate-500 text-sm mb-8">Sign in to your account</p>
 
           {error && (
             <div className="bg-rose-50 border border-rose-200 text-rose-600 rounded-xl px-4 py-3 text-sm mb-5">{error}</div>

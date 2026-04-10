@@ -121,6 +121,39 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* Landlord Section */}
+      <section className="bg-slate-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+          <div className="grid md:grid-cols-2 gap-12 items-center">
+            <div>
+              <span className="text-sm font-semibold text-brand-600">For landlords</span>
+              <h2 className="text-2xl md:text-3xl font-bold text-slate-900 tracking-tight mt-2">Own a property near a campus?</h2>
+              <p className="text-slate-500 mt-3 leading-relaxed">List free and reach verified students searching for housing right now. No commissions, no fees — ever.</p>
+              <Link
+                to={user?.role === 'landlord' ? '/create-listing' : '/signup?role=landlord'}
+                className="inline-flex items-center gap-2 bg-brand-600 hover:bg-brand-700 text-white px-6 py-3 rounded-xl font-semibold text-sm transition-all hover:shadow-lg hover:shadow-brand-600/20 active:scale-[0.98] mt-6"
+              >
+                List your property free <ArrowRight className="w-4 h-4" />
+              </Link>
+            </div>
+            <div className="grid grid-cols-3 gap-6 text-center">
+              <div>
+                <p className="text-3xl font-bold text-slate-900">2,716</p>
+                <p className="text-sm text-slate-500 mt-1">University portals</p>
+              </div>
+              <div>
+                <p className="text-3xl font-bold text-slate-900">Free</p>
+                <p className="text-sm text-slate-500 mt-1">Always free to list</p>
+              </div>
+              <div>
+                <p className="text-3xl font-bold text-slate-900">$0</p>
+                <p className="text-sm text-slate-500 mt-1">No commissions</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* CTA */}
       <section className="relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-brand-600 to-brand-800" />
@@ -130,15 +163,36 @@ export default function HomePage() {
         </div>
         <div className="max-w-3xl mx-auto text-center px-4 py-20 relative">
           <div className="mx-auto mb-5 w-fit"><Logo size={48} /></div>
-          <h2 className="text-3xl md:text-4xl font-bold text-white mb-4 tracking-tight">Ready to find your place?</h2>
-          <p className="text-brand-200 mb-8 text-lg">Join students finding off-campus housing near their campus.</p>
-          <Link
-            to="/signup"
-            className="inline-flex items-center gap-2 bg-white text-brand-700 px-8 py-4 rounded-xl font-semibold text-base hover:bg-brand-50 transition-all hover:shadow-xl active:scale-[0.98]"
-          >
-            Get Started Free
-            <ArrowRight className="w-4 h-4" />
-          </Link>
+          {!user ? (
+            <>
+              <h2 className="text-3xl md:text-4xl font-bold text-white mb-4 tracking-tight">Ready to find your place?</h2>
+              <p className="text-brand-200 mb-8 text-lg">Free for students. Free to list for landlords.</p>
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+                <Link to="/signup" className="inline-flex items-center gap-2 bg-white text-brand-700 px-8 py-4 rounded-xl font-semibold text-base hover:bg-brand-50 transition-all hover:shadow-xl active:scale-[0.98]">
+                  Find housing near my campus <ArrowRight className="w-4 h-4" />
+                </Link>
+                <Link to="/signup?role=landlord" className="inline-flex items-center gap-2 border border-white/40 text-white px-8 py-4 rounded-xl font-semibold text-base hover:bg-white/10 transition-all active:scale-[0.98]">
+                  List my property free <ArrowRight className="w-4 h-4" />
+                </Link>
+              </div>
+            </>
+          ) : user.role === 'student' ? (
+            <>
+              <h2 className="text-3xl md:text-4xl font-bold text-white mb-4 tracking-tight">Find housing near your campus</h2>
+              <p className="text-brand-200 mb-8 text-lg">Browse listings and rent data for every university in America.</p>
+              <Link to="/universities" className="inline-flex items-center gap-2 bg-white text-brand-700 px-8 py-4 rounded-xl font-semibold text-base hover:bg-brand-50 transition-all hover:shadow-xl active:scale-[0.98]">
+                Browse universities <ArrowRight className="w-4 h-4" />
+              </Link>
+            </>
+          ) : (
+            <>
+              <h2 className="text-3xl md:text-4xl font-bold text-white mb-4 tracking-tight">Ready to list your property?</h2>
+              <p className="text-brand-200 mb-8 text-lg">Reach verified students near your campus. Free, no commissions.</p>
+              <Link to="/create-listing" className="inline-flex items-center gap-2 bg-white text-brand-700 px-8 py-4 rounded-xl font-semibold text-base hover:bg-brand-50 transition-all hover:shadow-xl active:scale-[0.98]">
+                List your property free <ArrowRight className="w-4 h-4" />
+              </Link>
+            </>
+          )}
         </div>
       </section>
 

@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
 import { Mail, Lock, User, GraduationCap, Eye, EyeOff } from 'lucide-react';
 import Logo from '../components/Logo';
@@ -16,6 +16,13 @@ export default function SignupPage() {
   const [error, setError] = useState('');
   const { signup, isLoading } = useAuthStore();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+
+  useEffect(() => {
+    if (searchParams.get('role') === 'landlord') {
+      setForm(prev => ({ ...prev, role: 'landlord', university: '' }));
+    }
+  }, []);
 
   const update = (field: string, value: any) => {
     if (field === 'role') {
