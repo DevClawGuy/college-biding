@@ -2,20 +2,10 @@ import { Link } from 'react-router-dom';
 import { Search, Shield, TrendingUp, ArrowRight, CheckSquare, AlertTriangle, ShieldAlert } from 'lucide-react';
 import Logo from '../components/Logo';
 import { motion } from 'framer-motion';
-import { useEffect, useState } from 'react';
 import { useAuthStore } from '../store/authStore';
-import api from '../lib/api';
-import ListingCard from '../components/ListingCard';
 
 export default function HomePage() {
   const { user } = useAuthStore();
-  const [featured, setFeatured] = useState<any[]>([]);
-
-  useEffect(() => {
-    api.get('/listings?sort=ending_soonest').then(({ data }) => {
-      setFeatured(data.slice(0, 3));
-    }).catch(() => {});
-  }, []);
 
   return (
     <div className="min-h-screen">
@@ -82,7 +72,7 @@ export default function HomePage() {
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
         <div className="text-center mb-14">
           <h2 className="text-3xl md:text-4xl font-bold text-slate-900 tracking-tight">How HouseRush Works</h2>
-          <p className="text-slate-500 mt-3 max-w-lg mx-auto">Three simple steps to secure your perfect off-campus home.</p>
+          <p className="text-slate-500 mt-3 max-w-lg mx-auto">Simple, transparent, and free for everyone.</p>
         </div>
         <div className="grid md:grid-cols-3 gap-6">
           {[
@@ -102,28 +92,6 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Featured Listings */}
-      {featured.length > 0 && (
-        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-24">
-          <div className="flex items-end justify-between mb-8">
-            <div>
-              <h2 className="text-2xl md:text-3xl font-bold text-slate-900 tracking-tight">Ending Soon</h2>
-              <p className="text-slate-500 mt-1">Don't miss these auctions about to close.</p>
-            </div>
-            <Link to="/listings?sort=ending_soonest" className="hidden sm:flex items-center gap-1.5 text-brand-600 hover:text-brand-700 font-semibold text-sm transition-colors">
-              View All <ArrowRight className="w-4 h-4" />
-            </Link>
-          </div>
-          <div className="grid md:grid-cols-3 gap-6">
-            {featured.map((listing) => (
-              <ListingCard key={listing.id} listing={listing} />
-            ))}
-          </div>
-          <Link to="/listings?sort=ending_soonest" className="sm:hidden flex items-center justify-center gap-1.5 text-brand-600 font-semibold text-sm mt-6">
-            View All Listings <ArrowRight className="w-4 h-4" />
-          </Link>
-        </section>
-      )}
 
       {/* Free Resources */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-24">

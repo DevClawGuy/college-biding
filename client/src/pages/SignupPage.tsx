@@ -57,10 +57,10 @@ export default function SignupPage() {
             <span className="text-2xl font-bold text-white">HouseRush</span>
           </div>
           <h2 className="text-4xl font-bold text-white leading-tight mb-4">
-            Join thousands of students finding their home.
+            The smartest way to find off-campus housing.
           </h2>
           <p className="text-brand-200 text-lg leading-relaxed">
-            Create your free account and start bidding on verified off-campus housing near your university.
+            Free for students. Free to list for landlords. Real rent data for every campus in America.
           </p>
         </div>
       </div>
@@ -74,7 +74,7 @@ export default function SignupPage() {
           </Link>
 
           <h2 className="text-2xl font-bold text-slate-900 mb-1">Create your account</h2>
-          <p className="text-slate-500 text-sm mb-6">Start bidding on student housing</p>
+          <p className="text-slate-500 text-sm mb-6">Find your perfect place near campus</p>
 
           {error && (
             <div className="bg-rose-50 border border-rose-200 text-rose-600 rounded-xl px-4 py-3 text-sm mb-5">{error}</div>
