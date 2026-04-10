@@ -157,6 +157,10 @@ export const universities = sqliteTable('universities', {
   ipedsRoomBoardOncampus: integer('ipeds_room_board_oncampus'),
   ipedsHousingOffcampus: integer('ipeds_housing_offcampus'),
   ipedsDataYear: integer('ipeds_data_year'),
+  zoriLatest: real('zori_latest'),
+  zori12moAgo: real('zori_12mo_ago'),
+  zoriYoYPct: real('zori_yoy_pct'),
+  zoriUpdatedAt: text('zori_updated_at'),
   createdAt: text('created_at').notNull().default(''),
 });
 

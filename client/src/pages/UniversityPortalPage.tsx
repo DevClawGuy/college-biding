@@ -28,6 +28,10 @@ interface UniversityDetail {
   ipedsRoomBoardOncampus: number | null;
   ipedsHousingOffcampus: number | null;
   ipedsDataYear: number | null;
+  zoriLatest: number | null;
+  zori12moAgo: number | null;
+  zoriYoYPct: number | null;
+  zoriUpdatedAt: string | null;
   marketData: MarketDataItem[];
 }
 
@@ -271,6 +275,29 @@ export default function UniversityPortalPage() {
               <p style={{ fontSize: 10, opacity: 0.55, color: isLight ? '#1e293b' : '#fff', marginTop: 6 }}>Federal rent data (FY2026) — 40th percentile including utilities</p>
             </div>
           )}
+
+          {/* ZORI rent trend pill */}
+          {university.zoriYoYPct != null && (() => {
+            const pct = university.zoriYoYPct;
+            const absPct = Math.abs(pct);
+            let arrow: string;
+            let label: string;
+            if (pct > 1.5) { arrow = '↑'; label = `Rents up ${absPct}% this year`; }
+            else if (pct < -1.5) { arrow = '↓'; label = `Rents down ${absPct}% this year`; }
+            else { arrow = '→'; label = 'Rents stable this year'; }
+            const textColor = isLight ? '#1e293b' : '#fff';
+            return (
+              <div className="mt-4">
+                <span
+                  className="inline-flex items-center gap-1.5"
+                  style={{ background: 'rgba(255,255,255,0.12)', border: '1px solid rgba(255,255,255,0.2)', borderRadius: 8, padding: '6px 14px', fontSize: 13, fontWeight: 500, color: textColor }}
+                >
+                  {arrow} {label}
+                </span>
+                <p style={{ fontSize: 10, opacity: 0.55, color: textColor, marginTop: 4 }}>Data provided by Zillow Group</p>
+              </div>
+            );
+          })()}
 
           {/* Landlord CTA in hero */}
           {showLandlordCTA && (

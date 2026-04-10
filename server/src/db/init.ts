@@ -196,6 +196,10 @@ export async function initializeDatabase(): Promise<void> {
     `ALTER TABLE universities ADD COLUMN ipeds_room_board_oncampus INTEGER`,
     `ALTER TABLE universities ADD COLUMN ipeds_housing_offcampus INTEGER`,
     `ALTER TABLE universities ADD COLUMN ipeds_data_year INTEGER`,
+    `ALTER TABLE universities ADD COLUMN zori_latest REAL`,
+    `ALTER TABLE universities ADD COLUMN zori_12mo_ago REAL`,
+    `ALTER TABLE universities ADD COLUMN zori_yoy_pct REAL`,
+    `ALTER TABLE universities ADD COLUMN zori_updated_at TEXT`,
   ];
   for (const sql of migrations) {
     try {
