@@ -57,6 +57,8 @@ export const listings = sqliteTable('listings', {
   fmrForBeds: integer('fmr_for_beds'),
   rentcheckScore: real('rentcheck_score'),
   rentcheckLabel: text('rentcheck_label'),
+  nearbyAmenities: text('nearby_amenities'),
+  nearbyAmenitiesUpdatedAt: text('nearby_amenities_updated_at'),
   createdAt: text('created_at').notNull().default(''),
 });
 

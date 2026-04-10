@@ -5,6 +5,7 @@ import { db, schema } from '../db';
 import { eq, and, like, gte, lte, asc, desc, sql } from 'drizzle-orm';
 import { authenticateToken, AuthRequest, JWT_SECRET } from '../middleware/auth';
 import { calculateRentCheck } from '../lib/rentcheck';
+import { fetchNearbyAmenities } from '../lib/overpass';
 
 const router = Router();
 
@@ -248,6 +249,21 @@ router.post('/', authenticateToken, async (req: AuthRequest, res: Response) => {
       }
     } catch (rcErr) {
       console.error('RentCheck compute error (non-fatal):', rcErr);
+    }
+
+    // Fetch nearby amenities (non-blocking)
+    try {
+      if (lat != null && lng != null) {
+        const nearby = await fetchNearbyAmenities(lat, lng);
+        if (nearby) {
+          await db.update(schema.listings).set({
+            nearbyAmenities: JSON.stringify(nearby),
+            nearbyAmenitiesUpdatedAt: new Date().toISOString(),
+          }).where(eq(schema.listings.id, id)).run();
+        }
+      }
+    } catch (osmErr) {
+      console.error('Nearby amenities fetch error (non-fatal):', osmErr);
     }
 
     const listing = await db.select().from(schema.listings).where(eq(schema.listings.id, id)).get();

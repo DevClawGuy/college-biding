@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback, useRef } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { MapPin, Bed, Bath, Ruler, Clock, Heart, ChevronLeft, ChevronRight, Check, Eye, MessageCircle, Send, ChevronDown, Calendar, Users } from 'lucide-react';
+import { MapPin, Bed, Bath, Ruler, Clock, Heart, ChevronLeft, ChevronRight, Check, Eye, MessageCircle, Send, ChevronDown, Calendar, Users, ShoppingCart, Bus, Coffee, Bike, CreditCard, Pill, Shirt } from 'lucide-react';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import { useCountdown } from '../hooks/useCountdown';
 import { useAuthStore } from '../store/authStore';
@@ -34,6 +34,7 @@ interface Listing {
   winnerId: string | null;
   secureLeasePrice: number | null;
   viewCount: number;
+  nearbyAmenities?: string | null;
   landlordId: string;
   landlord?: { id: string; name: string; university: string; avatar: string | null };
   winner?: { id: string; name: string; email: string; university: string } | null;
@@ -337,6 +338,67 @@ export default function ListingDetailPage() {
               </div>
             </div>
           )}
+
+          {/* What's Nearby */}
+          {(() => {
+            if (!listing.nearbyAmenities) return null;
+            let nearby: Array<{ category: string; name: string; distanceMeters: number }>;
+            try { nearby = JSON.parse(listing.nearbyAmenities); } catch { return null; }
+            if (!nearby || nearby.length === 0) return null;
+
+            const catConfig: Record<string, { icon: typeof ShoppingCart; label: string }> = {
+              grocery: { icon: ShoppingCart, label: 'Grocery & Convenience' },
+              laundry: { icon: Shirt, label: 'Laundry' },
+              transit: { icon: Bus, label: 'Transit' },
+              pharmacy: { icon: Pill, label: 'Pharmacy' },
+              cafe: { icon: Coffee, label: 'Cafes & Coffee' },
+              bike: { icon: Bike, label: 'Bike Parking & Rental' },
+              atm: { icon: CreditCard, label: 'ATM' },
+            };
+
+            function fmtDist(m: number): string {
+              if (m < 100) return '< 100m';
+              if (m < 1000) return `${Math.round(m / 10) * 10}m`;
+              return `${(m / 1000).toFixed(1)}km`;
+            }
+
+            const grouped = new Map<string, typeof nearby>();
+            for (const item of nearby) {
+              const arr = grouped.get(item.category) ?? [];
+              arr.push(item);
+              grouped.set(item.category, arr);
+            }
+
+            return (
+              <div>
+                <h2 className="text-lg font-semibold text-slate-900 mb-4">What's Nearby</h2>
+                <div className="grid sm:grid-cols-2 gap-4">
+                  {Array.from(grouped.entries()).map(([cat, items]) => {
+                    const cfg = catConfig[cat];
+                    if (!cfg) return null;
+                    const Icon = cfg.icon;
+                    return (
+                      <div key={cat} className="bg-white rounded-xl border border-slate-100 p-4">
+                        <div className="flex items-center gap-2 mb-3">
+                          <Icon className="w-4 h-4 text-brand-600" />
+                          <span className="text-sm font-medium text-slate-900">{cfg.label}</span>
+                        </div>
+                        <div className="space-y-2">
+                          {items.slice(0, 3).map((item, idx) => (
+                            <div key={idx} className="flex items-center justify-between text-sm">
+                              <span className="text-slate-600 truncate mr-2">{item.name}</span>
+                              <span className="text-slate-400 text-xs flex-shrink-0">{fmtDist(item.distanceMeters)}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+                <p className="text-xs text-slate-400 mt-3">&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer" className="underline">OpenStreetMap</a> contributors</p>
+              </div>
+            );
+          })()}
 
           {/* Interested Students — landlord owner only */}
           {isLandlordOwner && (

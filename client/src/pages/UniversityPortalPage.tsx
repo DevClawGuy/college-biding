@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { ChevronLeft, ArrowRight, ShieldCheck, FileText, DollarSign, Users, Info, Eye, MapPin, Bed, Bath } from 'lucide-react';
+import { ChevronLeft, ArrowRight, ShieldCheck, FileText, DollarSign, Users, Info, Eye, MapPin, Bed, Bath, ShoppingCart, Bus, Coffee, Bike, CreditCard, Pill, Shirt } from 'lucide-react';
 import api from '../lib/api';
 import { useAuthStore } from '../store/authStore';
 
@@ -459,6 +459,33 @@ export default function UniversityPortalPage() {
                             </div>
                             <span style={{ background: primaryColor, color: '#fff', border: 'none', borderRadius: 6, padding: '7px 14px', fontSize: 12, fontWeight: 500 }}>View</span>
                           </div>
+                          {/* Nearby amenity icons */}
+                          {(() => {
+                            if (!listing.nearbyAmenities) return null;
+                            let nearby: Array<{ category: string }>;
+                            try { nearby = typeof listing.nearbyAmenities === 'string' ? JSON.parse(listing.nearbyAmenities) : listing.nearbyAmenities; } catch { return null; }
+                            if (!nearby || nearby.length === 0) return null;
+                            const catIcons: Record<string, { icon: typeof ShoppingCart; label: string }> = {
+                              grocery: { icon: ShoppingCart, label: 'Grocery' },
+                              laundry: { icon: Shirt, label: 'Laundry' },
+                              transit: { icon: Bus, label: 'Transit' },
+                              pharmacy: { icon: Pill, label: 'Pharmacy' },
+                              cafe: { icon: Coffee, label: 'Cafe' },
+                              bike: { icon: Bike, label: 'Bike' },
+                              atm: { icon: CreditCard, label: 'ATM' },
+                            };
+                            const cats = [...new Set(nearby.map(n => n.category))].slice(0, 5);
+                            return (
+                              <div className="flex items-center gap-1.5 mt-2">
+                                {cats.map(cat => {
+                                  const cfg = catIcons[cat];
+                                  if (!cfg) return null;
+                                  const Icon = cfg.icon;
+                                  return <span key={cat} title={cfg.label}><Icon className="w-4 h-4" style={{ color: '#94a3b8' }} /></span>;
+                                })}
+                              </div>
+                            );
+                          })()}
                         </div>
                       </Link>
                     );

@@ -4,6 +4,7 @@ import crypto from 'crypto';
 import { db, schema } from '../db';
 import { eq, like, gte, desc, sql } from 'drizzle-orm';
 import { sendEmail } from '../lib/email';
+import { fetchNearbyAmenities } from '../lib/overpass';
 
 const router = Router();
 
@@ -332,6 +333,23 @@ router.post('/listings/:id/approve', async (req: Request, res: Response) => {
   try {
     if (!checkAdminKey(req, res)) return;
     await db.update(schema.listings).set({ approvalStatus: 'approved' }).where(eq(schema.listings.id, String(req.params.id))).run();
+
+    // Fetch nearby amenities (non-blocking)
+    try {
+      const listing = await db.select().from(schema.listings).where(eq(schema.listings.id, String(req.params.id))).get();
+      if (listing?.lat != null && listing?.lng != null) {
+        const amenities = await fetchNearbyAmenities(listing.lat, listing.lng);
+        if (amenities) {
+          await db.update(schema.listings).set({
+            nearbyAmenities: JSON.stringify(amenities),
+            nearbyAmenitiesUpdatedAt: new Date().toISOString(),
+          }).where(eq(schema.listings.id, listing.id)).run();
+        }
+      }
+    } catch (osmErr) {
+      console.error('Nearby amenities fetch error (non-fatal):', osmErr);
+    }
+
     res.json({ success: true });
   } catch (error) {
     res.status(500).json({ error: 'Internal server error' });
