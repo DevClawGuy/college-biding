@@ -5,7 +5,6 @@ import Footer from './components/Footer';
 import HomePage from './pages/HomePage';
 import LoginPage from './pages/LoginPage';
 import SignupPage from './pages/SignupPage';
-import ListingsPage from './pages/ListingsPage';
 import ListingDetailPage from './pages/ListingDetailPage';
 import DashboardPage from './pages/DashboardPage';
 import CreateListingPage from './pages/CreateListingPage';
@@ -56,7 +55,7 @@ function AppContent() {
           <main className="flex-1">
             <Routes>
               <Route path="/" element={<HomePage />} />
-              <Route path="/listings" element={<ListingsPage />} />
+              <Route path="/listings" element={<Navigate to="/universities" replace />} />
               <Route path="/listing/:id" element={<ListingDetailPage />} />
               <Route path="/dashboard" element={<DashboardPage />} />
               <Route path="/create-listing" element={<CreateListingPage />} />

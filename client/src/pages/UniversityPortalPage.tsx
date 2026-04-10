@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { ChevronLeft, ArrowRight, ShieldCheck, FileText, DollarSign, Users, Info, Eye, MapPin, Bed, Bath, ShoppingCart, Bus, Coffee, Bike, CreditCard, Pill, Shirt } from 'lucide-react';
+import { ChevronLeft, ArrowRight, ShieldCheck, FileText, DollarSign, Users, Info, Eye, MapPin, Bed, Bath, ShoppingCart, Bus, Coffee, Bike, CreditCard, Pill, Shirt, Search, SlidersHorizontal, X } from 'lucide-react';
 import api from '../lib/api';
 import { useAuthStore } from '../store/authStore';
 
@@ -87,6 +87,15 @@ export default function UniversityPortalPage() {
   const [listings, setListings] = useState<any[]>([]);
   const [favorites, setFavorites] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
+
+  // Filter state
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedBeds, setSelectedBeds] = useState('any');
+  const [minPrice, setMinPrice] = useState<number | null>(null);
+  const [maxPrice, setMaxPrice] = useState<number | null>(null);
+  const [selectedAmenities, setSelectedAmenities] = useState<string[]>([]);
+  const [showFilters, setShowFilters] = useState(false);
+  const [sortBy, setSortBy] = useState('newest');
 
   useEffect(() => {
     if (!slug) return;
@@ -205,6 +214,57 @@ export default function UniversityPortalPage() {
   const avgRent = listings.length > 0
     ? Math.round(listings.reduce((sum: number, l: any) => sum + (l.startingBid ?? 0), 0) / listings.length)
     : null;
+
+  const toggleAmenityFilter = (a: string) => {
+    setSelectedAmenities(prev => prev.includes(a) ? prev.filter(x => x !== a) : [...prev, a]);
+  };
+
+  const clearFilters = () => {
+    setSearchQuery('');
+    setSelectedBeds('any');
+    setMinPrice(null);
+    setMaxPrice(null);
+    setSelectedAmenities([]);
+    setSortBy('newest');
+  };
+
+  const hasActiveFilters = searchQuery || selectedBeds !== 'any' || minPrice != null || maxPrice != null || selectedAmenities.length > 0;
+
+  const filteredListings = useMemo(() => {
+    let result = [...listings];
+
+    if (searchQuery) {
+      const q = searchQuery.toLowerCase();
+      result = result.filter(l =>
+        (l.title ?? '').toLowerCase().includes(q) ||
+        (l.address ?? '').toLowerCase().includes(q) ||
+        (l.description ?? '').toLowerCase().includes(q)
+      );
+    }
+
+    if (selectedBeds !== 'any') {
+      if (selectedBeds === 'studio') result = result.filter(l => l.beds === 0);
+      else if (selectedBeds === '3+') result = result.filter(l => l.beds >= 3);
+      else result = result.filter(l => l.beds === Number(selectedBeds));
+    }
+
+    if (minPrice != null) result = result.filter(l => (l.startingBid ?? 0) >= minPrice);
+    if (maxPrice != null) result = result.filter(l => (l.startingBid ?? 0) <= maxPrice);
+
+    if (selectedAmenities.length > 0) {
+      result = result.filter(l => {
+        const listAmenities: string[] = Array.isArray(l.amenities) ? l.amenities : [];
+        return selectedAmenities.every(a => listAmenities.some((la: string) => la.toLowerCase().includes(a.toLowerCase())));
+      });
+    }
+
+    if (sortBy === 'price_asc') result.sort((a, b) => (a.startingBid ?? 0) - (b.startingBid ?? 0));
+    else if (sortBy === 'price_desc') result.sort((a, b) => (b.startingBid ?? 0) - (a.startingBid ?? 0));
+    else if (sortBy === 'rentcheck') result.sort((a, b) => (b.rentcheckScore ?? 0) - (a.rentcheckScore ?? 0));
+    else result.sort((a, b) => ((b.createdAt ?? '') > (a.createdAt ?? '') ? 1 : -1));
+
+    return result;
+  }, [listings, searchQuery, selectedBeds, minPrice, maxPrice, selectedAmenities, sortBy]);
 
   return (
     <div>
@@ -379,9 +439,93 @@ export default function UniversityPortalPage() {
             <h2 className="font-semibold text-slate-900 tracking-tight" style={{ fontSize: 20 }}>Housing Near {university.name}</h2>
             {listings.length > 0 ? (
               <>
-                <p className="text-slate-500 mt-0.5 mb-4" style={{ fontSize: 13 }}>{listings.length} propert{listings.length !== 1 ? 'ies' : 'y'} available near campus</p>
+                {/* Search + Sort row */}
+                <div className="flex items-center gap-2 mt-3 mb-3">
+                  <div className="relative flex-1">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: '#94a3b8' }} />
+                    <input
+                      type="text"
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      placeholder="Search listings..."
+                      className="w-full pl-9 pr-3 py-2 text-sm bg-white rounded-lg"
+                      style={{ border: '0.5px solid #e2e8f0', outline: 'none' }}
+                    />
+                    {searchQuery && (
+                      <button onClick={() => setSearchQuery('')} className="absolute right-2 top-1/2 -translate-y-1/2">
+                        <X className="w-3.5 h-3.5" style={{ color: '#94a3b8' }} />
+                      </button>
+                    )}
+                  </div>
+                  <button
+                    onClick={() => setShowFilters(!showFilters)}
+                    className="flex items-center gap-1.5 px-3 py-2 text-sm font-medium bg-white rounded-lg transition-all"
+                    style={{ border: `0.5px solid ${showFilters || hasActiveFilters ? primaryColor : '#e2e8f0'}`, color: showFilters || hasActiveFilters ? primaryColor : '#64748b' }}
+                  >
+                    <SlidersHorizontal className="w-3.5 h-3.5" />
+                    Filters{hasActiveFilters ? ' ·' : ''}
+                  </button>
+                  <select
+                    value={sortBy}
+                    onChange={(e) => setSortBy(e.target.value)}
+                    className="px-3 py-2 text-sm bg-white rounded-lg"
+                    style={{ border: '0.5px solid #e2e8f0', color: '#64748b', outline: 'none' }}
+                  >
+                    <option value="newest">Newest</option>
+                    <option value="price_asc">Price: Low → High</option>
+                    <option value="price_desc">Price: High → Low</option>
+                    <option value="rentcheck">Best Deal</option>
+                  </select>
+                </div>
+
+                {/* Expanded filters */}
+                {showFilters && (
+                  <div className="bg-white rounded-lg p-4 mb-3 space-y-3" style={{ border: '0.5px solid #e2e8f0' }}>
+                    <div>
+                      <p className="text-xs font-medium text-slate-500 mb-1.5" style={{ textTransform: 'uppercase', letterSpacing: '0.05em' }}>Bedrooms</p>
+                      <div className="flex gap-1.5">
+                        {[{ v: 'any', l: 'Any' }, { v: 'studio', l: 'Studio' }, { v: '1', l: '1' }, { v: '2', l: '2' }, { v: '3+', l: '3+' }].map(o => (
+                          <button key={o.v} onClick={() => setSelectedBeds(o.v)}
+                            className="px-3 py-1.5 text-xs font-medium rounded-md transition-all"
+                            style={{ background: selectedBeds === o.v ? primaryColor : '#f1f5f9', color: selectedBeds === o.v ? '#fff' : '#64748b' }}>
+                            {o.l}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                    <div>
+                      <p className="text-xs font-medium text-slate-500 mb-1.5" style={{ textTransform: 'uppercase', letterSpacing: '0.05em' }}>Price Range</p>
+                      <div className="flex items-center gap-2">
+                        <input type="number" placeholder="Min $/mo" value={minPrice ?? ''} onChange={(e) => setMinPrice(e.target.value ? Number(e.target.value) : null)}
+                          className="w-28 px-2.5 py-1.5 text-xs bg-white rounded-md" style={{ border: '0.5px solid #e2e8f0', outline: 'none' }} />
+                        <span className="text-slate-300">—</span>
+                        <input type="number" placeholder="Max $/mo" value={maxPrice ?? ''} onChange={(e) => setMaxPrice(e.target.value ? Number(e.target.value) : null)}
+                          className="w-28 px-2.5 py-1.5 text-xs bg-white rounded-md" style={{ border: '0.5px solid #e2e8f0', outline: 'none' }} />
+                      </div>
+                    </div>
+                    <div>
+                      <p className="text-xs font-medium text-slate-500 mb-1.5" style={{ textTransform: 'uppercase', letterSpacing: '0.05em' }}>Amenities</p>
+                      <div className="flex flex-wrap gap-1.5">
+                        {['Parking', 'Pet Friendly', 'Utilities Included', 'Furnished', 'Laundry'].map(a => (
+                          <button key={a} onClick={() => toggleAmenityFilter(a)}
+                            className="px-3 py-1.5 text-xs font-medium rounded-md transition-all"
+                            style={{ background: selectedAmenities.includes(a) ? primaryColor : '#f1f5f9', color: selectedAmenities.includes(a) ? '#fff' : '#64748b' }}>
+                            {a}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                    {hasActiveFilters && (
+                      <button onClick={clearFilters} className="text-xs font-medium transition-colors" style={{ color: primaryColor }}>Clear all filters</button>
+                    )}
+                  </div>
+                )}
+
+                <p className="text-slate-500 mb-3" style={{ fontSize: 13 }}>{filteredListings.length} propert{filteredListings.length !== 1 ? 'ies' : 'y'} {hasActiveFilters ? 'found' : 'available near campus'}</p>
+
+                {filteredListings.length > 0 ? (
                 <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                  {listings.map((listing: any) => {
+                  {filteredListings.map((listing: any) => {
                     const rcLabel = listing.rentcheckScore != null && listing.rentcheckLabel ? getRentCheckDisplay(listing.rentcheckScore, listing.rentcheckLabel) : null;
                     const ppb = listing.pricePerBed as number | null;
                     const fmrBeds = listing.fmrForBeds as number | null;
@@ -491,6 +635,13 @@ export default function UniversityPortalPage() {
                     );
                   })}
                 </div>
+                ) : (
+                  <div className="text-center py-10 bg-white rounded-lg" style={{ border: '0.5px solid #e2e8f0' }}>
+                    <p className="text-sm font-medium text-slate-700">No listings match your filters.</p>
+                    <p className="text-xs text-slate-500 mt-1">Try adjusting your search.</p>
+                    <button onClick={clearFilters} className="mt-3 text-xs font-medium" style={{ color: primaryColor }}>Clear filters</button>
+                  </div>
+                )}
               </>
             ) : (
               <div className="text-center py-12 bg-white rounded-lg mt-4" style={{ border: '0.5px solid #e2e8f0' }}>
