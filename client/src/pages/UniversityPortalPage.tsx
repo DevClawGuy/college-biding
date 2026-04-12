@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { ChevronLeft, ArrowRight, ShieldCheck, FileText, DollarSign, Users, Info, Eye, MapPin, Bed, Bath, ShoppingCart, Bus, Coffee, Bike, CreditCard, Pill, Shirt, Search, SlidersHorizontal, X } from 'lucide-react';
+import { ChevronLeft, ArrowRight, ShieldCheck, FileText, DollarSign, Users, Info, Eye, MapPin, Bed, Bath, ShoppingCart, Bus, Coffee, Bike, CreditCard, Pill, Shirt, Search, SlidersHorizontal, X, ChevronDown } from 'lucide-react';
 import api from '../lib/api';
 import { useAuthStore } from '../store/authStore';
 
@@ -96,6 +96,8 @@ export default function UniversityPortalPage() {
   const [selectedAmenities, setSelectedAmenities] = useState<string[]>([]);
   const [showFilters, setShowFilters] = useState(false);
   const [sortBy, setSortBy] = useState('newest');
+  const [isFmrOpen, setIsFmrOpen] = useState(false);
+  const [isGoodToKnowOpen, setIsGoodToKnowOpen] = useState(false);
 
   useEffect(() => {
     if (!slug) return;
@@ -301,71 +303,67 @@ export default function UniversityPortalPage() {
             {university.enrollment != null && ` · ${university.enrollment.toLocaleString()} students`}
           </p>
 
-          {/* How to read these numbers */}
+          {/* Good to Know accordion */}
           {university.ipedsHousingOffcampus != null && university.ipedsHousingOffcampus > 0 && (
-            <div
-              className="mt-5 flex items-start gap-3"
-              style={{ background: 'rgba(255,255,255,0.12)', border: '1px solid rgba(255,255,255,0.25)', borderRadius: '10px', padding: '1rem 1.25rem' }}
-            >
-              <div className="flex-shrink-0 flex items-center justify-center" style={{ width: 32, height: 32, background: 'rgba(255,255,255,0.2)', borderRadius: 8 }}>
-                <Info className="w-4 h-4" style={{ color: isLight ? '#1e293b' : '#fff' }} />
-              </div>
-              <div>
-                <p style={{ fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.05em', opacity: 0.7, color: isLight ? '#1e293b' : '#fff', marginBottom: 4, fontWeight: 600 }}>Good to know</p>
-                <p style={{ fontSize: 15, fontWeight: 500, color: isLight ? '#1e293b' : '#fff', lineHeight: 1.45 }}>{university.name} estimates ${university.ipedsHousingOffcampus.toLocaleString()}/mo for a student's off-campus housing and food combined. The federal rent guide below shows rent-only costs for this area. Your actual rent will likely fall somewhere in between — use both numbers to build your budget.</p>
-              </div>
-            </div>
-          )}
-
-          {/* FMR pills in hero */}
-          {marketItems.length > 0 && (
-            <div className="mt-5">
-              <div className="flex gap-2 overflow-x-auto" style={{ scrollbarWidth: 'none' }}>
-                {marketItems.map(d => (
-                  <div
-                    key={d.id}
-                    className="flex-shrink-0 text-center"
-                    style={{ background: 'rgba(255,255,255,0.12)', border: '1px solid rgba(255,255,255,0.2)', borderRadius: 8, padding: '8px 14px' }}
-                  >
-                    <p style={{ fontSize: 11, opacity: 0.65, color: isLight ? '#1e293b' : '#fff' }}>{bedroomLabel(d.bedroomCount)}</p>
-                    <p style={{ fontSize: 16, fontWeight: 500, color: isLight ? '#1e293b' : '#fff' }}>${(d.medianRent ?? 0).toLocaleString()}</p>
-                  </div>
-                ))}
-              </div>
-              <p style={{ fontSize: 10, opacity: 0.55, color: isLight ? '#1e293b' : '#fff', marginTop: 6 }}>Federal rent data (FY2026) — 40th percentile including utilities</p>
-            </div>
-          )}
-
-          {/* ZORI rent trend pill */}
-          {university.zoriYoYPct != null && (() => {
-            const pct = university.zoriYoYPct;
-            const absPct = Math.abs(pct);
-            let arrow: string;
-            let label: string;
-            if (pct > 1.5) { arrow = '↑'; label = `Rents up ${absPct}% this year`; }
-            else if (pct < -1.5) { arrow = '↓'; label = `Rents down ${absPct}% this year`; }
-            else { arrow = '→'; label = 'Rents stable this year'; }
-            const textColor = isLight ? '#1e293b' : '#fff';
-            return (
-              <div className="mt-4">
-                <span
-                  className="inline-flex items-center gap-1.5"
-                  style={{ background: 'rgba(255,255,255,0.12)', border: '1px solid rgba(255,255,255,0.2)', borderRadius: 8, padding: '6px 14px', fontSize: 13, fontWeight: 500, color: textColor }}
-                >
-                  {arrow} {label}
+            <div className="mt-5 rounded-lg bg-white/10 border border-white/20 overflow-hidden">
+              <button
+                onClick={() => setIsGoodToKnowOpen(!isGoodToKnowOpen)}
+                className={`w-full flex items-center justify-between px-4 py-3 ${isLight ? 'text-slate-900' : 'text-white'}`}
+              >
+                <span className="flex items-center gap-2 text-sm font-semibold">
+                  <Info className="w-4 h-4" />
+                  Good to Know
                 </span>
-                <p style={{ fontSize: 10, opacity: 0.55, color: textColor, marginTop: 4 }}>Data provided by Zillow Group</p>
+                <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${isGoodToKnowOpen ? 'rotate-180' : ''}`} />
+              </button>
+              <div className={`overflow-hidden transition-all duration-300 ${isGoodToKnowOpen ? 'max-h-60' : 'max-h-0'}`}>
+                <div className={`px-4 pb-4 text-sm leading-relaxed ${isLight ? 'text-slate-800' : 'text-white/85'}`}>
+                  {university.name} estimates ${university.ipedsHousingOffcampus.toLocaleString()}/mo for a student's off-campus housing and food combined. The federal rent guide below shows rent-only costs for this area. Your actual rent will likely fall somewhere in between — use both numbers to build your budget.
+                </div>
               </div>
-            );
-          })()}
+            </div>
+          )}
+
+          {/* FMR accordion */}
+          {marketItems.length > 0 && (
+            <div className="mt-5 rounded-lg bg-white/10 border border-white/20 overflow-hidden">
+              <button
+                onClick={() => setIsFmrOpen(!isFmrOpen)}
+                className={`w-full flex items-center justify-between px-4 py-3 ${isLight ? 'text-slate-900' : 'text-white'}`}
+              >
+                <span className="flex items-center gap-3 text-sm font-semibold">
+                  Federal Rent Guide (FY2026)
+                  {university.zoriYoYPct != null && (() => {
+                    const pct = university.zoriYoYPct;
+                    const absPct = Math.abs(pct);
+                    const trendLabel = pct > 1.5 ? `↑ Rents up ${absPct}% this year` : pct < -1.5 ? `↓ Rents down ${absPct}% this year` : '→ Rents stable this year';
+                    return <span className="text-xs font-medium bg-white/15 px-2 py-0.5 rounded-full">{trendLabel}</span>;
+                  })()}
+                </span>
+                <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${isFmrOpen ? 'rotate-180' : ''}`} />
+              </button>
+              <div className={`overflow-hidden transition-all duration-300 ${isFmrOpen ? 'max-h-60' : 'max-h-0'}`}>
+                <div className="px-4 pb-4">
+                  <div className="flex gap-2 overflow-x-auto" style={{ scrollbarWidth: 'none' }}>
+                    {marketItems.map(d => (
+                      <div key={d.id} className="flex-shrink-0 text-center bg-white/10 border border-white/20 rounded-lg px-3.5 py-2">
+                        <p className={`text-xs opacity-65 ${isLight ? 'text-slate-900' : 'text-white'}`}>{bedroomLabel(d.bedroomCount)}</p>
+                        <p className={`text-base font-medium ${isLight ? 'text-slate-900' : 'text-white'}`}>${(d.medianRent ?? 0).toLocaleString()}</p>
+                      </div>
+                    ))}
+                  </div>
+                  <p className={`text-[10px] opacity-55 mt-2 ${isLight ? 'text-slate-900' : 'text-white'}`}>Federal rent data (FY2026) — 40th percentile including utilities</p>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Landlord CTA in hero */}
           {showLandlordCTA && (
             <div className="mt-6">
               <Link
                 to="/create-listing"
-                className="inline-flex items-center gap-2 transition-all hover:opacity-90"
-                style={{ background: 'transparent', border: '1.5px solid rgba(255,255,255,0.7)', color: isLight ? '#1e293b' : '#fff', borderRadius: 8, padding: '9px 18px', fontSize: 13, fontWeight: 500 }}
+                className="inline-flex items-center gap-2 bg-white text-gray-900 hover:bg-gray-100 rounded-lg px-5 py-2.5 text-sm font-medium transition-all"
               >
                 List Your Property Free <ArrowRight className="w-3.5 h-3.5" />
               </Link>
@@ -384,16 +382,7 @@ export default function UniversityPortalPage() {
               <h2 className="font-semibold text-slate-900 tracking-tight" style={{ fontSize: 20 }}>How does {university.name} compare?</h2>
               <p className="text-slate-500 mt-0.5 mb-4" style={{ fontSize: 13 }}>What does off-campus housing actually cost near {university.name}?</p>
 
-              <div className="grid sm:grid-cols-3 gap-3">
-                {/* University estimate */}
-                <div className="bg-white rounded-lg p-4" style={{ border: '0.5px solid #e2e8f0' }}>
-                  <p style={{ fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.05em', color: '#888', fontWeight: 600 }}>What {university.name} estimates</p>
-                  <p className="mt-2" style={{ fontSize: 24, fontWeight: 500, color: '#1e293b' }}>
-                    ${university.ipedsHousingOffcampus.toLocaleString()}<span style={{ fontSize: 12, fontWeight: 400, color: '#94a3b8' }}>/mo</span>
-                  </p>
-                  <p style={{ fontSize: 12, color: '#64748b', lineHeight: 1.4, marginTop: 4 }}>{university.name}'s estimate of monthly housing AND food costs combined for an off-campus student. Reported to the federal government annually.</p>
-                </div>
-
+              <div className="grid sm:grid-cols-2 gap-3 max-w-2xl">
                 {/* HUD benchmark */}
                 {fmr2br?.medianRent != null && (
                   <div className="bg-white rounded-lg p-4" style={{ border: '0.5px solid #e2e8f0' }}>
@@ -671,11 +660,11 @@ export default function UniversityPortalPage() {
             <p className="text-slate-500 mt-0.5 mb-4" style={{ fontSize: 13 }}>Everything you need to navigate off-campus housing with confidence.</p>
             <div className="grid sm:grid-cols-2 gap-3">
               {[
-                { icon: ShieldCheck, title: 'Avoiding Rental Scams', desc: 'Learn how to spot fake listings and protect yourself from fraudulent landlords.', link: '/guides' },
-                { icon: FileText, title: 'Lease Red Flags', desc: 'Common lease clauses that have cost students thousands of dollars.', link: '/guides' },
-                { icon: DollarSign, title: 'Budgeting for Off-Campus Housing', desc: 'How to calculate your true cost of living off campus including utilities and fees.', link: '/guides' },
+                { icon: ShieldCheck, title: 'Avoiding Rental Scams', desc: 'Learn how to spot fake listings and protect yourself from fraudulent landlords.' },
+                { icon: FileText, title: 'Lease Red Flags', desc: 'Common lease clauses that have cost students thousands of dollars.' },
+                { icon: DollarSign, title: 'Budgeting for Off-Campus Housing', desc: 'How to calculate your true cost of living off campus including utilities and fees.' },
               ].map(card => (
-                <Link key={card.title} to={card.link} className="bg-white rounded-lg p-4 flex gap-2.5 items-start transition-all hover:shadow-sm cursor-pointer" style={{ border: '0.5px solid #e2e8f0' }}>
+                <button key={card.title} onClick={() => navigate('/guides', { state: { fromUniversity: { slug: university.slug, name: university.name } } })} className="bg-white rounded-lg p-4 flex gap-2.5 items-start transition-all hover:shadow-sm cursor-pointer text-left" style={{ border: '0.5px solid #e2e8f0' }}>
                   <div className="flex-shrink-0 flex items-center justify-center" style={{ width: 32, height: 32, borderRadius: 8, background: '#f1f5f9' }}>
                     <card.icon className="w-4 h-4 text-slate-600" />
                   </div>
@@ -683,7 +672,7 @@ export default function UniversityPortalPage() {
                     <h3 style={{ fontSize: 14, fontWeight: 500, color: '#1e293b' }}>{card.title}</h3>
                     <p style={{ fontSize: 12, color: '#64748b', lineHeight: 1.4, marginTop: 2 }}>{card.desc}</p>
                   </div>
-                </Link>
+                </button>
               ))}
               <div className="bg-white rounded-lg p-4 flex gap-2.5 items-start" style={{ border: '0.5px solid #e2e8f0' }}>
                 <div className="flex-shrink-0 flex items-center justify-center" style={{ width: 32, height: 32, borderRadius: 8, background: '#f1f5f9' }}>

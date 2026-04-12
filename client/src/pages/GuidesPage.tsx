@@ -1,5 +1,5 @@
-import { Link } from 'react-router-dom';
-import { CheckSquare, AlertTriangle, Users, ShieldAlert, Search, Trophy, Download, ArrowRight } from 'lucide-react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { CheckSquare, AlertTriangle, Users, ShieldAlert, Search, Trophy, Download, ArrowRight, ChevronLeft } from 'lucide-react';
 
 // TODO: upgrade to downloadable PDF generation in the future
 
@@ -381,6 +381,10 @@ function downloadGuide(guide: Guide) {
 }
 
 export default function GuidesPage() {
+  const location = useLocation();
+  const navigate = useNavigate();
+  const fromUniversity = (location.state as { fromUniversity?: { slug: string; name: string } } | null)?.fromUniversity;
+
   return (
     <div>
       {/* Hero */}
@@ -391,6 +395,17 @@ export default function GuidesPage() {
           <div className="absolute bottom-10 right-10 w-80 h-80 bg-white rounded-full blur-[100px]" />
         </div>
         <div className="max-w-4xl mx-auto text-center px-4 py-16 sm:py-20 relative">
+          {fromUniversity && (
+            <div className="absolute top-4 right-4 sm:top-6 sm:right-6">
+              <button
+                onClick={() => navigate(`/universities/${fromUniversity.slug}`)}
+                className="flex items-center gap-1.5 bg-white border border-gray-200 text-gray-700 rounded-lg px-4 py-2 text-sm hover:bg-gray-50 transition-colors"
+              >
+                <ChevronLeft className="w-3.5 h-3.5" />
+                Back to {fromUniversity.name}
+              </button>
+            </div>
+          )}
           <h1 className="text-3xl sm:text-4xl font-bold text-white tracking-tight">Student Housing Guides & Checklists</h1>
           <p className="text-brand-200 mt-4 max-w-2xl mx-auto text-base sm:text-lg leading-relaxed">
             Everything you need to find, secure, and move into your perfect off-campus home.
