@@ -280,7 +280,17 @@ export default function UniversityPortalPage() {
           <div className="absolute top-10 left-10 w-60 h-60 bg-white rounded-full blur-[80px]" />
           <div className="absolute bottom-10 right-10 w-80 h-80 bg-white rounded-full blur-[100px]" />
         </div>
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 py-10 sm:py-14 relative">
+        {/* Drifting name background */}
+        <div className="absolute top-1/2 left-0 -translate-y-1/2 w-full overflow-hidden pointer-events-none z-0">
+          <div className="whitespace-nowrap animate-[drift-right_35s_linear_infinite]">
+            {[0, 1, 2, 3].map(i => (
+              <span key={i} className="inline-block pr-20 text-[140px] font-black leading-none text-white/[0.045]">
+                {university.name}
+              </span>
+            ))}
+          </div>
+        </div>
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 py-10 sm:py-14 relative z-10">
           {/* Breadcrumb */}
           <Link to="/universities" className={`inline-flex items-center gap-1 text-sm font-medium mb-5 transition-colors ${isLight ? 'text-slate-700 hover:text-slate-900' : 'text-white/70 hover:text-white'}`}>
             <ChevronLeft className="w-4 h-4" /> All Universities

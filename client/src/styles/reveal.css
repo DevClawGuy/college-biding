@@ -13,3 +13,8 @@
 .reveal-delay-2 { transition-delay: 0.2s; }
 .reveal-delay-3 { transition-delay: 0.3s; }
 .reveal-delay-4 { transition-delay: 0.4s; }
+
+@keyframes drift-right {
+  from { transform: translateX(-50%); }
+  to   { transform: translateX(0%); }
+}
