@@ -397,8 +397,6 @@ export default function UniversityPortalPage() {
                   )}
                 </div>
               </div>
-
-              <p className="text-xs text-slate-500 italic mt-3">University figures include housing and food costs combined. Federal rent data covers rent only. These are estimates — actual costs vary by landlord, unit size, and lifestyle.</p>
             </section>
           )}
 
