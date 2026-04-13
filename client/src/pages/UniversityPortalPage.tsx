@@ -321,15 +321,7 @@ export default function UniversityPortalPage() {
                 onClick={() => setIsFmrOpen(!isFmrOpen)}
                 className={`w-full flex items-center justify-between px-4 py-3 ${isLight ? 'text-slate-900' : 'text-white'}`}
               >
-                <span className="flex items-center gap-3 text-sm font-semibold">
-                  Federal Rent Guide (FY2026)
-                  {university.zoriYoYPct != null && (() => {
-                    const pct = university.zoriYoYPct;
-                    const absPct = Math.abs(pct);
-                    const trendLabel = pct > 1.5 ? `↑ Rents up ${absPct}% this year` : pct < -1.5 ? `↓ Rents down ${absPct}% this year` : '→ Rents stable this year';
-                    return <span className="text-xs font-medium bg-white/15 px-2 py-0.5 rounded-full">{trendLabel}</span>;
-                  })()}
-                </span>
+                <span className="text-sm font-semibold">Federal Rent Guide (FY2026)</span>
                 <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${isFmrOpen ? 'rotate-180' : ''}`} />
               </button>
               <div className={`overflow-hidden transition-all duration-300 ${isFmrOpen ? 'max-h-60' : 'max-h-0'}`}>
