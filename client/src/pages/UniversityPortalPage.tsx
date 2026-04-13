@@ -286,18 +286,8 @@ export default function UniversityPortalPage() {
             <ChevronLeft className="w-4 h-4" /> All Universities
           </Link>
 
-          {/* Badge */}
-          <div className="text-center mb-4">
-            <div
-              className="inline-flex items-center gap-2 text-xs font-medium px-3 py-1.5 rounded-full"
-              style={{ background: 'rgba(255,255,255,0.15)', color: isLight ? '#1e293b' : '#fff' }}
-            >
-              <span>✓</span> University portal — at no cost to {university.name}
-            </div>
-          </div>
-
           {/* Title */}
-          <h1 className={`font-bold tracking-tight ${isLight ? 'text-slate-900' : 'text-white'}`} style={{ fontSize: 32 }}>{university.name}</h1>
+          <h1 className={`text-5xl font-bold tracking-tight ${isLight ? 'text-slate-900' : 'text-white'}`}>{university.name}</h1>
           <p className={`mt-1.5 ${isLight ? 'text-slate-700' : 'text-white/75'}`} style={{ fontSize: 14 }}>
             Off-Campus Housing Portal · {university.city}, {university.state}
             {university.enrollment != null && ` · ${university.enrollment.toLocaleString()} students`}
