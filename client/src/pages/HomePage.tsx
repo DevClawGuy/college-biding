@@ -3,9 +3,11 @@ import { Search, Shield, TrendingUp, ArrowRight, CheckSquare, AlertTriangle, Shi
 import Logo from '../components/Logo';
 import { motion } from 'framer-motion';
 import { useAuthStore } from '../store/authStore';
+import { useScrollReveal } from '../hooks/useScrollReveal';
 
 export default function HomePage() {
   const { user } = useAuthStore();
+  useScrollReveal();
 
   return (
     <div className="min-h-screen">
@@ -70,7 +72,7 @@ export default function HomePage() {
 
       {/* Features */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
-        <div className="text-center mb-14">
+        <div className="text-center mb-14 reveal">
           <h2 className="text-3xl md:text-4xl font-bold text-slate-900 tracking-tight">How HouseRush Works</h2>
           <p className="text-slate-500 mt-3 max-w-lg mx-auto">Simple, transparent, and free for everyone.</p>
         </div>
@@ -79,8 +81,8 @@ export default function HomePage() {
             { icon: Search, title: 'Browse Listings', desc: 'Search verified properties near your campus. Filter by price, size, distance, and amenities.', step: '01' },
             { icon: TrendingUp, title: 'Express Interest', desc: 'Tell landlords you\'re interested. Submit your move-in date, group size, and a note. No binding commitment required.', step: '02' },
             { icon: Shield, title: 'Connect & Move In', desc: 'Landlords review interested students and reach out directly to finalize the lease. Simple, transparent, and fair.', step: '03' },
-          ].map(({ icon: Icon, title, desc, step }) => (
-            <div key={title} className="bg-white rounded-2xl p-7 card-shadow hover:card-shadow-hover transition-all duration-300 group relative overflow-hidden">
+          ].map(({ icon: Icon, title, desc, step }, i) => (
+            <div key={title} className={`bg-white rounded-2xl p-7 card-shadow hover:card-shadow-hover transition-all duration-300 group relative overflow-hidden reveal reveal-delay-${i + 1}`}>
               <div className="absolute top-5 right-5 text-4xl font-black text-slate-100 group-hover:text-brand-100 transition-colors">{step}</div>
               <div className="w-12 h-12 bg-brand-50 rounded-xl flex items-center justify-center mb-5 group-hover:bg-brand-100 transition-colors">
                 <Icon className="w-6 h-6 text-brand-600" />
@@ -95,7 +97,7 @@ export default function HomePage() {
 
       {/* Free Resources */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-24">
-        <div className="text-center mb-10">
+        <div className="text-center mb-10 reveal">
           <h2 className="text-2xl md:text-3xl font-bold text-slate-900 tracking-tight">Free Student Resources</h2>
           <p className="text-slate-500 mt-2 max-w-lg mx-auto">Guides and checklists to help you navigate off-campus housing like a pro.</p>
         </div>
@@ -104,8 +106,8 @@ export default function HomePage() {
             { icon: CheckSquare, title: 'Move-In Essentials', desc: 'Everything you need to buy and bring when moving into your first apartment.' },
             { icon: AlertTriangle, title: 'Lease Red Flags', desc: 'Common lease clauses that have cost students thousands of dollars.' },
             { icon: ShieldAlert, title: 'Rental Scam Signs', desc: 'Protect yourself from fake listings and fraudulent landlords.' },
-          ].map(({ icon: Icon, title, desc }) => (
-            <Link key={title} to="/guides" className="bg-white rounded-2xl p-6 card-shadow hover:card-shadow-hover transition-all duration-300 group border border-slate-100">
+          ].map(({ icon: Icon, title, desc }, i) => (
+            <Link key={title} to="/guides" className={`bg-white rounded-2xl p-6 card-shadow hover:card-shadow-hover transition-all duration-300 group border border-slate-100 reveal reveal-delay-${i + 1}`}>
               <div className="w-10 h-10 bg-brand-50 rounded-xl flex items-center justify-center mb-4 group-hover:bg-brand-100 transition-colors">
                 <Icon className="w-5 h-5 text-brand-600" />
               </div>
@@ -114,7 +116,7 @@ export default function HomePage() {
             </Link>
           ))}
         </div>
-        <div className="text-center mt-8">
+        <div className="text-center mt-8 reveal">
           <Link to="/guides" className="inline-flex items-center gap-1.5 text-brand-600 hover:text-brand-700 font-semibold text-sm transition-colors">
             View All Guides <ArrowRight className="w-4 h-4" />
           </Link>
@@ -125,7 +127,7 @@ export default function HomePage() {
       <section className="bg-slate-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
           <div className="grid md:grid-cols-2 gap-12 items-center">
-            <div>
+            <div className="reveal">
               <span className="text-sm font-semibold text-brand-600">For landlords</span>
               <h2 className="text-2xl md:text-3xl font-bold text-slate-900 tracking-tight mt-2">Own a property near a campus?</h2>
               <p className="text-slate-500 mt-3 leading-relaxed">List free and reach verified students searching for housing right now. No commissions, no fees — ever.</p>
@@ -136,7 +138,7 @@ export default function HomePage() {
                 List your property free <ArrowRight className="w-4 h-4" />
               </Link>
             </div>
-            <div className="grid grid-cols-3 gap-6 text-center">
+            <div className="grid grid-cols-3 gap-6 text-center reveal reveal-delay-2">
               <div>
                 <p className="text-3xl font-bold text-slate-900">2,716</p>
                 <p className="text-sm text-slate-500 mt-1">University portals</p>
@@ -161,7 +163,7 @@ export default function HomePage() {
           <div className="absolute top-10 left-10 w-60 h-60 bg-white rounded-full blur-[80px]" />
           <div className="absolute bottom-10 right-10 w-80 h-80 bg-white rounded-full blur-[100px]" />
         </div>
-        <div className="max-w-3xl mx-auto text-center px-4 py-20 relative">
+        <div className="max-w-3xl mx-auto text-center px-4 py-20 relative reveal">
           <div className="mx-auto mb-5 w-fit"><Logo size={48} /></div>
           {!user ? (
             <>
