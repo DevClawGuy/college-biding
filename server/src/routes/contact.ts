@@ -15,8 +15,7 @@ router.post('/', async (req: Request, res: Response) => {
     console.log(`[Contact Form] From: ${name} <${email}>`);
     console.log(`[Contact Form] Message: ${message}`);
 
-    // TODO: set CONTACT_EMAIL in Railway env vars
-    const contactEmail = process.env.CONTACT_EMAIL || 'contact@houserush.com';
+    const contactEmail = process.env.CONTACT_EMAIL || 'contact@houserush.app';
     const html = `
       <div style="font-family: 'Inter', system-ui, sans-serif; max-width: 560px; margin: 0 auto; padding: 40px 24px;">
         <h1 style="font-size: 22px; font-weight: 700; color: #0f172a; margin: 0 0 24px;">New Contact Form Submission</h1>
@@ -31,9 +30,12 @@ router.post('/', async (req: Request, res: Response) => {
       </div>
     `;
 
-    sendEmail(contactEmail, 'New HouseRush Contact Form Submission', html).catch(err => {
-      console.error('Contact email failed:', err);
-    });
+    const sent = await sendEmail(contactEmail, 'New HouseRush Contact Form Submission', html);
+
+    if (!sent) {
+      res.status(500).json({ success: false, error: 'Failed to send message. Please email us directly at contact@houserush.app' });
+      return;
+    }
 
     res.json({ success: true });
   } catch (error) {
