@@ -39,7 +39,7 @@ export default function ContactPage() {
         </div>
         <div>
           <p className="font-semibold text-slate-900">Email Us</p>
-          <a href="mailto:support@houserush.com" className="text-brand-600 hover:underline text-sm">support@houserush.com</a>
+          <a href="mailto:contact@houserush.app" className="text-brand-600 hover:underline text-sm">contact@houserush.app</a>
         </div>
       </div>
 
