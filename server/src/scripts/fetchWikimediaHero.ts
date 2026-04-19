@@ -5,59 +5,93 @@ import { getClientConfig } from '../db/index';
 import { eq } from 'drizzle-orm';
 import * as schema from '../db/schema';
 
-interface WikiResponse {
+const HEADERS = { 'User-Agent': 'HouseRush/1.0 (https://houserush.app; contact@houserush.app)' };
+
+interface WikiPagesResponse {
   query: {
     pages: Record<string, {
-      original?: {
-        source: string;
-      };
+      original?: { source: string };
+      imageinfo?: Array<{ url: string }>;
     }>;
   };
 }
 
-async function run() {
-  console.log('Fetching Wikimedia Commons hero image for Monmouth University...');
+interface WikiSearchResponse {
+  query: {
+    search: Array<{ title: string }>;
+  };
+}
 
-  const url = new URL('https://en.wikipedia.org/w/api.php');
-  url.searchParams.set('action', 'query');
-  url.searchParams.set('titles', 'Monmouth University');
-  url.searchParams.set('prop', 'pageimages');
-  url.searchParams.set('piprop', 'original');
-  url.searchParams.set('format', 'json');
-  url.searchParams.set('origin', '*');
-
-  let imageUrl: string | null = null;
+async function fetchImageUrl(universityName: string): Promise<string | null> {
+  // Strategy 1: Wikipedia pageimages API
+  const wikiUrl = new URL('https://en.wikipedia.org/w/api.php');
+  wikiUrl.searchParams.set('action', 'query');
+  wikiUrl.searchParams.set('titles', universityName);
+  wikiUrl.searchParams.set('prop', 'pageimages');
+  wikiUrl.searchParams.set('piprop', 'original');
+  wikiUrl.searchParams.set('format', 'json');
+  wikiUrl.searchParams.set('origin', '*');
 
   try {
-    const res = await fetch(url.toString());
-    if (!res.ok) {
-      console.error(`Wikipedia API returned HTTP ${res.status}`);
-      process.exit(1);
+    const res = await fetch(wikiUrl.toString(), { headers: HEADERS });
+    if (res.ok) {
+      const data = (await res.json()) as WikiPagesResponse;
+      const pages = data.query?.pages ?? {};
+      const pageId = Object.keys(pages)[0];
+      const url = pages[pageId]?.original?.source;
+      if (url) return url;
     }
+  } catch { /* continue to fallback */ }
 
-    const data = (await res.json()) as WikiResponse;
-    const pages = data.query?.pages;
-    if (!pages) {
-      console.error('No pages in Wikipedia response');
-      process.exit(1);
-    }
+  // Strategy 2: Search Wikimedia Commons
+  const commonsSearchUrl = new URL('https://commons.wikimedia.org/w/api.php');
+  commonsSearchUrl.searchParams.set('action', 'query');
+  commonsSearchUrl.searchParams.set('list', 'search');
+  commonsSearchUrl.searchParams.set('srsearch', `${universityName} campus`);
+  commonsSearchUrl.searchParams.set('srnamespace', '6');
+  commonsSearchUrl.searchParams.set('srlimit', '1');
+  commonsSearchUrl.searchParams.set('format', 'json');
+  commonsSearchUrl.searchParams.set('origin', '*');
 
-    const pageId = Object.keys(pages)[0];
-    const page = pages[pageId];
-    imageUrl = page?.original?.source ?? null;
+  try {
+    const res = await fetch(commonsSearchUrl.toString(), { headers: HEADERS });
+    if (!res.ok) return null;
+    const data = (await res.json()) as WikiSearchResponse;
+    const firstResult = data.query?.search?.[0];
+    if (!firstResult) return null;
 
-    if (!imageUrl) {
-      console.log('No image found for Monmouth University on Wikipedia');
-      process.exit(0);
-    }
+    // Get the actual image URL
+    const infoUrl = new URL('https://commons.wikimedia.org/w/api.php');
+    infoUrl.searchParams.set('action', 'query');
+    infoUrl.searchParams.set('titles', firstResult.title);
+    infoUrl.searchParams.set('prop', 'imageinfo');
+    infoUrl.searchParams.set('iiprop', 'url');
+    infoUrl.searchParams.set('format', 'json');
+    infoUrl.searchParams.set('origin', '*');
 
-    console.log(`Found image: ${imageUrl}`);
-  } catch (err) {
-    console.error('Failed to fetch from Wikipedia:', err);
-    process.exit(1);
+    const infoRes = await fetch(infoUrl.toString(), { headers: HEADERS });
+    if (!infoRes.ok) return null;
+    const infoData = (await infoRes.json()) as WikiPagesResponse;
+    const infoPages = infoData.query?.pages ?? {};
+    const infoPageId = Object.keys(infoPages)[0];
+    return infoPages[infoPageId]?.imageinfo?.[0]?.url ?? null;
+  } catch {
+    return null;
+  }
+}
+
+async function run() {
+  console.log('Fetching Wikimedia hero image for Monmouth University...');
+
+  const imageUrl = await fetchImageUrl('Monmouth University');
+
+  if (!imageUrl) {
+    console.log('No image found for Monmouth University');
+    process.exit(0);
   }
 
-  // Save to DB
+  console.log(`Found image: ${imageUrl}`);
+
   const config = getClientConfig();
   console.log(`Connecting to DB: ${config.url.substring(0, 45)}...`);
   const client = createClient(config);
