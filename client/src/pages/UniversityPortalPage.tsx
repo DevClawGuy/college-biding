@@ -273,7 +273,7 @@ export default function UniversityPortalPage() {
   return (
     <div>
       {/* ═══ HERO ═══ */}
-      <section className="relative overflow-hidden min-h-[480px]">
+      <section className="relative overflow-hidden min-h-[480px] flex flex-col justify-center">
         {/* Layer 1: Campus photo (when available) */}
         {university.heroImageUrl && (
           <div
@@ -300,7 +300,7 @@ export default function UniversityPortalPage() {
             ))}
           </div>
         </div>
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 py-10 sm:py-14 relative z-10">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 py-6 relative z-10">
           {/* Breadcrumb */}
           <Link to="/universities" className={`inline-flex items-center gap-1 text-sm font-medium mb-5 transition-colors ${isLight ? 'text-slate-700 hover:text-slate-900' : 'text-white/70 hover:text-white'}`}>
             <ChevronLeft className="w-4 h-4" /> All Universities
