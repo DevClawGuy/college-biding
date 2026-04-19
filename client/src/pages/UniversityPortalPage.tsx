@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import { useParams, Link, useNavigate } from 'react-router-dom';
+import { useParams, Link, useNavigate, useLocation } from 'react-router-dom';
 import { ChevronLeft, ArrowRight, ShieldCheck, FileText, DollarSign, Users, Info, Eye, MapPin, Bed, Bath, ShoppingCart, Bus, Coffee, Bike, CreditCard, Pill, Shirt, Search, SlidersHorizontal, X, ChevronDown } from 'lucide-react';
 import api from '../lib/api';
 import { useAuthStore } from '../store/authStore';
@@ -81,6 +81,8 @@ function getRentCheckDisplay(_score: number, label: string) {
 export default function UniversityPortalPage() {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
+  const location = useLocation();
+  const stateColor = (location.state as { primaryColor?: string } | null)?.primaryColor ?? null;
   const { user } = useAuthStore();
 
   const [university, setUniversity] = useState<UniversityDetail | null>(null);
@@ -166,7 +168,7 @@ export default function UniversityPortalPage() {
   // Derived values (safe to compute even when university is null)
   const marketItems = university?.marketData.filter(d => d.medianRent != null) ?? [];
   const fmr2br = marketItems.find(d => d.bedroomCount === 2);
-  const primaryColor = university?.primaryColor ?? '#4f46e5';
+  const primaryColor = university?.primaryColor ?? stateColor ?? '#2a2a2a';
 
   const avgRent = listings.length > 0
     ? Math.round(listings.reduce((sum: number, l: any) => sum + (l.startingBid ?? 0), 0) / listings.length)
@@ -227,7 +229,7 @@ export default function UniversityPortalPage() {
   if (loading) {
     return (
       <div>
-        <div className="bg-gradient-to-br from-brand-700 to-brand-900 py-16 px-4">
+        <div className="py-16 px-4" style={{ background: stateColor ? `linear-gradient(135deg, ${stateColor} 0%, ${darkenHex(stateColor)} 100%)` : 'linear-gradient(135deg, #2a2a2a 0%, #1a1a1a 100%)' }}>
           <div className="max-w-5xl mx-auto space-y-4">
             <div className="h-4 skeleton rounded w-24 opacity-30" />
             <div className="h-10 skeleton rounded-lg w-2/3 opacity-30" />
@@ -273,8 +275,8 @@ export default function UniversityPortalPage() {
       {/* ═══ HERO ═══ */}
       <section className="relative overflow-hidden">
         <div
-          className="absolute inset-0 bg-gradient-to-br from-brand-700 to-brand-900"
-          style={heroBackground ? { background: heroBackground } : {}}
+          className="absolute inset-0"
+          style={{ background: heroBackground ?? (stateColor ? `linear-gradient(135deg, ${stateColor} 0%, ${darkenHex(stateColor)} 100%)` : 'linear-gradient(135deg, #2a2a2a 0%, #1a1a1a 100%)') }}
         />
         <div className="absolute inset-0 opacity-10">
           <div className="absolute top-10 left-10 w-60 h-60 bg-white rounded-full blur-[80px]" />

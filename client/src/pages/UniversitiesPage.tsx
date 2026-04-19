@@ -15,6 +15,7 @@ interface University {
   slug: string;
   latitude: number | null;
   longitude: number | null;
+  primaryColor: string | null;
   activeListingCount: number;
 }
 
@@ -169,7 +170,7 @@ export default function UniversitiesPage() {
       ) : (
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
           {universities.map((uni) => (
-            <Link key={uni.id} to={`/universities/${uni.slug}`}>
+            <Link key={uni.id} to={`/universities/${uni.slug}`} state={{ primaryColor: uni.primaryColor }}>
               <motion.div
                 initial={{ opacity: 0, y: 24 }}
                 animate={{ opacity: 1, y: 0 }}
