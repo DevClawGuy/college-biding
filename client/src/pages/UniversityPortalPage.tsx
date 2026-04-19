@@ -96,8 +96,7 @@ export default function UniversityPortalPage() {
   const [selectedAmenities, setSelectedAmenities] = useState<string[]>([]);
   const [showFilters, setShowFilters] = useState(false);
   const [sortBy, setSortBy] = useState('newest');
-  const [isFmrOpen, setIsFmrOpen] = useState(false);
-  const [isGoodToKnowOpen, setIsGoodToKnowOpen] = useState(false);
+  const [isRentDataOpen, setIsRentDataOpen] = useState(false);
 
   const { data: university, isLoading: uniLoading, isError: uniError } = useQuery({
     queryKey: ['university', slug],
@@ -308,60 +307,13 @@ export default function UniversityPortalPage() {
           </Link>
 
           {/* Title */}
-          <h1 className={`text-5xl font-bold tracking-tight ${isLight ? 'text-slate-900' : 'text-white'}`}>{university.name}</h1>
-          <p className={`mt-1.5 ${isLight ? 'text-slate-700' : 'text-white/75'}`} style={{ fontSize: 14 }}>
+          <h1 className={`text-6xl font-bold tracking-tight ${isLight ? 'text-slate-900' : 'text-white'}`}>{university.name}</h1>
+          <p className={`mt-1.5 text-lg ${isLight ? 'text-slate-700' : 'text-white/75'}`}>
             Off-Campus Housing Portal · {university.city}, {university.state}
             {university.enrollment != null && ` · ${university.enrollment.toLocaleString()} students`}
           </p>
 
-          {/* Good to Know accordion */}
-          {university.ipedsHousingOffcampus != null && university.ipedsHousingOffcampus > 0 && (
-            <div className="mt-5 rounded-lg bg-white/10 border border-white/20 overflow-hidden">
-              <button
-                onClick={() => setIsGoodToKnowOpen(!isGoodToKnowOpen)}
-                className={`w-full flex items-center justify-between px-4 py-3 ${isLight ? 'text-slate-900' : 'text-white'}`}
-              >
-                <span className="flex items-center gap-2 text-sm font-semibold">
-                  <Info className="w-4 h-4" />
-                  Good to Know
-                </span>
-                <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${isGoodToKnowOpen ? 'rotate-180' : ''}`} />
-              </button>
-              <div className={`overflow-hidden transition-all duration-300 ${isGoodToKnowOpen ? 'max-h-60' : 'max-h-0'}`}>
-                <div className={`px-4 pb-4 text-sm leading-relaxed ${isLight ? 'text-slate-800' : 'text-white/85'}`}>
-                  {university.name} estimates ${university.ipedsHousingOffcampus.toLocaleString()}/mo for a student's off-campus housing and food combined. The federal rent guide below shows rent-only costs for this area. Your actual rent will likely fall somewhere in between — use both numbers to build your budget.
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* FMR accordion */}
-          {marketItems.length > 0 && (
-            <div className="mt-5 rounded-lg bg-white/10 border border-white/20 overflow-hidden">
-              <button
-                onClick={() => setIsFmrOpen(!isFmrOpen)}
-                className={`w-full flex items-center justify-between px-4 py-3 ${isLight ? 'text-slate-900' : 'text-white'}`}
-              >
-                <span className="text-sm font-semibold">Federal Rent Guide (FY2026)</span>
-                <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${isFmrOpen ? 'rotate-180' : ''}`} />
-              </button>
-              <div className={`overflow-hidden transition-all duration-300 ${isFmrOpen ? 'max-h-60' : 'max-h-0'}`}>
-                <div className="px-4 pb-4">
-                  <div className="flex gap-2 overflow-x-auto" style={{ scrollbarWidth: 'none' }}>
-                    {marketItems.map(d => (
-                      <div key={d.id} className="flex-shrink-0 text-center bg-white/10 border border-white/20 rounded-lg px-3.5 py-2">
-                        <p className={`text-xs opacity-65 ${isLight ? 'text-slate-900' : 'text-white'}`}>{bedroomLabel(d.bedroomCount)}</p>
-                        <p className={`text-base font-medium ${isLight ? 'text-slate-900' : 'text-white'}`}>${(d.medianRent ?? 0).toLocaleString()}</p>
-                      </div>
-                    ))}
-                  </div>
-                  <p className={`text-[10px] opacity-55 mt-2 ${isLight ? 'text-slate-900' : 'text-white'}`}>Federal rent data (FY2026) — 40th percentile including utilities</p>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Landlord CTA in hero */}
+          {/* Housing Provider CTA in hero */}
           {showLandlordCTA && (
             <div className="mt-6">
               <Link
@@ -378,51 +330,6 @@ export default function UniversityPortalPage() {
       {/* ═══ BODY ═══ */}
       <div style={{ background: '#f8f9fb', padding: '0 1.5rem 2rem' }}>
         <div className="max-w-5xl mx-auto">
-
-          {/* ═══ THREE-WAY COMPARISON ═══ */}
-          {university.ipedsHousingOffcampus != null && (
-            <section style={{ paddingTop: '1.75rem' }}>
-              <h2 className="font-semibold text-slate-900 tracking-tight" style={{ fontSize: 20 }}>How does {university.name} compare?</h2>
-              <p className="text-slate-500 mt-0.5 mb-4" style={{ fontSize: 13 }}>What does off-campus housing actually cost near {university.name}?</p>
-
-              <div className="grid sm:grid-cols-2 gap-3 max-w-2xl">
-                {/* HUD benchmark */}
-                {fmr2br?.medianRent != null && (
-                  <div className="bg-white rounded-lg p-4" style={{ border: '0.5px solid #e2e8f0' }}>
-                    <p style={{ fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.05em', color: '#185FA5', fontWeight: 600 }}>Federal rent guide</p>
-                    <p className="mt-2" style={{ fontSize: 24, fontWeight: 500, color: '#1e293b' }}>
-                      ${fmr2br.medianRent.toLocaleString()}<span style={{ fontSize: 12, fontWeight: 400, color: '#94a3b8' }}>/mo</span>
-                    </p>
-                    <p style={{ fontSize: 12, color: '#64748b', lineHeight: 1.4, marginTop: 4 }}>Rent-only estimate for a 2-bedroom in this county. Does not include food or utilities. Updated annually by the federal government.</p>
-                  </div>
-                )}
-
-                {/* HouseRush */}
-                <div className="bg-white rounded-lg p-4" style={{ border: `2px solid ${primaryColor}` }}>
-                  <p style={{ fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.05em', color: primaryColor, fontWeight: 600 }}>Listed on HouseRush</p>
-                  {avgRent != null ? (
-                    <>
-                      <p className="mt-2" style={{ fontSize: 24, fontWeight: 500, color: '#1e293b' }}>
-                        ${avgRent.toLocaleString()}<span style={{ fontSize: 12, fontWeight: 400, color: '#94a3b8' }}>/mo</span>
-                      </p>
-                      <p style={{ fontSize: 12, color: '#64748b', lineHeight: 1.4, marginTop: 4 }}>Average rent from properties currently listed near campus on HouseRush.</p>
-                      {fmr2br?.medianRent && avgRent < fmr2br.medianRent && (
-                        <span className="inline-block mt-2" style={{ background: '#EAF3DE', color: '#3B6D11', fontSize: 10, padding: '3px 8px', borderRadius: 6, fontWeight: 500 }}>Great deal</span>
-                      )}
-                    </>
-                  ) : (
-                    <>
-                      <p className="mt-2 text-slate-400" style={{ fontSize: 16, fontWeight: 500 }}>No listings yet</p>
-                      <p style={{ fontSize: 12, color: '#64748b', lineHeight: 1.4, marginTop: 4 }}>Be the first to list near {university.name}</p>
-                    </>
-                  )}
-                </div>
-              </div>
-            </section>
-          )}
-
-          {/* Divider */}
-          <div style={{ height: '0.5px', background: '#e2e8f0', marginTop: '1.75rem' }} />
 
           {/* ═══ LISTINGS ═══ */}
           <section style={{ paddingTop: '1.75rem' }}>
@@ -651,6 +558,86 @@ export default function UniversityPortalPage() {
               </div>
             )}
           </section>
+
+          {/* ═══ DATA CARDS ═══ */}
+          {(fmr2br?.medianRent != null || listings.length > 0) && (
+            <div className="grid sm:grid-cols-2 gap-3 mt-6">
+              {fmr2br?.medianRent != null && (
+                <div className="bg-gray-50 rounded-xl p-4">
+                  <p className="text-[10px] uppercase tracking-wider font-semibold text-slate-500">Federal Rent Guide</p>
+                  <p className="mt-2 text-2xl font-medium text-slate-900">
+                    ${fmr2br.medianRent.toLocaleString()}<span className="text-xs font-normal text-slate-400">/mo</span>
+                  </p>
+                  <p className="text-xs text-slate-500 mt-1 leading-relaxed">2-bedroom estimate for this county. Rent only, no utilities. Updated annually by HUD.</p>
+                </div>
+              )}
+              <div className="bg-gray-50 rounded-xl p-4" style={{ border: `1.5px solid ${primaryColor}` }}>
+                <p className="text-[10px] uppercase tracking-wider font-semibold" style={{ color: primaryColor }}>Listed on HouseRush</p>
+                {avgRent != null ? (
+                  <>
+                    <p className="mt-2 text-2xl font-medium text-slate-900">
+                      ${avgRent.toLocaleString()}<span className="text-xs font-normal text-slate-400">/mo</span>
+                    </p>
+                    <p className="text-xs text-slate-500 mt-1 leading-relaxed">Average rent from {listings.length} active listing{listings.length !== 1 ? 's' : ''} near campus.</p>
+                  </>
+                ) : (
+                  <>
+                    <p className="mt-2 text-base font-medium text-slate-400">No listings yet</p>
+                    <p className="text-xs text-slate-500 mt-1 leading-relaxed">Be the first to list near {university.name}</p>
+                  </>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Divider */}
+          <div style={{ height: '0.5px', background: '#e2e8f0', marginTop: '1.75rem' }} />
+
+          {/* ═══ RENT DATA & GOOD TO KNOW ACCORDION ═══ */}
+          {(marketItems.length > 0 || (university.ipedsHousingOffcampus != null && university.ipedsHousingOffcampus > 0)) && (
+            <section style={{ paddingTop: '1.75rem' }}>
+              <div className="bg-white rounded-xl overflow-hidden" style={{ border: '0.5px solid #e2e8f0' }}>
+                <button
+                  onClick={() => setIsRentDataOpen(!isRentDataOpen)}
+                  className="w-full flex items-center justify-between px-4 py-3 text-sm font-semibold text-slate-900"
+                >
+                  <span className="flex items-center gap-2">
+                    <Info className="w-4 h-4 text-slate-500" />
+                    Rent Data & Good to Know
+                  </span>
+                  <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform duration-200 ${isRentDataOpen ? 'rotate-180' : ''}`} />
+                </button>
+                <div className={`overflow-hidden transition-all duration-300 ${isRentDataOpen ? 'max-h-[500px]' : 'max-h-0'}`}>
+                  <div className="px-4 pb-4 grid sm:grid-cols-2 gap-4">
+                    {/* Left: Good to Know */}
+                    {university.ipedsHousingOffcampus != null && university.ipedsHousingOffcampus > 0 && (
+                      <div>
+                        <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Good to Know</p>
+                        <p className="text-sm text-slate-600 leading-relaxed">
+                          {university.name} estimates ${university.ipedsHousingOffcampus.toLocaleString()}/mo for a student's off-campus housing and food combined. The federal rent guide shows rent-only costs for this area. Your actual rent will likely fall somewhere in between — use both numbers to build your budget.
+                        </p>
+                      </div>
+                    )}
+                    {/* Right: FMR bedroom breakdown */}
+                    {marketItems.length > 0 && (
+                      <div>
+                        <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">FMR by Bedroom</p>
+                        <div className="flex flex-wrap gap-2">
+                          {marketItems.map(d => (
+                            <div key={d.id} className="bg-gray-50 rounded-lg px-3 py-1.5 text-center">
+                              <p className="text-[10px] text-slate-400">{bedroomLabel(d.bedroomCount)}</p>
+                              <p className="text-sm font-medium text-slate-900">${(d.medianRent ?? 0).toLocaleString()}</p>
+                            </div>
+                          ))}
+                        </div>
+                        <p className="text-[10px] text-slate-400 mt-2">Federal rent data (FY2026) — 40th percentile including utilities</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </section>
+          )}
 
           {/* Divider */}
           <div style={{ height: '0.5px', background: '#e2e8f0', marginTop: '1.75rem' }} />
