@@ -291,11 +291,11 @@ export default function UniversityPortalPage() {
           <div className="absolute top-10 left-10 w-60 h-60 bg-white rounded-full blur-[80px]" />
           <div className="absolute bottom-10 right-10 w-80 h-80 bg-white rounded-full blur-[100px]" />
         </div>
-        {/* Drifting name background */}
-        <div className="absolute top-1/2 left-0 -translate-y-1/2 w-full overflow-hidden pointer-events-none z-0">
+        {/* Drifting name ticker */}
+        <div className="absolute bottom-0 left-0 right-0 h-9 overflow-hidden pointer-events-none z-0">
           <div className="whitespace-nowrap animate-[drift-right_35s_linear_infinite]">
             {[0, 1, 2, 3].map(i => (
-              <span key={i} className="inline-block pr-20 text-[140px] font-black leading-none text-white/[0.045]">
+              <span key={i} className="inline-block pr-[60px] text-[22px] font-black leading-9 tracking-[-0.01em] text-white/[0.08]">
                 {university.name}
               </span>
             ))}
