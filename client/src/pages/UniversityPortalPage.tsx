@@ -290,6 +290,10 @@ export default function UniversityPortalPage() {
           <div className="absolute top-10 left-10 w-60 h-60 bg-white rounded-full blur-[80px]" />
           <div className="absolute bottom-10 right-10 w-80 h-80 bg-white rounded-full blur-[100px]" />
         </div>
+        {/* Back link */}
+        <Link to="/universities" className="absolute top-6 left-8 z-10 text-sm text-white/60 hover:text-white/90 flex items-center gap-1 transition-colors">
+          <ChevronLeft className="w-4 h-4" /> All Universities
+        </Link>
         {/* Drifting name ticker */}
         <div className="absolute bottom-0 left-0 right-0 h-9 overflow-hidden pointer-events-none z-0">
           <div className="whitespace-nowrap animate-[drift-right_35s_linear_infinite]">
@@ -301,11 +305,6 @@ export default function UniversityPortalPage() {
           </div>
         </div>
         <div className="max-w-5xl mx-auto px-4 sm:px-6 py-6 relative z-10">
-          {/* Breadcrumb */}
-          <Link to="/universities" className={`inline-flex items-center gap-1 text-sm font-medium mb-5 transition-colors ${isLight ? 'text-slate-700 hover:text-slate-900' : 'text-white/70 hover:text-white'}`}>
-            <ChevronLeft className="w-4 h-4" /> All Universities
-          </Link>
-
           {/* Title */}
           <h1 className={`text-7xl font-bold tracking-tight ${isLight ? 'text-slate-900' : 'text-white'}`}>{university.name}</h1>
           <p className={`mt-1.5 text-lg ${isLight ? 'text-slate-700' : 'text-white/75'}`}>
