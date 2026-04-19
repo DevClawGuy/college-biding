@@ -33,6 +33,7 @@ interface UniversityDetail {
   zori12moAgo: number | null;
   zoriYoYPct: number | null;
   zoriUpdatedAt: string | null;
+  heroImageUrl: string | null;
   marketData: MarketDataItem[];
 }
 
@@ -274,8 +275,16 @@ export default function UniversityPortalPage() {
     <div>
       {/* ═══ HERO ═══ */}
       <section className="relative overflow-hidden">
+        {/* Layer 1: Campus photo (when available) */}
+        {university.heroImageUrl && (
+          <div
+            className="absolute inset-0 bg-cover bg-center"
+            style={{ backgroundImage: `url(${university.heroImageUrl})` }}
+          />
+        )}
+        {/* Layer 2: Color overlay */}
         <div
-          className="absolute inset-0"
+          className={`absolute inset-0 ${university.heroImageUrl ? 'opacity-[0.82]' : ''}`}
           style={{ background: heroBackground ?? (stateColor ? `linear-gradient(135deg, ${stateColor} 0%, ${darkenHex(stateColor)} 100%)` : 'linear-gradient(135deg, #2a2a2a 0%, #1a1a1a 100%)') }}
         />
         <div className="absolute inset-0 opacity-10">

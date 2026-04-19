@@ -163,6 +163,7 @@ export const universities = sqliteTable('universities', {
   zori12moAgo: real('zori_12mo_ago'),
   zoriYoYPct: real('zori_yoy_pct'),
   zoriUpdatedAt: text('zori_updated_at'),
+  heroImageUrl: text('hero_image_url'),
   createdAt: text('created_at').notNull().default(''),
 });
 

@@ -202,6 +202,7 @@ export async function initializeDatabase(): Promise<void> {
     `ALTER TABLE universities ADD COLUMN zori_updated_at TEXT`,
     `ALTER TABLE listings ADD COLUMN nearby_amenities TEXT`,
     `ALTER TABLE listings ADD COLUMN nearby_amenities_updated_at TEXT`,
+    `ALTER TABLE universities ADD COLUMN hero_image_url TEXT`,
   ];
   for (const sql of migrations) {
     try {
