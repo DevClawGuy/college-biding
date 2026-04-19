@@ -15,10 +15,30 @@ const Logo: FC<LogoProps> = ({ size = 40 }) => (
       strokeWidth="4"
       strokeLinejoin="round"
     />
-    <path
-      d="M58 22 L42 52 L53 52 L38 80 L64 46 L52 46 Z"
-      fill="white"
-    />
+    <g transform="translate(50,52) scale(2.3) translate(-12,-12)">
+      <path
+        d="M21.42 10.922a1 1 0 0 0-.019-1.838L12.83 5.18a2 2 0 0 0-1.66 0L2.6 9.08a1 1 0 0 0 0 1.832l8.57 3.908a2 2 0 0 0 1.66 0z"
+        fill="none"
+        stroke="white"
+        strokeWidth="1.05"
+        strokeLinejoin="round"
+        strokeLinecap="round"
+      />
+      <path
+        d="M22 10v6"
+        stroke="white"
+        strokeWidth="1.05"
+        strokeLinecap="round"
+        fill="none"
+      />
+      <path
+        d="M6 12.5V16a6 3 0 0 0 12 0v-3.5"
+        stroke="white"
+        strokeWidth="1.05"
+        strokeLinecap="round"
+        fill="none"
+      />
+    </g>
   </svg>
 );
 
