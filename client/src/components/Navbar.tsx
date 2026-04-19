@@ -54,7 +54,7 @@ export default function Navbar() {
   return (
     <nav className={`sticky top-0 z-50 transition-all duration-300 ${
       scrolled
-        ? 'glass border-b border-slate-200/60 shadow-sm'
+        ? 'bg-white border-b border-[#eeeeee] shadow-sm'
         : 'bg-white/0'
     }`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -62,25 +62,25 @@ export default function Navbar() {
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2.5 group">
             <Logo size={32} />
-            <span className="text-xl font-bold tracking-tight text-slate-900">
+            <span className="text-xl font-bold tracking-tight text-[#111111]">
               House<span className="text-brand-600">Rush</span>
             </span>
           </Link>
 
           {/* Desktop nav */}
           <div className="hidden md:flex items-center gap-1">
-            <Link to="/universities" className="flex items-center gap-1.5 px-3.5 py-2 text-sm font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition-all">
+            <Link to="/universities" className="flex items-center gap-1.5 px-3.5 py-2 text-sm font-medium text-[#666666] hover:text-[#111111] hover:bg-slate-100 rounded-lg transition-all">
               <GraduationCap className="w-4 h-4" />
               Universities
             </Link>
             {user && (
               <>
-                <Link to="/dashboard" className="flex items-center gap-1.5 px-3.5 py-2 text-sm font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition-all">
+                <Link to="/dashboard" className="flex items-center gap-1.5 px-3.5 py-2 text-sm font-medium text-[#666666] hover:text-[#111111] hover:bg-slate-100 rounded-lg transition-all">
                   <LayoutDashboard className="w-4 h-4" />
                   Dashboard
                 </Link>
                 {user.role === 'landlord' && (
-                  <Link to="/create-listing" className="flex items-center gap-1.5 px-3.5 py-2 text-sm font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition-all">
+                  <Link to="/create-listing" className="flex items-center gap-1.5 px-3.5 py-2 text-sm font-medium text-[#666666] hover:text-[#111111] hover:bg-slate-100 rounded-lg transition-all">
                     <PlusCircle className="w-4 h-4" />
                     List Property
                   </Link>
@@ -120,9 +120,9 @@ export default function Navbar() {
                     {user.name.charAt(0)}
                   </div>
                   <div className="text-sm leading-tight hidden lg:block">
-                    <p className="font-medium text-slate-900">{user.name.split(' ')[0]}</p>
+                    <p className="font-medium text-[#111111]">{user.name.split(' ')[0]}</p>
                     {user.isEduVerified && (
-                      <span className="text-[10px] font-semibold text-brand-600 bg-brand-50 px-1.5 py-0.5 rounded-full">.edu verified</span>
+                      <span className="text-[10px] font-semibold text-brand-700 bg-brand-50 px-1.5 py-0.5 rounded-full">.edu verified</span>
                     )}
                   </div>
                 </Link>
@@ -139,10 +139,10 @@ export default function Navbar() {
               <>
                 {/* Login/signup — desktop */}
                 <div className="hidden md:flex items-center gap-3">
-                  <Link to="/login" className="px-4 py-2 text-sm font-medium text-slate-700 hover:text-slate-900 transition-colors">
+                  <Link to="/login" className="px-4 py-2 text-sm font-medium text-[#666666] hover:text-[#111111] transition-colors">
                     Log in
                   </Link>
-                  <Link to="/signup" className="px-4 py-2.5 bg-brand-600 hover:bg-brand-700 text-white text-sm font-semibold rounded-xl transition-all hover:shadow-lg hover:shadow-brand-600/25 active:scale-[0.98]">
+                  <Link to="/signup" className="px-4 py-2.5 bg-brand-600 hover:bg-brand-700 text-white text-sm font-semibold rounded-xl transition-all hover:shadow-lg active:scale-[0.98]">
                     Get Started
                   </Link>
                 </div>

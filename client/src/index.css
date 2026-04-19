@@ -1,17 +1,17 @@
 @import "tailwindcss";
 
 @theme {
-  --color-brand-50: #eef2ff;
-  --color-brand-100: #e0e7ff;
-  --color-brand-200: #c7d2fe;
-  --color-brand-300: #a5b4fc;
-  --color-brand-400: #818cf8;
-  --color-brand-500: #6366f1;
-  --color-brand-600: #4f46e5;
-  --color-brand-700: #4338ca;
-  --color-brand-800: #3730a3;
-  --color-brand-900: #312e81;
-  --color-brand-950: #1e1b4b;
+  --color-brand-50: #f0fdf9;
+  --color-brand-100: #ccfbf1;
+  --color-brand-200: #99f6e4;
+  --color-brand-300: #5eead4;
+  --color-brand-400: #2dd4bf;
+  --color-brand-500: #14b8a6;
+  --color-brand-600: #00d4b4;
+  --color-brand-700: #00a896;
+  --color-brand-800: #0d9488;
+  --color-brand-900: #134e4a;
+  --color-brand-950: #042f2e;
   --color-surface: #ffffff;
   --color-surface-secondary: #f8fafc;
   --color-surface-tertiary: #f1f5f9;
@@ -66,8 +66,8 @@
 }
 
 @keyframes pulse-ring {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.4); }
-  50% { box-shadow: 0 0 0 14px rgba(99, 102, 241, 0); }
+  0%, 100% { box-shadow: 0 0 0 0 rgba(0, 212, 180, 0.4); }
+  50% { box-shadow: 0 0 0 14px rgba(0, 212, 180, 0); }
 }
 
 @keyframes shimmer {

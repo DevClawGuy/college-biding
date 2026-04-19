@@ -7,7 +7,7 @@ interface LogoProps {
 
 const Logo: FC<LogoProps> = ({ size = 40 }) => (
   <svg width={size} height={size} viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-    <rect width="100" height="100" rx="20" fill="#4F46E5" />
+    <rect width="100" height="100" rx="20" fill="#00d4b4" />
     <path
       d="M50 10 L88 38 L82 38 L82 88 L18 88 L18 38 L12 38 Z"
       fill="none"
