@@ -294,7 +294,7 @@ export default function UniversityPortalPage() {
         {/* Drifting name ticker */}
         <div className="absolute bottom-0 left-0 right-0 h-9 overflow-hidden pointer-events-none z-0">
           <div className="whitespace-nowrap animate-[drift-right_35s_linear_infinite]">
-            {[0, 1, 2, 3].map(i => (
+            {[0, 1, 2, 3, 4, 5, 6, 7].map(i => (
               <span key={i} className="inline-block pr-[60px] text-[22px] font-black leading-9 tracking-[-0.01em] text-white/[0.08]">
                 {university.name}
               </span>
