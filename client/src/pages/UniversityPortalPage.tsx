@@ -101,7 +101,8 @@ export default function UniversityPortalPage() {
   const { data: university, isLoading: uniLoading, isError: uniError } = useQuery({
     queryKey: ['university', slug],
     queryFn: () => api.get(`/universities/${slug}`).then(r => r.data as UniversityDetail),
-    staleTime: 1000 * 60 * 5,
+    staleTime: 0,
+    gcTime: 0,
     enabled: !!slug,
   });
 
