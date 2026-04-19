@@ -15,7 +15,7 @@ export default function Footer() {
               </span>
             </div>
             <p className="text-sm leading-relaxed max-w-sm">
-              HouseRush is an online listing and information platform. We are not a real estate broker, agent, or property manager. We are not a party to any lease or transaction between students and landlords.
+              HouseRush is an online listing and information platform. We are not a real estate broker, agent, or property manager. We are not a party to any lease or transaction between students and housing providers.
             </p>
           </div>
 

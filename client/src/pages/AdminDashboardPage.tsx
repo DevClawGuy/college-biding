@@ -168,7 +168,7 @@ export default function AdminDashboardPage() {
             <h2 className="text-sm font-semibold text-slate-900">Users</h2>
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 divide-x divide-slate-100">
-            <Stat label="Total" value={data.users.total} sub={`${data.users.students} students, ${data.users.landlords} landlords`} />
+            <Stat label="Total" value={data.users.total} sub={`${data.users.students} students, ${data.users.landlords} housing providers`} />
             <Stat label="New Today" value={data.users.newToday} />
             <Stat label="This Week" value={data.users.newThisWeek} />
             <Stat label="Active 7d" value={data.users.active7d} sub="Any activity" />
@@ -362,7 +362,7 @@ function UserOutreachSection({
         </div>
         <div className="flex items-center gap-2">
           <button onClick={() => selectGroup('student')} className="text-[11px] font-medium text-brand-600 bg-brand-50 px-2.5 py-1 rounded-lg hover:bg-brand-100 transition-colors">Select Students</button>
-          <button onClick={() => selectGroup('landlord')} className="text-[11px] font-medium text-purple-600 bg-purple-50 px-2.5 py-1 rounded-lg hover:bg-purple-100 transition-colors">Select Landlords</button>
+          <button onClick={() => selectGroup('landlord')} className="text-[11px] font-medium text-purple-600 bg-purple-50 px-2.5 py-1 rounded-lg hover:bg-purple-100 transition-colors">Select Housing Providers</button>
         </div>
       </div>
 
@@ -377,7 +377,7 @@ function UserOutreachSection({
         {(['all', 'students', 'landlords', 'no_bids', 'active_week'] as const).map(f => (
           <button key={f} onClick={() => setUserFilter(f)}
             className={`text-[11px] font-medium px-3 py-1.5 rounded-lg transition-all ${userFilter === f ? 'bg-slate-900 text-white' : 'bg-slate-50 text-slate-600 hover:bg-slate-100'}`}>
-            {f === 'all' ? 'All' : f === 'students' ? 'Students' : f === 'landlords' ? 'Landlords' : f === 'no_bids' ? 'No Bids' : 'Active 7d'}
+            {f === 'all' ? 'All' : f === 'students' ? 'Students' : f === 'landlords' ? 'Housing Providers' : f === 'no_bids' ? 'No Bids' : 'Active 7d'}
           </button>
         ))}
       </div>
@@ -419,7 +419,7 @@ function UserOutreachSection({
                 <td className="px-3 py-2.5 text-slate-500 truncate max-w-[200px]">{u.email}</td>
                 <td className="px-3 py-2.5">
                   <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-md ${u.role === 'student' ? 'bg-brand-50 text-brand-700' : 'bg-purple-50 text-purple-700'}`}>
-                    {u.role === 'student' ? 'Student' : 'Landlord'}
+                    {u.role === 'student' ? 'Student' : 'Housing Provider'}
                   </span>
                 </td>
                 <td className="px-3 py-2.5 text-slate-600 tabular-nums">{u.bidCount}</td>

@@ -67,7 +67,7 @@ export default function SignupPage() {
             The smartest way to find off-campus housing.
           </h2>
           <p className="text-brand-200 text-lg leading-relaxed">
-            Free for students. Free to list for landlords. Real rent data for every campus in America.
+            Free for students. Free to list for housing providers. Real rent data for every campus in America.
           </p>
         </div>
       </div>
@@ -94,7 +94,7 @@ export default function SignupPage() {
                 className={`flex-1 py-2.5 rounded-lg text-sm font-medium transition-all ${
                   form.role === role ? 'bg-white shadow-sm text-slate-900' : 'text-slate-500 hover:text-slate-700'
                 }`}>
-                {role === 'student' ? 'Student' : 'Landlord'}
+                {role === 'student' ? 'Student' : 'Housing Provider'}
               </button>
             ))}
           </div>

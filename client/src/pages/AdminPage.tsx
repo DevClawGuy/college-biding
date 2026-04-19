@@ -94,7 +94,7 @@ export default function AdminPage() {
                   <h3 className="font-semibold text-slate-900">{listing.title}</h3>
                   <p className="text-sm text-slate-500 mt-0.5">{listing.address}, {listing.city}</p>
                   <div className="flex items-center gap-4 mt-2 text-xs text-slate-400">
-                    <span>Landlord: <strong className="text-slate-600">{listing.landlordName}</strong></span>
+                    <span>Provider: <strong className="text-slate-600">{listing.landlordName}</strong></span>
                     <span>Starting: <strong className="text-slate-600">${listing.startingBid}/mo</strong></span>
                     <span>Ends: <strong className="text-slate-600">{new Date(listing.auctionEnd).toLocaleDateString()}</strong></span>
                   </div>

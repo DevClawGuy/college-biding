@@ -195,7 +195,7 @@ export default function DashboardPage() {
           {/* MY LISTINGS (Landlord) */}
           {activeTab === 'listings' && (
             <div className="space-y-4">
-              {user.role !== 'landlord' ? <EmptyState icon={Home} title="Student Account" desc="Switch to a landlord account to create listings." /> :
+              {user.role !== 'landlord' ? <EmptyState icon={Home} title="Student Account" desc="Switch to a housing provider account to create listings." /> :
                listings.length === 0 ? (
                 <EmptyState icon={Home} title="No listings yet" desc="Create your first listing to start receiving bids!">
                   <Link to="/create-listing" className="mt-5 inline-block bg-brand-600 text-white px-6 py-2.5 rounded-xl font-semibold hover:bg-brand-700 transition-all">Create Listing</Link>
@@ -280,7 +280,7 @@ export default function DashboardPage() {
           {/* MESSAGES */}
           {activeTab === 'messages' && (
             <div className="space-y-3">
-              {conversations.length === 0 ? <EmptyState icon={MessageCircle} title="No messages yet" desc="Message a landlord from any listing page to start a conversation." /> :
+              {conversations.length === 0 ? <EmptyState icon={MessageCircle} title="No messages yet" desc="Message a housing provider from any listing page to start a conversation." /> :
                conversations.map(conv => {
                 const key = `${conv.listingId}:${conv.otherUserId}`;
                 const isExpanded = expandedConv === key;

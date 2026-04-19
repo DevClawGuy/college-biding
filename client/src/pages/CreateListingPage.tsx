@@ -120,8 +120,8 @@ export default function CreateListingPage() {
   if (!user || user.role !== 'landlord') {
     return (
       <div className="max-w-2xl mx-auto px-4 py-24 text-center">
-        <h2 className="text-2xl font-bold text-slate-700">Landlord Access Only</h2>
-        <p className="text-slate-500 mt-2">You need a landlord account to create listings.</p>
+        <h2 className="text-2xl font-bold text-slate-700">Housing Provider Access Only</h2>
+        <p className="text-slate-500 mt-2">You need a housing provider account to create listings.</p>
       </div>
     );
   }

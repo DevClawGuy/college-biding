@@ -629,7 +629,7 @@ export default function UniversityPortalPage() {
                 <p className="text-base font-medium text-slate-700">No listings yet near {university.name}</p>
                 {showLandlordCTA && (
                   <>
-                    <p className="text-slate-500 mt-1.5 text-xs">Are you a landlord with property near here?</p>
+                    <p className="text-slate-500 mt-1.5 text-xs">Are you a housing provider with property near here?</p>
                     <Link
                       to="/create-listing"
                       className="inline-flex items-center gap-2 mt-4 text-white transition-all"
@@ -652,7 +652,7 @@ export default function UniversityPortalPage() {
             <p className="text-slate-500 mt-0.5 mb-4" style={{ fontSize: 13 }}>Everything you need to navigate off-campus housing with confidence.</p>
             <div className="grid sm:grid-cols-2 gap-3">
               {[
-                { icon: ShieldCheck, title: 'Avoiding Rental Scams', desc: 'Learn how to spot fake listings and protect yourself from fraudulent landlords.' },
+                { icon: ShieldCheck, title: 'Avoiding Rental Scams', desc: 'Learn how to spot fake listings and protect yourself from fraudulent housing providers.' },
                 { icon: FileText, title: 'Lease Red Flags', desc: 'Common lease clauses that have cost students thousands of dollars.' },
                 { icon: DollarSign, title: 'Budgeting for Off-Campus Housing', desc: 'How to calculate your true cost of living off campus including utilities and fees.' },
               ].map(card => (
@@ -691,7 +691,7 @@ export default function UniversityPortalPage() {
                   style={heroBackground ? { background: heroBackground } : {}}
                 />
                 <div className="relative">
-                  <p style={{ fontSize: 16, fontWeight: 500, color: '#fff' }}>Are you a landlord with property near {university.name}?</p>
+                  <p style={{ fontSize: 16, fontWeight: 500, color: '#fff' }}>Are you a housing provider with property near {university.name}?</p>
                   <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.75)', marginTop: 4 }}>List free. Reach verified students directly. No commissions, no fees.</p>
                   <Link
                     to="/create-listing"

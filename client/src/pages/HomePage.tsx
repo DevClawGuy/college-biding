@@ -98,8 +98,8 @@ export default function HomePage() {
           <div className="grid md:grid-cols-3 gap-6">
             {[
               { icon: Search, title: 'Browse Listings', desc: 'Search verified properties near your campus. Filter by price, size, distance, and amenities.', step: '01' },
-              { icon: TrendingUp, title: 'Express Interest', desc: 'Tell landlords you\'re interested. Submit your move-in date, group size, and a note. No binding commitment required.', step: '02' },
-              { icon: Shield, title: 'Connect & Move In', desc: 'Landlords review interested students and reach out directly to finalize the lease. Simple, transparent, and fair.', step: '03' },
+              { icon: TrendingUp, title: 'Express Interest', desc: 'Tell housing providers you\'re interested. Submit your move-in date, group size, and a note. No binding commitment required.', step: '02' },
+              { icon: Shield, title: 'Connect & Move In', desc: 'Housing providers review interested students and reach out directly to finalize the lease. Simple, transparent, and fair.', step: '03' },
             ].map(({ icon: Icon, title, desc, step }, i) => (
               <div key={title} className={`bg-white border border-[#eeeeee] rounded-xl p-7 hover:shadow-md transition-all duration-300 group relative overflow-hidden reveal reveal-delay-${i + 1}`}>
                 <div className="absolute top-5 right-5 text-4xl font-black text-[#eeeeee] group-hover:text-[#f0fdf9] transition-colors">{step}</div>
@@ -124,7 +124,7 @@ export default function HomePage() {
           {[
             { icon: CheckSquare, title: 'Move-In Essentials', desc: 'Everything you need to buy and bring when moving into your first apartment.' },
             { icon: AlertTriangle, title: 'Lease Red Flags', desc: 'Common lease clauses that have cost students thousands of dollars.' },
-            { icon: ShieldAlert, title: 'Rental Scam Signs', desc: 'Protect yourself from fake listings and fraudulent landlords.' },
+            { icon: ShieldAlert, title: 'Rental Scam Signs', desc: 'Protect yourself from fake listings and fraudulent housing providers.' },
           ].map(({ icon: Icon, title, desc }, i) => (
             <Link key={title} to="/guides" className={`bg-white border border-[#eeeeee] rounded-xl p-6 hover:shadow-md transition-all duration-300 group reveal reveal-delay-${i + 1}`}>
               <div className="w-10 h-10 bg-[#f0fdf9] border border-[rgba(0,212,180,0.2)] rounded-lg flex items-center justify-center mb-4">
@@ -147,7 +147,7 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
           <div className="grid md:grid-cols-2 gap-12 items-center">
             <div className="reveal">
-              <span className="text-sm font-semibold text-[#00d4b4]">For landlords</span>
+              <span className="text-sm font-semibold text-[#00d4b4]">For housing providers</span>
               <h2 className="text-2xl md:text-3xl font-bold text-[#111111] tracking-tight mt-2">Own a property near a campus?</h2>
               <p className="text-[#666666] mt-3 leading-relaxed">List free and reach verified students searching for housing right now. No commissions, no fees — ever.</p>
               <Link
@@ -182,7 +182,7 @@ export default function HomePage() {
           {!user ? (
             <>
               <h2 className="text-3xl md:text-4xl font-bold text-white mb-4 tracking-tight">Ready to find your place?</h2>
-              <p className="text-[#888888] mb-8 text-lg">Free for students. Free to list for landlords.</p>
+              <p className="text-[#888888] mb-8 text-lg">Free for students. Free to list for housing providers.</p>
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
                 <Link to="/signup" className="inline-flex items-center gap-2 bg-[#00d4b4] text-white px-8 py-4 rounded-xl font-semibold text-base hover:bg-[#00a896] transition-all hover:shadow-xl active:scale-[0.98]">
                   Find housing near my campus <ArrowRight className="w-4 h-4" />

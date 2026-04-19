@@ -420,7 +420,7 @@ export default function ListingDetailPage() {
             </div>
           )}
 
-          {/* Landlord */}
+          {/* Housing Provider */}
           {listing.landlord && (
             <div className="bg-white rounded-2xl p-5 flex items-center gap-4 card-shadow border border-slate-100">
               <div className="w-12 h-12 bg-gradient-to-br from-brand-400 to-brand-600 rounded-full flex items-center justify-center text-white font-semibold text-lg">
@@ -501,16 +501,16 @@ export default function ListingDetailPage() {
                             className="w-full px-3 py-2.5 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all" placeholder="1-6" />
                         </div>
                         <div>
-                          <label className="block text-xs font-medium text-slate-600 mb-1">Note to landlord</label>
+                          <label className="block text-xs font-medium text-slate-600 mb-1">Note to housing provider</label>
                           <textarea value={interestForm.note} onChange={e => setInterestForm(p => ({ ...p, note: e.target.value }))} maxLength={280}
-                            className="w-full px-3 py-2.5 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all resize-none" rows={3} placeholder="Tell the landlord about yourself..." />
+                            className="w-full px-3 py-2.5 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all resize-none" rows={3} placeholder="Tell the housing provider about yourself..." />
                           <p className="text-[10px] text-slate-400 mt-0.5 text-right">{interestForm.note.length}/280</p>
                         </div>
                         <div>
                           <label className="block text-xs font-medium text-slate-500 mb-1">Optional: what monthly rent would work for you?</label>
                           <input type="number" min={1} value={interestForm.rentSuggestion} onChange={e => setInterestForm(p => ({ ...p, rentSuggestion: e.target.value }))}
                             className="w-full px-3 py-2.5 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all" placeholder="$ per month" />
-                          <p className="text-[10px] text-slate-400 mt-0.5">Shared privately with the landlord only. Never shown to other students.</p>
+                          <p className="text-[10px] text-slate-400 mt-0.5">Shared privately with the housing provider only. Never shown to other students.</p>
                         </div>
                       </div>
                     )}
@@ -521,12 +521,12 @@ export default function ListingDetailPage() {
                     </button>
 
                     {interestCount > 0 && <p className="text-sm text-slate-500 mt-3 text-center">{interestCount} student{interestCount !== 1 ? 's' : ''} have expressed interest</p>}
-                    <p className="text-xs text-slate-400 mt-2 text-center">Expressing interest is free and non-binding. The landlord will reach out if interested.</p>
+                    <p className="text-xs text-slate-400 mt-2 text-center">Expressing interest is free and non-binding. The housing provider will reach out if interested.</p>
                   </div>
                 )
               ) : user && user.role === 'landlord' ? (
-                /* Landlord viewing another landlord's listing */
-                <p className="text-center text-slate-500 text-sm bg-slate-50 py-3.5 rounded-xl border border-slate-100">You are viewing this listing as a landlord.</p>
+                /* Housing provider viewing another listing */
+                <p className="text-center text-slate-500 text-sm bg-slate-50 py-3.5 rounded-xl border border-slate-100">You are viewing this listing as a housing provider.</p>
               ) : (
                 /* Not logged in */
                 <div>
@@ -546,12 +546,12 @@ export default function ListingDetailPage() {
               )}
             </div>
 
-            {/* Message Landlord Section */}
+            {/* Message Housing Provider Section */}
             {user && user.role !== 'landlord' && listing.landlordId !== user.id && (
               <div className="bg-white rounded-2xl card-shadow border border-slate-200 p-5">
                 <div className="flex items-center gap-2 mb-3">
                   <MessageCircle className="w-4 h-4 text-brand-600" />
-                  <h3 className="text-sm font-semibold text-slate-900">Message Landlord</h3>
+                  <h3 className="text-sm font-semibold text-slate-900">Message Housing Provider</h3>
                 </div>
                 {threadMessages.length > 0 && (
                   <div className="max-h-60 overflow-y-auto space-y-2 mb-3 px-1">
@@ -589,10 +589,10 @@ export default function ListingDetailPage() {
               <div className="bg-white rounded-2xl card-shadow border border-slate-200 p-5">
                 <div className="flex items-center gap-2 mb-3">
                   <MessageCircle className="w-4 h-4 text-slate-400" />
-                  <h3 className="text-sm font-semibold text-slate-900">Message Landlord</h3>
+                  <h3 className="text-sm font-semibold text-slate-900">Message Housing Provider</h3>
                 </div>
                 <Link to="/login" className="block text-center w-full bg-slate-100 hover:bg-slate-200 text-slate-700 py-3 rounded-xl font-semibold text-sm transition-all">
-                  Log in to message the landlord
+                  Log in to message the housing provider
                 </Link>
               </div>
             )}

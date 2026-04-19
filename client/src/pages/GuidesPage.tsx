@@ -101,11 +101,11 @@ What to do: Ask for the renewal to require mutual written agreement.
 2. VAGUE MAINTENANCE RESPONSIBILITY
 Watch for: "Tenant is responsible for routine maintenance and upkeep."
 Why it's dangerous: "Routine" could mean anything — they could charge you for appliance repairs.
-What to do: Ask for specific examples in writing. Get a list of what landlord vs. tenant covers.
+What to do: Ask for specific examples in writing. Get a list of what housing provider vs. tenant covers.
 
 3. SECURITY DEPOSIT TRAPS
 Watch for: Non-refundable "fees" disguised as deposits, or no timeline for return.
-Why it's dangerous: NJ law requires deposits returned within 30 days. Some landlords ignore this.
+Why it's dangerous: NJ law requires deposits returned within 30 days. Some housing providers ignore this.
 What to do: Document everything at move-in. Take timestamped photos. Know NJ deposit laws.
 
 4. SUBLETTING RESTRICTIONS
@@ -120,9 +120,9 @@ What to do: Negotiate a fixed early termination fee (e.g., 2 months rent max).
 
 GENERAL TIPS:
 - Never sign same-day. Always take the lease home and read it.
-- Google your landlord's name + "complaints" before signing.
+- Google your housing provider's name + "complaints" before signing.
 - Ask other tenants in the building about their experience.
-- Keep copies of ALL communication with your landlord.`,
+- Keep copies of ALL communication with your housing provider.`,
   },
   {
     slug: 'roommate-agreement',
@@ -195,10 +195,10 @@ SIGNATURES:
     slug: 'rental-scam-warning-signs',
     icon: ShieldAlert,
     title: 'Rental Scam Warning Signs',
-    description: 'Protect yourself from fake listings and fraudulent landlords. These red flags can save you from losing your deposit.',
+    description: 'Protect yourself from fake listings and fraudulent housing providers. These red flags can save you from losing your deposit.',
     bullets: [
       'Too-good-to-be-true pricing',
-      'Landlord refuses in-person showing',
+      'Housing provider refuses in-person showing',
       'Requests for wire transfer or gift cards',
       'Pressure to sign immediately',
       'No lease or vague rental agreement',
@@ -210,12 +210,12 @@ RED FLAG #1: TOO-GOOD-TO-BE-TRUE PRICING
 If a 2BR in Long Branch is listed at $600/mo when similar units go for $1,500+, it's a scam.
 Always compare with similar listings in the same area.
 
-RED FLAG #2: LANDLORD REFUSES IN-PERSON SHOWING
+RED FLAG #2: HOUSING PROVIDER REFUSES IN-PERSON SHOWING
 "I'm out of the country" or "I'll mail you the keys" = scam.
 Never rent a place you haven't seen in person or via a verified video tour.
 
 RED FLAG #3: WIRE TRANSFERS OR GIFT CARDS
-Legitimate landlords accept checks, Venmo, or Zelle. They never ask for:
+Legitimate housing providers accept checks, Venmo, or Zelle. They never ask for:
 - Wire transfers
 - Gift cards
 - Bitcoin/crypto
@@ -223,7 +223,7 @@ Legitimate landlords accept checks, Venmo, or Zelle. They never ask for:
 
 RED FLAG #4: PRESSURE TO SIGN IMMEDIATELY
 "Someone else is interested, you need to sign today!" is a pressure tactic.
-Real landlords give you time to read the lease and think it over.
+Real housing providers give you time to read the lease and think it over.
 
 RED FLAG #5: NO LEASE OR VAGUE AGREEMENT
 If there's no written lease, walk away. Period.
@@ -231,9 +231,9 @@ A handshake deal gives you zero legal protection.
 
 HOW TO PROTECT YOURSELF:
 [ ] Google the property address — does the listing match public records?
-[ ] Search the landlord's name + "scam" or "complaints"
+[ ] Search the housing provider's name + "scam" or "complaints"
 [ ] Never send money before seeing the property in person
-[ ] Ask for the landlord's ID and proof of ownership
+[ ] Ask for the housing provider's ID and proof of ownership
 [ ] Use HouseRush — all listings are verified before going live
 [ ] Trust your gut — if it feels off, it probably is
 
@@ -297,7 +297,7 @@ DOORS & SECURITY:
 [ ] Check smoke detectors — are they present and working?
 [ ] Check carbon monoxide detector
 
-ASK THE LANDLORD:
+ASK THE HOUSING PROVIDER:
 [ ] What's the pest control schedule?
 [ ] Who handles maintenance requests and how fast?
 [ ] What utilities are included?
@@ -316,11 +316,11 @@ DOCUMENT EVERYTHING:
     slug: 'after-winning-auction',
     icon: Trophy,
     title: 'What Happens After You Express Interest',
-    description: "You expressed interest — now what? Here's exactly what happens next and what to expect from the landlord.",
+    description: "You expressed interest — now what? Here's exactly what happens next and what to expect from the housing provider.",
     bullets: [
       'You receive a confirmation email',
-      'The landlord reviews your interest and contact details',
-      'The landlord reaches out directly within 48 hours',
+      'The housing provider reviews your interest and contact details',
+      'The housing provider reaches out directly within 48 hours',
       "You'll discuss move-in date, lease terms, and next steps",
       'No commitment is made until you sign a lease',
     ],
@@ -330,10 +330,10 @@ By HouseRush — houserush.vercel.app
 STEP 1: WINNER CONFIRMATION (Immediate)
 - You'll see confetti on screen and a "You Won!" banner
 - You'll receive an email with the property details and winning bid
-- The landlord also receives an email with your contact info
+- The housing provider also receives an email with your contact info
 
 STEP 2: AGENT CONTACT (Within 24 Hours)
-- The landlord or their agent will reach out via email or phone
+- The housing provider or their agent will reach out via email or phone
 - They'll schedule a time to review the lease
 - If you haven't heard within 48 hours, check your spam folder and contact support
 
@@ -359,7 +359,7 @@ STEP 5: MOVE-IN PREP
 WHAT IF YOU CHANGE YOUR MIND?
 - Before signing the lease: You can walk away, but it's considered bad faith
 - After signing: Review the early termination clause in your lease
-- Contact the landlord ASAP — honest communication goes a long way
+- Contact the housing provider ASAP — honest communication goes a long way
 - Note: Backing out may affect your HouseRush reputation for future bids
 
 NEED HELP?
