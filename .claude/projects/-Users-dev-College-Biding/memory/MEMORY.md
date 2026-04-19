@@ -1,0 +1,3 @@
+- [User Profile](user_profile.md) — Student developer building HouseRush, Monmouth University housing platform
+- [Coding Standards](feedback_coding_standards.md) — Strict coding rules: TS strict, Tailwind only, Thunder Client examples, Playwright tests, LibSQL syntax
+- [Project Context](project_houserush.md) — HouseRush architecture, deployment, admin creds, env vars, and build queue

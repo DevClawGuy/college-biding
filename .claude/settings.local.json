@@ -1,7 +1,14 @@
 {
   "permissions": {
     "allow": [
-      "Bash(npx tsc:*)"
+      "Bash(npx tsc:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(npm run:*)",
+      "Bash(ls /Users/dev/College-Biding/HOUSERUSH*)",
+      "Bash(ls /Users/dev/College-Biding/houserush*)",
+      "Bash(ls /Users/dev/College-Biding/*CONTEXT*)"
     ]
   }
 }

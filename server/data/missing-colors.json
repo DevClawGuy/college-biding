@@ -1,0 +1,1866 @@
+[
+  {
+    "id": 15,
+    "name": "Saint Peters University"
+  },
+  {
+    "id": 18,
+    "name": "NJ City University"
+  },
+  {
+    "id": 26,
+    "name": "Berkeley College"
+  },
+  {
+    "id": 31,
+    "name": "Amridge University"
+  },
+  {
+    "id": 59,
+    "name": "United States Sports Academy"
+  },
+  {
+    "id": 66,
+    "name": "Brookline College-Phoenix"
+  },
+  {
+    "id": 70,
+    "name": "The School of Architecture"
+  },
+  {
+    "id": 73,
+    "name": "GateWay Community College"
+  },
+  {
+    "id": 74,
+    "name": "Dine College"
+  },
+  {
+    "id": 76,
+    "name": "Prescott College"
+  },
+  {
+    "id": 77,
+    "name": "Rio Salado College"
+  },
+  {
+    "id": 79,
+    "name": "Yavapai College"
+  },
+  {
+    "id": 91,
+    "name": "Crowley's Ridge College"
+  },
+  {
+    "id": 104,
+    "name": "Berkeley School of Theology"
+  },
+  {
+    "id": 110,
+    "name": "Bethesda University"
+  },
+  {
+    "id": 116,
+    "name": "University of California College of the Law-San Francisco"
+  },
+  {
+    "id": 149,
+    "name": "Casa Loma College-Los Angeles"
+  },
+  {
+    "id": 154,
+    "name": "Church Divinity School of the Pacific"
+  },
+  {
+    "id": 155,
+    "name": "Claremont Graduate University"
+  },
+  {
+    "id": 158,
+    "name": "Western University of Health Sciences"
+  },
+  {
+    "id": 161,
+    "name": "Design Institute of San Diego"
+  },
+  {
+    "id": 162,
+    "name": "Dharma Realm Buddhist University"
+  },
+  {
+    "id": 165,
+    "name": "Emperor's College of Traditional Oriental Medicine"
+  },
+  {
+    "id": 167,
+    "name": "FIDM-Fashion Institute of Design & Merchandising"
+  },
+  {
+    "id": 169,
+    "name": "Fielding Graduate University"
+  },
+  {
+    "id": 170,
+    "name": "Five Branches University"
+  },
+  {
+    "id": 172,
+    "name": "Franciscan School of Theology"
+  },
+  {
+    "id": 174,
+    "name": "Fuller Theological Seminary"
+  },
+  {
+    "id": 177,
+    "name": "Graduate Theological Union"
+  },
+  {
+    "id": 182,
+    "name": "Humphreys University-Stockton and Modesto Campuses"
+  },
+  {
+    "id": 183,
+    "name": "Interior Designers Institute"
+  },
+  {
+    "id": 185,
+    "name": "Life Pacific University"
+  },
+  {
+    "id": 188,
+    "name": "Latin American Bible Institute"
+  },
+  {
+    "id": 189,
+    "name": "Life Chiropractic College West"
+  },
+  {
+    "id": 203,
+    "name": "Musicians Institute"
+  },
+  {
+    "id": 205,
+    "name": "Naval Postgraduate School"
+  },
+  {
+    "id": 210,
+    "name": "Otis College of Art and Design"
+  },
+  {
+    "id": 224,
+    "name": "Pardee RAND Graduate School"
+  },
+  {
+    "id": 227,
+    "name": "Dongguk University Los Angeles"
+  },
+  {
+    "id": 235,
+    "name": "San Joaquin College of Law"
+  },
+  {
+    "id": 241,
+    "name": "Saybrook University"
+  },
+  {
+    "id": 247,
+    "name": "Skyline College"
+  },
+  {
+    "id": 253,
+    "name": "Starr King School for the Ministry"
+  },
+  {
+    "id": 258,
+    "name": "Claremont School of Theology"
+  },
+  {
+    "id": 260,
+    "name": "Epic Bible College & Graduate School"
+  },
+  {
+    "id": 261,
+    "name": "The Colleges of Law at Ventura"
+  },
+  {
+    "id": 263,
+    "name": "West Los Angeles College"
+  },
+  {
+    "id": 264,
+    "name": "Carrington College-Sacramento"
+  },
+  {
+    "id": 268,
+    "name": "Woodbury University"
+  },
+  {
+    "id": 269,
+    "name": "The Wright Institute"
+  },
+  {
+    "id": 273,
+    "name": "Aims Community College"
+  },
+  {
+    "id": 285,
+    "name": "Denver Seminary"
+  },
+  {
+    "id": 288,
+    "name": "Front Range Community College"
+  },
+  {
+    "id": 289,
+    "name": "Iliff School of Theology"
+  },
+  {
+    "id": 301,
+    "name": "Montessori Education Center of the Rockies"
+  },
+  {
+    "id": 303,
+    "name": "Trinidad State College"
+  },
+  {
+    "id": 307,
+    "name": "Bais Binyomin Academy"
+  },
+  {
+    "id": 316,
+    "name": "Rensselaer at Hartford"
+  },
+  {
+    "id": 317,
+    "name": "Hartford International University for Religion and Peace"
+  },
+  {
+    "id": 336,
+    "name": "Goldey-Beacom College"
+  },
+  {
+    "id": 341,
+    "name": "Pontifical Faculty of the Immaculate Conception at the Dominican House of Studies"
+  },
+  {
+    "id": 349,
+    "name": "Baptist University of Florida"
+  },
+  {
+    "id": 373,
+    "name": "The College of the Florida Keys"
+  },
+  {
+    "id": 379,
+    "name": "Gulf Coast State College"
+  },
+  {
+    "id": 380,
+    "name": "Hillsborough Community College"
+  },
+  {
+    "id": 381,
+    "name": "Hobe Sound Bible College"
+  },
+  {
+    "id": 382,
+    "name": "Indian River State College"
+  },
+  {
+    "id": 383,
+    "name": "AI Miami International University of Art and Design"
+  },
+  {
+    "id": 400,
+    "name": "Pensacola State College"
+  },
+  {
+    "id": 403,
+    "name": "Ringling College of Art and Design"
+  },
+  {
+    "id": 406,
+    "name": "St Petersburg College"
+  },
+  {
+    "id": 417,
+    "name": "Talmudic College of Florida"
+  },
+  {
+    "id": 432,
+    "name": "Atlanta's John Marshall Law School"
+  },
+  {
+    "id": 438,
+    "name": "College of Coastal Georgia"
+  },
+  {
+    "id": 443,
+    "name": "Dalton State College"
+  },
+  {
+    "id": 457,
+    "name": "Interdenominational Theological Center"
+  },
+  {
+    "id": 459,
+    "name": "Life University"
+  },
+  {
+    "id": 467,
+    "name": "Piedmont University"
+  },
+  {
+    "id": 472,
+    "name": "Spelman College"
+  },
+  {
+    "id": 490,
+    "name": "The College of Idaho"
+  },
+  {
+    "id": 494,
+    "name": "College of Southern Idaho"
+  },
+  {
+    "id": 505,
+    "name": "Catholic Theological Union at Chicago"
+  },
+  {
+    "id": 518,
+    "name": "Garrett-Evangelical Theological Seminary"
+  },
+  {
+    "id": 531,
+    "name": "Institute for Clinical Social Work"
+  },
+  {
+    "id": 536,
+    "name": "Lakeview College of Nursing"
+  },
+  {
+    "id": 542,
+    "name": "McCormick Theological Seminary"
+  },
+  {
+    "id": 544,
+    "name": "Meadville Theological School of Lombard College"
+  },
+  {
+    "id": 560,
+    "name": "Rockford University"
+  },
+  {
+    "id": 563,
+    "name": "Rush University"
+  },
+  {
+    "id": 570,
+    "name": "University of Saint Mary of the Lake"
+  },
+  {
+    "id": 571,
+    "name": "Spertus College"
+  },
+  {
+    "id": 575,
+    "name": "Telshe Yeshiva-Chicago"
+  },
+  {
+    "id": 578,
+    "name": "VanderCook College of Music"
+  },
+  {
+    "id": 587,
+    "name": "Christian Theological Seminary"
+  },
+  {
+    "id": 614,
+    "name": "Anabaptist Mennonite Biblical Seminary"
+  },
+  {
+    "id": 622,
+    "name": "Saint Meinrad School of Theology"
+  },
+  {
+    "id": 640,
+    "name": "Faith Baptist Bible College and Theological Seminary"
+  },
+  {
+    "id": 657,
+    "name": "Des Moines University-Osteopathic Medical Center"
+  },
+  {
+    "id": 660,
+    "name": "St Luke's College"
+  },
+  {
+    "id": 690,
+    "name": "University of Saint Mary"
+  },
+  {
+    "id": 708,
+    "name": "Frontier Nursing University"
+  },
+  {
+    "id": 716,
+    "name": "Lexington Theological Seminary"
+  },
+  {
+    "id": 733,
+    "name": "Dillard University"
+  },
+  {
+    "id": 739,
+    "name": "Louisiana Christian University"
+  },
+  {
+    "id": 761,
+    "name": "Maine College of Health Professions"
+  },
+  {
+    "id": 770,
+    "name": "Maine College of Art & Design"
+  },
+  {
+    "id": 804,
+    "name": "Hult International Business School"
+  },
+  {
+    "id": 822,
+    "name": "Laboure College of Healthcare"
+  },
+  {
+    "id": 824,
+    "name": "Conway School of Landscape Design"
+  },
+  {
+    "id": 844,
+    "name": "Longy School of Music of Bard College"
+  },
+  {
+    "id": 852,
+    "name": "University of Massachusetts Chan Medical School"
+  },
+  {
+    "id": 853,
+    "name": "William James College"
+  },
+  {
+    "id": 864,
+    "name": "College of Our Lady of the Elms"
+  },
+  {
+    "id": 865,
+    "name": "Pope St John XXIII National Seminary"
+  },
+  {
+    "id": 899,
+    "name": "Cranbrook Academy of Art"
+  },
+  {
+    "id": 928,
+    "name": "The University of Olivet"
+  },
+  {
+    "id": 929,
+    "name": "Kuyper College"
+  },
+  {
+    "id": 935,
+    "name": "Finlandia University"
+  },
+  {
+    "id": 940,
+    "name": "Western Theological Seminary"
+  },
+  {
+    "id": 960,
+    "name": "Minneapolis College of Art and Design"
+  },
+  {
+    "id": 968,
+    "name": "Oak Hills Christian College"
+  },
+  {
+    "id": 980,
+    "name": "United Theological Seminary of the Twin Cities"
+  },
+  {
+    "id": 981,
+    "name": "Dunwoody College of Technology"
+  },
+  {
+    "id": 1003,
+    "name": "Mission University"
+  },
+  {
+    "id": 1017,
+    "name": "Eden Theological Seminary"
+  },
+  {
+    "id": 1020,
+    "name": "Ozarks Technical Community College"
+  },
+  {
+    "id": 1025,
+    "name": "Kenrick Glennon Seminary"
+  },
+  {
+    "id": 1026,
+    "name": "A T Still University of Health Sciences"
+  },
+  {
+    "id": 1040,
+    "name": "Nazarene Theological Seminary"
+  },
+  {
+    "id": 1043,
+    "name": "Ozark Christian College"
+  },
+  {
+    "id": 1047,
+    "name": "Ranken Technical College"
+  },
+  {
+    "id": 1053,
+    "name": "Saint Paul School of Theology"
+  },
+  {
+    "id": 1055,
+    "name": "Stephens College"
+  },
+  {
+    "id": 1064,
+    "name": "Blackfeet Community College"
+  },
+  {
+    "id": 1067,
+    "name": "Aaniiih Nakoda College"
+  },
+  {
+    "id": 1094,
+    "name": "Summit Christian College"
+  },
+  {
+    "id": 1103,
+    "name": "Great Basin College"
+  },
+  {
+    "id": 1115,
+    "name": "University of New Hampshire at Manchester"
+  },
+  {
+    "id": 1119,
+    "name": "University of New Hampshire College of Professional Studies Online"
+  },
+  {
+    "id": 1121,
+    "name": "Eastwick College-Hackensack"
+  },
+  {
+    "id": 1122,
+    "name": "Berkeley College-Woodland Park"
+  },
+  {
+    "id": 1123,
+    "name": "Beth Medrash Govoha"
+  },
+  {
+    "id": 1133,
+    "name": "Eastwick College-Ramsey"
+  },
+  {
+    "id": 1138,
+    "name": "New Brunswick Theological Seminary"
+  },
+  {
+    "id": 1153,
+    "name": "Talmudical Academy-New Jersey"
+  },
+  {
+    "id": 1157,
+    "name": "Navajo Technical University"
+  },
+  {
+    "id": 1168,
+    "name": "Vaughn College of Aeronautics and Technology"
+  },
+  {
+    "id": 1176,
+    "name": "Associated Beth Rivkah Schools"
+  },
+  {
+    "id": 1177,
+    "name": "Bank Street College of Education"
+  },
+  {
+    "id": 1180,
+    "name": "Berkeley College-New York"
+  },
+  {
+    "id": 1181,
+    "name": "Beth Hamedrash Shaarei Yosher Institute"
+  },
+  {
+    "id": 1182,
+    "name": "Mount Sinai Phillips School of Nursing"
+  },
+  {
+    "id": 1184,
+    "name": "Brooklyn Law School"
+  },
+  {
+    "id": 1189,
+    "name": "Cazenovia College"
+  },
+  {
+    "id": 1198,
+    "name": "Weill Medical College of Cornell University"
+  },
+  {
+    "id": 1211,
+    "name": "CUNY School of Law"
+  },
+  {
+    "id": 1219,
+    "name": "Five Towns College"
+  },
+  {
+    "id": 1223,
+    "name": "Helene Fuld College of Nursing"
+  },
+  {
+    "id": 1230,
+    "name": "Jamestown Business College"
+  },
+  {
+    "id": 1242,
+    "name": "Maria College of Albany"
+  },
+  {
+    "id": 1247,
+    "name": "Mesivta Torah Vodaath Rabbinical Seminary"
+  },
+  {
+    "id": 1248,
+    "name": "Mesivta of Eastern Parkway-Yeshiva Zichron Meilech"
+  },
+  {
+    "id": 1254,
+    "name": "University of Mount Saint Vincent"
+  },
+  {
+    "id": 1255,
+    "name": "Icahn School of Medicine at Mount Sinai"
+  },
+  {
+    "id": 1258,
+    "name": "Northeast College of Health Sciences"
+  },
+  {
+    "id": 1267,
+    "name": "Alliance University"
+  },
+  {
+    "id": 1268,
+    "name": "Ohr Hameir Theological Seminary"
+  },
+  {
+    "id": 1271,
+    "name": "Plaza College"
+  },
+  {
+    "id": 1274,
+    "name": "Rabbinical Academy Mesivta Rabbi Chaim Berlin"
+  },
+  {
+    "id": 1278,
+    "name": "Rabbinical College of Long Island"
+  },
+  {
+    "id": 1284,
+    "name": "The Rockefeller University"
+  },
+  {
+    "id": 1286,
+    "name": "St Bernard's School of Theology and Ministry"
+  },
+  {
+    "id": 1293,
+    "name": "Sh'or Yoshuv Rabbinical College"
+  },
+  {
+    "id": 1297,
+    "name": "Saint Vladimirs Orthodox Theological Seminary"
+  },
+  {
+    "id": 1306,
+    "name": "University at Albany"
+  },
+  {
+    "id": 1314,
+    "name": "State University of New York at Cortland"
+  },
+  {
+    "id": 1322,
+    "name": "SUNY College of Optometry"
+  },
+  {
+    "id": 1323,
+    "name": "SUNY Old Westbury"
+  },
+  {
+    "id": 1331,
+    "name": "Talmudical Institute of Upstate New York"
+  },
+  {
+    "id": 1332,
+    "name": "Teachers College at Columbia University"
+  },
+  {
+    "id": 1333,
+    "name": "Torah Temimah Talmudical Seminary"
+  },
+  {
+    "id": 1334,
+    "name": "Touro University"
+  },
+  {
+    "id": 1335,
+    "name": "Trocaire College"
+  },
+  {
+    "id": 1339,
+    "name": "United Talmudical Seminary"
+  },
+  {
+    "id": 1388,
+    "name": "University of North Carolina Asheville"
+  },
+  {
+    "id": 1393,
+    "name": "University of North Carolina School of the Arts"
+  },
+  {
+    "id": 1397,
+    "name": "William Peace University"
+  },
+  {
+    "id": 1399,
+    "name": "Pfeiffer University"
+  },
+  {
+    "id": 1405,
+    "name": "St. Andrews University"
+  },
+  {
+    "id": 1409,
+    "name": "Watts College of Nursing"
+  },
+  {
+    "id": 1417,
+    "name": "Nueta Hidatsa Sahnish College"
+  },
+  {
+    "id": 1420,
+    "name": "Mayville State University"
+  },
+  {
+    "id": 1424,
+    "name": "Sitting Bull College"
+  },
+  {
+    "id": 1428,
+    "name": "Valley City State University"
+  },
+  {
+    "id": 1433,
+    "name": "Art Academy of Cincinnati"
+  },
+  {
+    "id": 1435,
+    "name": "Athenaeum of Ohio"
+  },
+  {
+    "id": 1436,
+    "name": "Aultman College of Nursing and Health Sciences"
+  },
+  {
+    "id": 1447,
+    "name": "The Christ College of Nursing and Health Sciences"
+  },
+  {
+    "id": 1465,
+    "name": "Gods Bible School and College"
+  },
+  {
+    "id": 1467,
+    "name": "Hebrew Union College-Jewish Institute of Religion"
+  },
+  {
+    "id": 1482,
+    "name": "James A. Rhodes State College"
+  },
+  {
+    "id": 1487,
+    "name": "Marion Technical College"
+  },
+  {
+    "id": 1496,
+    "name": "Mount St. Joseph University"
+  },
+  {
+    "id": 1497,
+    "name": "Zane State College"
+  },
+  {
+    "id": 1501,
+    "name": "Northeast Ohio Medical University"
+  },
+  {
+    "id": 1519,
+    "name": "Payne Theological Seminary"
+  },
+  {
+    "id": 1521,
+    "name": "Professional Skills Institute"
+  },
+  {
+    "id": 1522,
+    "name": "Rabbinical College Telshe"
+  },
+  {
+    "id": 1524,
+    "name": "The Modern College of Design"
+  },
+  {
+    "id": 1532,
+    "name": "United Theological Seminary"
+  },
+  {
+    "id": 1534,
+    "name": "The North Coast College"
+  },
+  {
+    "id": 1537,
+    "name": "Wilberforce University"
+  },
+  {
+    "id": 1539,
+    "name": "Winebrenner Theological Seminary"
+  },
+  {
+    "id": 1552,
+    "name": "Randall University"
+  },
+  {
+    "id": 1574,
+    "name": "Chemeketa Community College"
+  },
+  {
+    "id": 1575,
+    "name": "Sumner College"
+  },
+  {
+    "id": 1577,
+    "name": "New Hope Christian College-Eugene"
+  },
+  {
+    "id": 1582,
+    "name": "Mt Hood Community College"
+  },
+  {
+    "id": 1583,
+    "name": "Multnomah University"
+  },
+  {
+    "id": 1598,
+    "name": "Western Seminary"
+  },
+  {
+    "id": 1601,
+    "name": "University of Western States"
+  },
+  {
+    "id": 1606,
+    "name": "DeSales University"
+  },
+  {
+    "id": 1611,
+    "name": "Missio Theological Seminary"
+  },
+  {
+    "id": 1614,
+    "name": "Cabrini University"
+  },
+  {
+    "id": 1639,
+    "name": "Hussian College-Philadelphia"
+  },
+  {
+    "id": 1648,
+    "name": "Lackawanna College"
+  },
+  {
+    "id": 1651,
+    "name": "Lancaster Theological Seminary"
+  },
+  {
+    "id": 1655,
+    "name": "United Lutheran Seminary"
+  },
+  {
+    "id": 1665,
+    "name": "Mount Aloysius College"
+  },
+  {
+    "id": 1667,
+    "name": "Neumann University"
+  },
+  {
+    "id": 1668,
+    "name": "Salus University"
+  },
+  {
+    "id": 1695,
+    "name": "University of the Arts"
+  },
+  {
+    "id": 1697,
+    "name": "Philadelphia College of Osteopathic Medicine"
+  },
+  {
+    "id": 1705,
+    "name": "Reconstructionist Rabbinical College"
+  },
+  {
+    "id": 1706,
+    "name": "Walnut Hill College"
+  },
+  {
+    "id": 1722,
+    "name": "Theological Seminary of the Reformed Episcopal Church"
+  },
+  {
+    "id": 1749,
+    "name": "Northpoint Bible College"
+  },
+  {
+    "id": 1754,
+    "name": "Bob Jones University"
+  },
+  {
+    "id": 1782,
+    "name": "Sherman College of Chiropractic"
+  },
+  {
+    "id": 1784,
+    "name": "Voorhees University"
+  },
+  {
+    "id": 1791,
+    "name": "Mount Marty University"
+  },
+  {
+    "id": 1796,
+    "name": "Presentation College"
+  },
+  {
+    "id": 1799,
+    "name": "Sinte Gleska University"
+  },
+  {
+    "id": 1801,
+    "name": "Sisseton Wahpeton College"
+  },
+  {
+    "id": 1805,
+    "name": "Baptist Health Sciences University"
+  },
+  {
+    "id": 1811,
+    "name": "Pentecostal Theological Seminary"
+  },
+  {
+    "id": 1814,
+    "name": "Hussian College-Daymar College Nashville"
+  },
+  {
+    "id": 1816,
+    "name": "Fisk University"
+  },
+  {
+    "id": 1828,
+    "name": "Meharry Medical College"
+  },
+  {
+    "id": 1848,
+    "name": "Amberton University"
+  },
+  {
+    "id": 1851,
+    "name": "The Art Institute of Houston"
+  },
+  {
+    "id": 1855,
+    "name": "Baptist Health System School of Health Professions"
+  },
+  {
+    "id": 1856,
+    "name": "Baptist Missionary Association Theological Seminary"
+  },
+  {
+    "id": 1867,
+    "name": "Del Mar College"
+  },
+  {
+    "id": 1874,
+    "name": "Episcopal Theological Seminary of the Southwest"
+  },
+  {
+    "id": 1875,
+    "name": "Miami International University of Art & Design-Art Institute Dallas"
+  },
+  {
+    "id": 1876,
+    "name": "Galveston College"
+  },
+  {
+    "id": 1888,
+    "name": "Huston-Tillotson University"
+  },
+  {
+    "id": 1890,
+    "name": "Jarvis Christian University"
+  },
+  {
+    "id": 1896,
+    "name": "College of the Mainland"
+  },
+  {
+    "id": 1901,
+    "name": "Wade College"
+  },
+  {
+    "id": 1902,
+    "name": "Navarro College"
+  },
+  {
+    "id": 1905,
+    "name": "Oblate School of Theology"
+  },
+  {
+    "id": 1915,
+    "name": "San Antonio College"
+  },
+  {
+    "id": 1929,
+    "name": "University of Texas Southwestern Medical Center"
+  },
+  {
+    "id": 1962,
+    "name": "Ensign College"
+  },
+  {
+    "id": 1978,
+    "name": "SIT Graduate Institute"
+  },
+  {
+    "id": 1980,
+    "name": "Vermont Law and Graduate School"
+  },
+  {
+    "id": 1990,
+    "name": "Eastern Virginia Medical School"
+  },
+  {
+    "id": 2007,
+    "name": "Sentara College of Health Sciences"
+  },
+  {
+    "id": 2015,
+    "name": "Riverside College of Health Careers"
+  },
+  {
+    "id": 2034,
+    "name": "Bellingham Technical College"
+  },
+  {
+    "id": 2035,
+    "name": "Big Bend Community College"
+  },
+  {
+    "id": 2038,
+    "name": "City University of Seattle"
+  },
+  {
+    "id": 2045,
+    "name": "Everett Community College"
+  },
+  {
+    "id": 2058,
+    "name": "Olympic College"
+  },
+  {
+    "id": 2060,
+    "name": "Peninsula College"
+  },
+  {
+    "id": 2062,
+    "name": "Renton Technical College"
+  },
+  {
+    "id": 2093,
+    "name": "Potomac State College of West Virginia University"
+  },
+  {
+    "id": 2106,
+    "name": "Madison Area Technical College"
+  },
+  {
+    "id": 2107,
+    "name": "Bellin College"
+  },
+  {
+    "id": 2119,
+    "name": "Medical College of Wisconsin"
+  },
+  {
+    "id": 2120,
+    "name": "Milwaukee Institute of Art & Design"
+  },
+  {
+    "id": 2123,
+    "name": "Nashotah House"
+  },
+  {
+    "id": 2148,
+    "name": "Western Wyoming Community College"
+  },
+  {
+    "id": 2163,
+    "name": "HJ International Graduate School for Peace and Public Leadership"
+  },
+  {
+    "id": 2164,
+    "name": "Beckfield College-Florence"
+  },
+  {
+    "id": 2165,
+    "name": "Ecumenical Theological Seminary"
+  },
+  {
+    "id": 2176,
+    "name": "New College of Florida"
+  },
+  {
+    "id": 2179,
+    "name": "University of Advancing Technology"
+  },
+  {
+    "id": 2180,
+    "name": "Paradise Valley Community College"
+  },
+  {
+    "id": 2183,
+    "name": "Stone Child College"
+  },
+  {
+    "id": 2187,
+    "name": "Hodges University"
+  },
+  {
+    "id": 2188,
+    "name": "University of St. Augustine for Health Sciences"
+  },
+  {
+    "id": 2189,
+    "name": "Hussian College-Daymar College Clarksville"
+  },
+  {
+    "id": 2194,
+    "name": "Fremont University"
+  },
+  {
+    "id": 2200,
+    "name": "Valley College-Martinsburg"
+  },
+  {
+    "id": 2203,
+    "name": "Fond du Lac Tribal and Community College"
+  },
+  {
+    "id": 2205,
+    "name": "Provo College"
+  },
+  {
+    "id": 2208,
+    "name": "Midwest College of Oriental Medicine-Racine"
+  },
+  {
+    "id": 2210,
+    "name": "Acupuncture and Integrative Medicine College-Berkeley"
+  },
+  {
+    "id": 2211,
+    "name": "University of the Potomac-Washington DC Campus"
+  },
+  {
+    "id": 2212,
+    "name": "Rabbi Jacob Joseph School"
+  },
+  {
+    "id": 2217,
+    "name": "The College of Health Care Professions-Northwest"
+  },
+  {
+    "id": 2220,
+    "name": "World Mission University"
+  },
+  {
+    "id": 2221,
+    "name": "Yo San University of Traditional Chinese Medicine"
+  },
+  {
+    "id": 2222,
+    "name": "Brookline College-Tempe"
+  },
+  {
+    "id": 2223,
+    "name": "Schiller International University"
+  },
+  {
+    "id": 2231,
+    "name": "Erikson Institute"
+  },
+  {
+    "id": 2236,
+    "name": "College of Menominee Nation"
+  },
+  {
+    "id": 2239,
+    "name": "Phillips Theological Seminary"
+  },
+  {
+    "id": 2244,
+    "name": "Centura College-Chesapeake"
+  },
+  {
+    "id": 2246,
+    "name": "Sonoran University of Health Sciences"
+  },
+  {
+    "id": 2248,
+    "name": "Bakke Graduate University"
+  },
+  {
+    "id": 2250,
+    "name": "Eastern International College-Jersey City"
+  },
+  {
+    "id": 2257,
+    "name": "AOMA Graduate School of Integrative Medicine"
+  },
+  {
+    "id": 2264,
+    "name": "Career Networks Institute"
+  },
+  {
+    "id": 2271,
+    "name": "Ilisagvik College"
+  },
+  {
+    "id": 2276,
+    "name": "International Baptist College and Seminary"
+  },
+  {
+    "id": 2280,
+    "name": "University of Management and Technology"
+  },
+  {
+    "id": 2282,
+    "name": "Midwest College of Oriental Medicine-Skokie"
+  },
+  {
+    "id": 2283,
+    "name": "Cascadia College"
+  },
+  {
+    "id": 2290,
+    "name": "PCI College"
+  },
+  {
+    "id": 2292,
+    "name": "Acupuncture and Massage College"
+  },
+  {
+    "id": 2293,
+    "name": "Upper Valley Educators Institute"
+  },
+  {
+    "id": 2294,
+    "name": "Keck Graduate Institute"
+  },
+  {
+    "id": 2297,
+    "name": "Pillar College"
+  },
+  {
+    "id": 2300,
+    "name": "Richmont Graduate University"
+  },
+  {
+    "id": 2303,
+    "name": "Irell & Manella Graduate School of Biological Sciences at City of Hope"
+  },
+  {
+    "id": 2309,
+    "name": "Won Institute of Graduate Studies"
+  },
+  {
+    "id": 2312,
+    "name": "St Louis College of Health Careers-Fenton"
+  },
+  {
+    "id": 2314,
+    "name": "University of the Potomac-VA Campus"
+  },
+  {
+    "id": 2315,
+    "name": "Edward Via College of Osteopathic Medicine"
+  },
+  {
+    "id": 2317,
+    "name": "University of Antelope Valley"
+  },
+  {
+    "id": 2318,
+    "name": "NorthShore University HealthSystem School of Nurse Anesthesia"
+  },
+  {
+    "id": 2325,
+    "name": "InterCoast Colleges-West Covina"
+  },
+  {
+    "id": 2328,
+    "name": "Bexley Hall Seabury Western Theological Seminary Federation, Inc."
+  },
+  {
+    "id": 2331,
+    "name": "Brookline College-Albuquerque"
+  },
+  {
+    "id": 2332,
+    "name": "Byzantine Catholic Seminary of Saints Cyril and Methodius"
+  },
+  {
+    "id": 2334,
+    "name": "Hussian College-Daymar College Murfreesboro"
+  },
+  {
+    "id": 2335,
+    "name": "ATI College-Whittier"
+  },
+  {
+    "id": 2336,
+    "name": "Baptist University of the Americas"
+  },
+  {
+    "id": 2338,
+    "name": "Institute of Clinical Acupuncture & Oriental Med"
+  },
+  {
+    "id": 2342,
+    "name": "Toyota Technological Institute at Chicago"
+  },
+  {
+    "id": 2346,
+    "name": "Neumont College of Computer Science"
+  },
+  {
+    "id": 2348,
+    "name": "Roseman University of Health Sciences"
+  },
+  {
+    "id": 2349,
+    "name": "Divine Mercy University"
+  },
+  {
+    "id": 2354,
+    "name": "Eastern School of Acupuncture and Traditional Medicine"
+  },
+  {
+    "id": 2355,
+    "name": "Ecclesia College"
+  },
+  {
+    "id": 2356,
+    "name": "Los Angeles College of Music"
+  },
+  {
+    "id": 2358,
+    "name": "Stanbridge University"
+  },
+  {
+    "id": 2359,
+    "name": "Uta Mesivta of Kiryas Joel"
+  },
+  {
+    "id": 2363,
+    "name": "Joyce University of Nursing and Health Sciences"
+  },
+  {
+    "id": 2369,
+    "name": "Aviator College of Aeronautical Science and Technology"
+  },
+  {
+    "id": 2370,
+    "name": "SUM Bible College and Theological Seminary"
+  },
+  {
+    "id": 2372,
+    "name": "International Institute for Restorative Practices"
+  },
+  {
+    "id": 2375,
+    "name": "Huntsville Bible College"
+  },
+  {
+    "id": 2376,
+    "name": "Gnomon"
+  },
+  {
+    "id": 2377,
+    "name": "Dragon Rises College of Oriental Medicine"
+  },
+  {
+    "id": 2386,
+    "name": "Brite Divinity School"
+  },
+  {
+    "id": 2394,
+    "name": "Talmudical Seminary of Bobov"
+  },
+  {
+    "id": 2395,
+    "name": "Charleston School of Law"
+  },
+  {
+    "id": 2398,
+    "name": "The Art Institute of Austin"
+  },
+  {
+    "id": 2410,
+    "name": "Taft University System"
+  },
+  {
+    "id": 2411,
+    "name": "Laurus College"
+  },
+  {
+    "id": 2413,
+    "name": "Institute of Taoist Education and Acupuncture"
+  },
+  {
+    "id": 2417,
+    "name": "Daoist Traditions College of Chinese Medical Arts"
+  },
+  {
+    "id": 2423,
+    "name": "Institute of World Politics"
+  },
+  {
+    "id": 2424,
+    "name": "Pontifical John Paul II Institute for Studies on Marriage and Family"
+  },
+  {
+    "id": 2425,
+    "name": "Vermont College of Fine Arts"
+  },
+  {
+    "id": 2426,
+    "name": "Polytechnic University of Puerto Rico-Miami"
+  },
+  {
+    "id": 2427,
+    "name": "Polytechnic University of Puerto Rico-Orlando"
+  },
+  {
+    "id": 2428,
+    "name": "Geisinger Commonwealth School of Medicine"
+  },
+  {
+    "id": 2434,
+    "name": "Angeles College"
+  },
+  {
+    "id": 2437,
+    "name": "Ambria College of Nursing"
+  },
+  {
+    "id": 2438,
+    "name": "City Vision University"
+  },
+  {
+    "id": 2442,
+    "name": "The Art Institute of Virginia Beach"
+  },
+  {
+    "id": 2447,
+    "name": "The Art Institute of San Antonio"
+  },
+  {
+    "id": 2448,
+    "name": "Unitek College"
+  },
+  {
+    "id": 2453,
+    "name": "Touro University Worldwide"
+  },
+  {
+    "id": 2454,
+    "name": "Touro University California"
+  },
+  {
+    "id": 2456,
+    "name": "Touro University Nevada"
+  },
+  {
+    "id": 2466,
+    "name": "Omega Graduate School"
+  },
+  {
+    "id": 2467,
+    "name": "Jung Tao School of Classical Chinese Medicine"
+  },
+  {
+    "id": 2470,
+    "name": "Jose Maria Vargas University"
+  },
+  {
+    "id": 2472,
+    "name": "Manna University"
+  },
+  {
+    "id": 2476,
+    "name": "Keser Torah-Mayan Hatalmud"
+  },
+  {
+    "id": 2477,
+    "name": "Millennia Atlantic University"
+  },
+  {
+    "id": 2478,
+    "name": "Institute for Doctoral Studies in the Visual Arts"
+  },
+  {
+    "id": 2484,
+    "name": "Los Angeles Pacific University"
+  },
+  {
+    "id": 2485,
+    "name": "Relay Graduate School of Education"
+  },
+  {
+    "id": 2488,
+    "name": "The Colleges of Law at Santa Barbara"
+  },
+  {
+    "id": 2489,
+    "name": "The University of America"
+  },
+  {
+    "id": 2491,
+    "name": "Catholic Distance University"
+  },
+  {
+    "id": 2494,
+    "name": "Criswell College"
+  },
+  {
+    "id": 2495,
+    "name": "Beverly Hills Design Institute"
+  },
+  {
+    "id": 2499,
+    "name": "Sessions College for Professional Design"
+  },
+  {
+    "id": 2502,
+    "name": "Be'er Yaakov Talmudic Seminary"
+  },
+  {
+    "id": 2513,
+    "name": "Rocky Vista University"
+  },
+  {
+    "id": 2514,
+    "name": "Midwives College of Utah"
+  },
+  {
+    "id": 2515,
+    "name": "Future Generations University"
+  },
+  {
+    "id": 2517,
+    "name": "Sotheby's Institute of Art-NY"
+  },
+  {
+    "id": 2522,
+    "name": "Sanford Burnham Prebys Medical Discovery Institute"
+  },
+  {
+    "id": 2525,
+    "name": "Middle Georgia State University"
+  },
+  {
+    "id": 2526,
+    "name": "Veritas Baptist College"
+  },
+  {
+    "id": 2549,
+    "name": "Learnet Academy Inc"
+  },
+  {
+    "id": 2550,
+    "name": "Integrity College of Health"
+  },
+  {
+    "id": 2559,
+    "name": "Minerva University"
+  },
+  {
+    "id": 2560,
+    "name": "University of West Los Angeles"
+  },
+  {
+    "id": 2561,
+    "name": "Rabbinical College Ohr Yisroel"
+  },
+  {
+    "id": 2565,
+    "name": "High Tech High Graduate School of Education"
+  },
+  {
+    "id": 2573,
+    "name": "Bethlehem College & Seminary"
+  },
+  {
+    "id": 2574,
+    "name": "Elmezzi Graduate School of Molecular Medicine"
+  },
+  {
+    "id": 2576,
+    "name": "San Ignacio University"
+  },
+  {
+    "id": 2577,
+    "name": "Valor Christian College"
+  },
+  {
+    "id": 2579,
+    "name": "United International College"
+  },
+  {
+    "id": 2580,
+    "name": "Presidio Graduate School"
+  },
+  {
+    "id": 2581,
+    "name": "Wright Graduate University for the Realization of Human Potential"
+  },
+  {
+    "id": 2588,
+    "name": "Hussian College-Los Angeles"
+  },
+  {
+    "id": 2592,
+    "name": "Husson University"
+  },
+  {
+    "id": 2595,
+    "name": "Felbry College"
+  },
+  {
+    "id": 2597,
+    "name": "Alhambra Medical University"
+  },
+  {
+    "id": 2601,
+    "name": "Elim Bible Institute and College"
+  },
+  {
+    "id": 2604,
+    "name": "Claremont Lincoln University"
+  },
+  {
+    "id": 2607,
+    "name": "Burrell College of Osteopathic Medicine"
+  },
+  {
+    "id": 2610,
+    "name": "John Patrick University of Health and Applied Sciences"
+  },
+  {
+    "id": 2612,
+    "name": "Teachers College of San Joaquin"
+  },
+  {
+    "id": 2613,
+    "name": "University of the People"
+  },
+  {
+    "id": 2614,
+    "name": "Wongu University of Oriental Medicine"
+  },
+  {
+    "id": 2615,
+    "name": "Institute of Buddhist Studies"
+  },
+  {
+    "id": 2623,
+    "name": "America Evangelical University"
+  },
+  {
+    "id": 2625,
+    "name": "Los Angeles Academy of Figurative Art"
+  },
+  {
+    "id": 2627,
+    "name": "Bolivar Technical College"
+  },
+  {
+    "id": 2636,
+    "name": "Gwinnett Institute"
+  },
+  {
+    "id": 2638,
+    "name": "Maine Media College"
+  },
+  {
+    "id": 2648,
+    "name": "Women's Institute of Torah Seminary and College"
+  },
+  {
+    "id": 2652,
+    "name": "Meridian University"
+  },
+  {
+    "id": 2655,
+    "name": "The Continents States University"
+  },
+  {
+    "id": 2656,
+    "name": "Reiss-Davis Graduate School"
+  },
+  {
+    "id": 2662,
+    "name": "Institute of Lutheran Theology"
+  },
+  {
+    "id": 2665,
+    "name": "Congregation Talmidei Mesivta Tiferes Shmiel Aleksander"
+  },
+  {
+    "id": 2670,
+    "name": "SANS Technology Institute"
+  },
+  {
+    "id": 2672,
+    "name": "Ponce Health Sciences University-St Louis"
+  },
+  {
+    "id": 2674,
+    "name": "Glasgow Caledonian New York College"
+  },
+  {
+    "id": 2675,
+    "name": "Faith Theological Seminary and Christian College"
+  },
+  {
+    "id": 2677,
+    "name": "Lotus Professional College"
+  },
+  {
+    "id": 2678,
+    "name": "Christ Mission College"
+  },
+  {
+    "id": 2681,
+    "name": "North-West College-San Diego"
+  },
+  {
+    "id": 2683,
+    "name": "Oak Valley College"
+  },
+  {
+    "id": 2684,
+    "name": "Alder Graduate School of Education"
+  },
+  {
+    "id": 2685,
+    "name": "Indian Bible College"
+  },
+  {
+    "id": 2686,
+    "name": "Hackensack Meridian School of Medicine"
+  },
+  {
+    "id": 2691,
+    "name": "Pathways College"
+  },
+  {
+    "id": 2694,
+    "name": "Provo College-Idaho Falls Campus"
+  },
+  {
+    "id": 2696,
+    "name": "Agape College of Business and Science"
+  },
+  {
+    "id": 2697,
+    "name": "Daybreak University"
+  },
+  {
+    "id": 2701,
+    "name": "Lakewood University"
+  },
+  {
+    "id": 2702,
+    "name": "NewU University"
+  },
+  {
+    "id": 2707,
+    "name": "University of Silicon Andhra"
+  },
+  {
+    "id": 2712,
+    "name": "Bridges Christian College"
+  },
+  {
+    "id": 2714,
+    "name": "Redeemers University North America"
+  },
+  {
+    "id": 2715,
+    "name": "Reach University"
+  },
+  {
+    "id": 2726,
+    "name": "Larkin University"
+  },
+  {
+    "id": 2727,
+    "name": "Pathways College-Arizona"
+  },
+  {
+    "id": 2728,
+    "name": "Pontifex University"
+  },
+  {
+    "id": 2732,
+    "name": "Commonwealth University of Pennsylvania"
+  }
+]

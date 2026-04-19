@@ -1,0 +1,218 @@
+[
+  {
+    "ipeds_id": "128498",
+    "name": "Albertus Magnus College",
+    "city": "New Haven",
+    "state": "CT",
+    "zip": "06511-1189",
+    "county_fips": "09009"
+  },
+  {
+    "ipeds_id": "128744",
+    "name": "University of Bridgeport",
+    "city": "Bridgeport",
+    "state": "CT",
+    "zip": "06604-5620",
+    "county_fips": "09001"
+  },
+  {
+    "ipeds_id": "128780",
+    "name": "Charter Oak State College",
+    "city": "New Britain",
+    "state": "CT",
+    "zip": "06051",
+    "county_fips": "09003"
+  },
+  {
+    "ipeds_id": "128902",
+    "name": "Connecticut College",
+    "city": "New London",
+    "state": "CT",
+    "zip": "06320-4196",
+    "county_fips": "09011"
+  },
+  {
+    "ipeds_id": "129020",
+    "name": "University of Connecticut",
+    "city": "Storrs",
+    "state": "CT",
+    "zip": "06269",
+    "county_fips": "09013"
+  },
+  {
+    "ipeds_id": "129154",
+    "name": "Goodwin University",
+    "city": "East Hartford",
+    "state": "CT",
+    "zip": "06118",
+    "county_fips": "09003"
+  },
+  {
+    "ipeds_id": "129215",
+    "name": "Eastern Connecticut State University",
+    "city": "Willimantic",
+    "state": "CT",
+    "zip": "06226",
+    "county_fips": "09015"
+  },
+  {
+    "ipeds_id": "129242",
+    "name": "Fairfield University",
+    "city": "Fairfield",
+    "state": "CT",
+    "zip": "06824-5195",
+    "county_fips": "09001"
+  },
+  {
+    "ipeds_id": "129428",
+    "name": "Rensselaer at Hartford",
+    "city": "Hartford",
+    "state": "CT",
+    "zip": "06120",
+    "county_fips": "09003"
+  },
+  {
+    "ipeds_id": "129491",
+    "name": "Hartford International University for Religion and Peace",
+    "city": "Hartford",
+    "state": "CT",
+    "zip": "06105-2260",
+    "county_fips": "09003"
+  },
+  {
+    "ipeds_id": "129525",
+    "name": "University of Hartford",
+    "city": "West Hartford",
+    "state": "CT",
+    "zip": "06117-1599",
+    "county_fips": "09003"
+  },
+  {
+    "ipeds_id": "129534",
+    "name": "Holy Apostles College and Seminary",
+    "city": "Cromwell",
+    "state": "CT",
+    "zip": "06416-2005",
+    "county_fips": "09007"
+  },
+  {
+    "ipeds_id": "129774",
+    "name": "Mitchell College",
+    "city": "New London",
+    "state": "CT",
+    "zip": "06320",
+    "county_fips": "09011"
+  },
+  {
+    "ipeds_id": "129941",
+    "name": "University of New Haven",
+    "city": "West Haven",
+    "state": "CT",
+    "zip": "06516-1916",
+    "county_fips": "09009"
+  },
+  {
+    "ipeds_id": "130110",
+    "name": "Paier College",
+    "city": "Bridgeport",
+    "state": "CT",
+    "zip": "06606",
+    "county_fips": "09001"
+  },
+  {
+    "ipeds_id": "130226",
+    "name": "Quinnipiac University",
+    "city": "Hamden",
+    "state": "CT",
+    "zip": "06518",
+    "county_fips": "09009"
+  },
+  {
+    "ipeds_id": "130253",
+    "name": "Sacred Heart University",
+    "city": "Fairfield",
+    "state": "CT",
+    "zip": "06825-1000",
+    "county_fips": "09001"
+  },
+  {
+    "ipeds_id": "130314",
+    "name": "University of Saint Joseph",
+    "city": "West Hartford",
+    "state": "CT",
+    "zip": "06117",
+    "county_fips": "09003"
+  },
+  {
+    "ipeds_id": "130493",
+    "name": "Southern Connecticut State University",
+    "city": "New Haven",
+    "state": "CT",
+    "zip": "06515-1355",
+    "county_fips": "09009"
+  },
+  {
+    "ipeds_id": "130590",
+    "name": "Trinity College",
+    "city": "Hartford",
+    "state": "CT",
+    "zip": "06106-3100",
+    "county_fips": "09003"
+  },
+  {
+    "ipeds_id": "130624",
+    "name": "United States Coast Guard Academy",
+    "city": "New London",
+    "state": "CT",
+    "zip": "06320-4195",
+    "county_fips": "09011"
+  },
+  {
+    "ipeds_id": "130697",
+    "name": "Wesleyan University",
+    "city": "Middletown",
+    "state": "CT",
+    "zip": "06459",
+    "county_fips": "09007"
+  },
+  {
+    "ipeds_id": "130776",
+    "name": "Western Connecticut State University",
+    "city": "Danbury",
+    "state": "CT",
+    "zip": "06810-6826",
+    "county_fips": "09001"
+  },
+  {
+    "ipeds_id": "436818",
+    "name": "University of Connecticut-Waterbury Campus",
+    "city": "Waterbury",
+    "state": "CT",
+    "zip": "06702",
+    "county_fips": "09009"
+  },
+  {
+    "ipeds_id": "436827",
+    "name": "University of Connecticut-Avery Point",
+    "city": "Groton",
+    "state": "CT",
+    "zip": "06340-6097",
+    "county_fips": "09011"
+  },
+  {
+    "ipeds_id": "436836",
+    "name": "University of Connecticut-Stamford",
+    "city": "Stamford",
+    "state": "CT",
+    "zip": "06901-2315",
+    "county_fips": "09001"
+  },
+  {
+    "ipeds_id": "463056",
+    "name": "University of Connecticut-Hartford Campus",
+    "city": "Hartford",
+    "state": "CT",
+    "zip": "06103",
+    "county_fips": "09003"
+  }
+]
