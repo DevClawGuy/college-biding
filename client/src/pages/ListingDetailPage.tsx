@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback, useRef } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { MapPin, Bed, Bath, Ruler, Clock, Heart, ChevronLeft, ChevronRight, Check, Eye, MessageCircle, Send, ChevronDown, Calendar, Users, ShoppingCart, Bus, Coffee, Bike, CreditCard, Pill, Shirt } from 'lucide-react';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
@@ -6,6 +6,7 @@ import { useCountdown } from '../hooks/useCountdown';
 import { useAuthStore } from '../store/authStore';
 import { getSocket } from '../lib/socket';
 import api from '../lib/api';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 
@@ -70,27 +71,54 @@ const mapIcon = L.icon({
 
 export default function ListingDetailPage() {
   const { id } = useParams<{ id: string }>();
-  const [listing, setListing] = useState<Listing | null>(null);
-  const [loading, setLoading] = useState(true);
   const [photoIndex, setPhotoIndex] = useState(0);
-  const [isFavorited, setIsFavorited] = useState(false);
-
-  // Interest state
-  const [interestCount, setInterestCount] = useState(0);
-  const [userHasExpressed, setUserHasExpressed] = useState(false);
   const [showInterestForm, setShowInterestForm] = useState(false);
   const [interestForm, setInterestForm] = useState({ moveInDate: '', occupants: '', note: '', rentSuggestion: '' });
   const [submittingInterest, setSubmittingInterest] = useState(false);
   const [withdrawingInterest, setWithdrawingInterest] = useState(false);
-  const [interestedStudents, setInterestedStudents] = useState<InterestedStudent[]>([]);
-
-  // Message state
-  const [threadMessages, setThreadMessages] = useState<Message[]>([]);
   const [msgInput, setMsgInput] = useState('');
   const [msgSending, setMsgSending] = useState(false);
   const msgEndRef = useRef<HTMLDivElement>(null);
 
   const { user } = useAuthStore();
+  const queryClient = useQueryClient();
+
+  const { data: listing, isLoading: loading } = useQuery({
+    queryKey: ['listing', id],
+    queryFn: () => api.get(`/listings/${id}`).then(r => r.data as Listing),
+    enabled: !!id,
+  });
+
+  const { data: interestData } = useQuery({
+    queryKey: ['interest', id],
+    queryFn: () => api.get(`/interest/${id}`).then(r => r.data as { count: number; userHasExpressed: boolean }),
+    enabled: !!id,
+  });
+
+  const { data: interestDetailsData } = useQuery({
+    queryKey: ['interest-details', id],
+    queryFn: () => api.get(`/interest/${id}/details`).then(r => r.data as InterestedStudent[]),
+    enabled: !!user && user.role === 'landlord' && !!listing && listing.landlordId === user.id,
+  });
+
+  const { data: favoriteData } = useQuery({
+    queryKey: ['favorite-check', id],
+    queryFn: () => api.get(`/favorites/check/${id}`).then(r => r.data as { isFavorited: boolean }),
+    enabled: !!user && !!id,
+  });
+
+  const { data: messagesData } = useQuery({
+    queryKey: ['messages', id],
+    queryFn: () => api.get(`/messages/${id}`).then(r => r.data as Message[]),
+    enabled: !!user && !!id,
+  });
+
+  const interestCount = interestData?.count ?? 0;
+  const userHasExpressed = interestData?.userHasExpressed ?? false;
+  const interestedStudents = interestDetailsData ?? [];
+  const isFavorited = favoriteData?.isFavorited ?? false;
+  const threadMessages = messagesData ?? [];
+
   const countdown = useCountdown(listing?.auctionEnd ?? '');
 
   // Dynamic page title
@@ -100,55 +128,6 @@ export default function ListingDetailPage() {
     return () => { document.title = 'HouseRush - Off-Campus Student Housing'; };
   }, [listing?.title]);
 
-  const fetchData = useCallback(async () => {
-    if (!id) return;
-    try {
-      const res = await api.get(`/listings/${id}`);
-      setListing(res.data);
-    } catch {
-      console.error('Failed to fetch listing');
-    } finally {
-      setLoading(false);
-    }
-  }, [id]);
-
-  useEffect(() => { fetchData(); }, [fetchData]);
-
-  // Fetch interest data
-  useEffect(() => {
-    if (!id) return;
-    api.get(`/interest/${id}`).then(({ data }) => {
-      setInterestCount(data.count ?? 0);
-      setUserHasExpressed(data.userHasExpressed ?? false);
-    }).catch(() => {});
-  }, [id, userHasExpressed]);
-
-  // Fetch interested students for landlord
-  useEffect(() => {
-    if (!id || !user || !listing) return;
-    if (user.role === 'landlord' && listing.landlordId === user.id) {
-      api.get(`/interest/${id}/details`).then(({ data }) => {
-        setInterestedStudents(data);
-      }).catch(() => {});
-    }
-  }, [id, user, listing]);
-
-  // Favorites
-  useEffect(() => {
-    if (user && id) api.get(`/favorites/check/${id}`).then(({ data }) => setIsFavorited(data.isFavorited)).catch(() => {});
-  }, [user, id]);
-
-  // Messages
-  const fetchMessages = useCallback(async () => {
-    if (!user || !id) return;
-    try {
-      const { data } = await api.get(`/messages/${id}`);
-      setThreadMessages(data);
-    } catch { /* */ }
-  }, [user, id]);
-
-  useEffect(() => { fetchMessages(); }, [fetchMessages]);
-
   useEffect(() => {
     msgEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [threadMessages.length]);
@@ -157,9 +136,9 @@ export default function ListingDetailPage() {
     if (!id || !msgInput.trim() || msgSending) return;
     setMsgSending(true);
     try {
-      const { data } = await api.post(`/messages/${id}`, { body: msgInput.trim() });
-      setThreadMessages(prev => [...prev, data.message]);
+      await api.post(`/messages/${id}`, { body: msgInput.trim() });
       setMsgInput('');
+      queryClient.invalidateQueries({ queryKey: ['messages', id] });
     } catch { /* */ }
     setMsgSending(false);
   };
@@ -169,21 +148,14 @@ export default function ListingDetailPage() {
     if (!id) return;
     const socket = getSocket();
     socket.emit('join_listing', id);
-    socket.on('new_interest', (data) => {
-      if (data.listingId === id) setInterestCount(data.count);
+    socket.on('new_interest', (data: { listingId: string }) => {
+      if (data.listingId === id) queryClient.invalidateQueries({ queryKey: ['interest', id] });
     });
-    socket.on('auction_ended', (data) => {
-      if (data.listingId === id) {
-        setListing(prev => prev ? { ...prev, status: 'ended' as const } : prev);
-      }
+    socket.on('auction_ended', (data: { listingId: string }) => {
+      if (data.listingId === id) queryClient.invalidateQueries({ queryKey: ['listing', id] });
     });
-    socket.on('new_message', (data) => {
-      if (data.listingId === id) {
-        setThreadMessages(prev => [...prev, {
-          id: data.messageId, senderId: data.senderId, recipientId: '',
-          senderName: data.senderName, body: data.body, isRead: true, createdAt: data.createdAt,
-        }]);
-      }
+    socket.on('new_message', (data: { listingId: string }) => {
+      if (data.listingId === id) queryClient.invalidateQueries({ queryKey: ['messages', id] });
     });
     return () => { socket.emit('leave_listing', id); socket.off('new_interest'); socket.off('auction_ended'); socket.off('new_message'); };
   }, [id]);
@@ -193,7 +165,8 @@ export default function ListingDetailPage() {
     try {
       if (isFavorited) await api.delete(`/favorites/${id}`);
       else await api.post(`/favorites/${id}`);
-      setIsFavorited(!isFavorited);
+      queryClient.invalidateQueries({ queryKey: ['favorite-check', id] });
+      queryClient.invalidateQueries({ queryKey: ['favorites'] });
     } catch { /* */ }
   };
 
@@ -207,8 +180,8 @@ export default function ListingDetailPage() {
         note: interestForm.note || null,
         rentSuggestion: interestForm.rentSuggestion ? Number(interestForm.rentSuggestion) : null,
       });
-      setUserHasExpressed(true);
       setShowInterestForm(false);
+      queryClient.invalidateQueries({ queryKey: ['interest', id] });
     } catch { /* */ }
     setSubmittingInterest(false);
   };
@@ -218,8 +191,8 @@ export default function ListingDetailPage() {
     setWithdrawingInterest(true);
     try {
       await api.delete(`/interest/${id}`);
-      setUserHasExpressed(false);
       setInterestForm({ moveInDate: '', occupants: '', note: '', rentSuggestion: '' });
+      queryClient.invalidateQueries({ queryKey: ['interest', id] });
     } catch { /* */ }
     setWithdrawingInterest(false);
   };

@@ -2,15 +2,15 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
 import { LayoutDashboard, PlusCircle, Bell, LogOut, Menu, X, MessageCircle, GraduationCap } from 'lucide-react';
 import Logo from './Logo';
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import api from '../lib/api';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 
 export default function Navbar() {
   const { user, logout } = useAuthStore();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const [menuOpen, setMenuOpen] = useState(false);
-  const [unreadCount, setUnreadCount] = useState(0);
-  const [unreadMsgCount, setUnreadMsgCount] = useState(0);
   const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
@@ -19,29 +19,31 @@ export default function Navbar() {
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
-  const fetchUnreadCount = useCallback(() => {
-    if (!user) return;
-    api.get('/notifications/unread-count').then(({ data }) => {
-      setUnreadCount(data.count ?? 0);
-    }).catch(() => {});
-    api.get('/messages/unread-count').then(({ data }) => {
-      setUnreadMsgCount(data.count ?? 0);
-    }).catch(() => {});
-  }, [user]);
+  const { data: notifData } = useQuery({
+    queryKey: ['unread-notifications'],
+    queryFn: () => api.get('/notifications/unread-count').then(r => r.data as { count: number }),
+    enabled: !!user,
+    refetchInterval: 30000,
+    refetchIntervalInBackground: false,
+  });
 
-  // Fetch on mount + poll every 30s
-  useEffect(() => {
-    if (!user) { setUnreadCount(0); setUnreadMsgCount(0); return; }
-    fetchUnreadCount();
-    const interval = setInterval(fetchUnreadCount, 30_000);
-    return () => clearInterval(interval);
-  }, [user, fetchUnreadCount]);
+  const { data: msgData } = useQuery({
+    queryKey: ['unread-messages'],
+    queryFn: () => api.get('/messages/unread-count').then(r => r.data as { count: number }),
+    enabled: !!user,
+    refetchInterval: 30000,
+    refetchIntervalInBackground: false,
+  });
+
+  const unreadCount = notifData?.count ?? 0;
+  const unreadMsgCount = msgData?.count ?? 0;
 
   const handleBellClick = () => {
     navigate('/dashboard?tab=notifications');
-    // Mark all read when navigating to notifications
     if (unreadCount > 0) {
-      api.put('/notifications/read-all').then(() => setUnreadCount(0)).catch(() => {});
+      api.put('/notifications/read-all').then(() => {
+        queryClient.invalidateQueries({ queryKey: ['unread-notifications'] });
+      }).catch(() => {});
     }
   };
 

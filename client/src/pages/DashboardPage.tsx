@@ -1,9 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useSearchParams, Link, useNavigate } from 'react-router-dom';
 import { Home, Heart, Bell, Clock, Trophy, Check, ChevronRight, Phone, Mail, Trash2, MessageCircle, Send } from 'lucide-react';
 import { useAuthStore } from '../store/authStore';
 import { useCountdown } from '../hooks/useCountdown';
 import api from '../lib/api';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 
 const studentTabs = [
   { id: 'interests', label: 'My Interests', icon: Heart },
@@ -43,75 +44,96 @@ export default function DashboardPage() {
   const activeTab = rawTab && tabs.some(t => t.id === rawTab) ? rawTab : defaultTab;
   const navigate = useNavigate();
 
-  const [interests, setInterests] = useState<any[]>([]);
-  const [listings, setListings] = useState<any[]>([]);
-  const [interestCounts, setInterestCounts] = useState<Record<string, number>>({});
-  const [favorites, setFavorites] = useState<any[]>([]);
-  const [notifications, setNotifications] = useState<any[]>([]);
-  const [conversations, setConversations] = useState<any[]>([]);
+  const queryClient = useQueryClient();
   const [expandedConv, setExpandedConv] = useState<string | null>(null);
   const [convMessages, setConvMessages] = useState<any[]>([]);
   const [convMsgInput, setConvMsgInput] = useState('');
   const [convMsgSending, setConvMsgSending] = useState(false);
-  const [unreadMsgCount, setUnreadMsgCount] = useState(0);
-  const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    if (!user) { navigate('/login'); return; }
-    fetchTabData();
-    // Fetch unread message count for badge
-    api.get('/messages/unread-count').then(({ data }) => setUnreadMsgCount(data.count ?? 0)).catch(() => {});
-  }, [activeTab, user]);
+  if (!user) { navigate('/login'); }
 
-  const fetchTabData = async () => {
-    setLoading(true);
-    try {
-      switch (activeTab) {
-        case 'interests': {
-          const data = (await api.get('/interest/my')).data;
-          setInterests(data);
-          break;
-        }
-        case 'listings': {
-          const listData = (await api.get('/listings/my/listings')).data;
-          setListings(listData);
-          // Fetch interest counts for each listing
-          const counts: Record<string, number> = {};
-          for (const l of listData) {
-            try {
-              const { data: ic } = await api.get(`/interest/${l.id}`);
-              counts[l.id] = ic.count ?? 0;
-            } catch { counts[l.id] = 0; }
-          }
-          setInterestCounts(counts);
-          break;
-        }
-        case 'messages': {
-          const convData = (await api.get('/messages/conversations')).data;
-          setConversations(convData);
-          setUnreadMsgCount(0);
-          break;
-        }
-        case 'favorites': setFavorites((await api.get('/favorites')).data); break;
-        case 'notifications': {
-          const notifsData = (await api.get('/notifications')).data;
-          setNotifications(notifsData);
-          if (notifsData.some((n: any) => !n.read)) api.put('/notifications/read-all').catch(() => {});
-          break;
-        }
+  const { data: msgCountData } = useQuery({
+    queryKey: ['unread-messages'],
+    queryFn: () => api.get('/messages/unread-count').then(r => r.data as { count: number }),
+    enabled: !!user,
+  });
+  const unreadMsgCount = msgCountData?.count ?? 0;
+
+  const { data: interestsData, isLoading: interestsLoading } = useQuery({
+    queryKey: ['my-interests'],
+    queryFn: () => api.get('/interest/my').then(r => r.data as any[]),
+    enabled: !!user && activeTab === 'interests',
+  });
+
+  const { data: listingsData, isLoading: listingsLoading } = useQuery({
+    queryKey: ['my-listings'],
+    queryFn: async () => {
+      const listData = (await api.get('/listings/my/listings')).data as any[];
+      const counts: Record<string, number> = {};
+      for (const l of listData) {
+        try {
+          const { data: ic } = await api.get(`/interest/${l.id}`);
+          counts[l.id] = (ic as { count: number }).count ?? 0;
+        } catch { counts[l.id] = 0; }
       }
-    } catch { /* */ } finally { setLoading(false); }
-  };
+      return { listings: listData, interestCounts: counts };
+    },
+    enabled: !!user && activeTab === 'listings',
+  });
+
+  const { data: favoritesData, isLoading: favLoading } = useQuery({
+    queryKey: ['favorites'],
+    queryFn: () => api.get('/favorites').then(r => r.data as any[]),
+    enabled: !!user && activeTab === 'favorites',
+  });
+
+  const { data: notificationsData, isLoading: notifsLoading } = useQuery({
+    queryKey: ['notifications'],
+    queryFn: async () => {
+      const notifsData = (await api.get('/notifications')).data as any[];
+      if (notifsData.some((n: any) => !n.read)) api.put('/notifications/read-all').catch(() => {});
+      return notifsData;
+    },
+    enabled: !!user && activeTab === 'notifications',
+  });
+
+  const { data: conversationsData, isLoading: convoLoading } = useQuery({
+    queryKey: ['conversations'],
+    queryFn: () => api.get('/messages/conversations').then(r => r.data as any[]),
+    enabled: !!user && activeTab === 'messages',
+  });
+
+  const interests = interestsData ?? [];
+  const listings = listingsData?.listings ?? [];
+  const interestCounts = listingsData?.interestCounts ?? {};
+  const favorites = favoritesData ?? [];
+  const notifications = notificationsData ?? [];
+  const conversations = conversationsData ?? [];
+
+  const loading = activeTab === 'interests' ? interestsLoading
+    : activeTab === 'listings' ? listingsLoading
+    : activeTab === 'favorites' ? favLoading
+    : activeTab === 'notifications' ? notifsLoading
+    : activeTab === 'messages' ? convoLoading
+    : false;
 
   const removeFavorite = async (listingId: string) => {
     try {
       await api.delete(`/favorites/${listingId}`);
-      setFavorites(prev => prev.filter(l => l.id !== listingId));
+      queryClient.invalidateQueries({ queryKey: ['favorites'] });
     } catch { /* */ }
   };
 
-  const markAllRead = async () => { await api.put('/notifications/read-all'); setNotifications(p => p.map(n => ({ ...n, read: true }))); };
-  const markRead = async (id: string) => { await api.put(`/notifications/${id}/read`); setNotifications(p => p.map(n => n.id === id ? { ...n, read: true } : n)); };
+  const markAllRead = async () => {
+    await api.put('/notifications/read-all');
+    queryClient.invalidateQueries({ queryKey: ['notifications'] });
+    queryClient.invalidateQueries({ queryKey: ['unread-notifications'] });
+  };
+  const markRead = async (id: string) => {
+    await api.put(`/notifications/${id}/read`);
+    queryClient.invalidateQueries({ queryKey: ['notifications'] });
+    queryClient.invalidateQueries({ queryKey: ['unread-notifications'] });
+  };
 
   if (!user) return null;
 
@@ -225,13 +247,13 @@ export default function DashboardPage() {
                         <p className="text-[11px] text-slate-400 mt-1">This is a non-binding offer. You retain full discretion to accept or decline.</p>
                         <div className="flex gap-2 mt-3">
                           <button
-                            onClick={async (e) => { e.preventDefault(); if (confirm('Confirm this offer? The student will be notified as the winner.')) { try { await api.post(`/listings/${listing.id}/confirm-offer`); fetchTabData(); } catch {} } }}
+                            onClick={async (e) => { e.preventDefault(); if (confirm('Confirm this offer? The student will be notified as the winner.')) { try { await api.post(`/listings/${listing.id}/confirm-offer`); queryClient.invalidateQueries({ queryKey: ['my-listings'] }); } catch {} } }}
                             className="flex-1 py-2 rounded-lg text-sm font-semibold text-white bg-emerald-600 hover:bg-emerald-700 transition-all active:scale-[0.98]"
                           >
                             Confirm Offer
                           </button>
                           <button
-                            onClick={async (e) => { e.preventDefault(); if (confirm('Decline and relist? The listing will be relisted for 7 more days.')) { try { await api.post(`/listings/${listing.id}/decline-relist`); fetchTabData(); } catch {} } }}
+                            onClick={async (e) => { e.preventDefault(); if (confirm('Decline and relist? The listing will be relisted for 7 more days.')) { try { await api.post(`/listings/${listing.id}/decline-relist`); queryClient.invalidateQueries({ queryKey: ['my-listings'] }); } catch {} } }}
                             className="flex-1 py-2 rounded-lg text-sm font-semibold text-rose-600 bg-rose-50 hover:bg-rose-100 border border-rose-200 transition-all active:scale-[0.98]"
                           >
                             Decline & Relist
@@ -244,7 +266,7 @@ export default function DashboardPage() {
                   {/* Delete button for listings with no bids */}
                   {listing.status === 'active' && listing.bidCount === 0 && (
                     <div className="px-4 pb-3 pt-0">
-                      <button onClick={async () => { if (confirm('Delete this listing?')) { try { await api.delete(`/listings/${listing.id}`); fetchTabData(); } catch {} } }}
+                      <button onClick={async () => { if (confirm('Delete this listing?')) { try { await api.delete(`/listings/${listing.id}`); queryClient.invalidateQueries({ queryKey: ['my-listings'] }); } catch {} } }}
                         className="text-xs text-rose-400 hover:text-rose-600 font-medium transition-colors flex items-center gap-1">
                         <Trash2 className="w-3 h-3" /> Delete listing
                       </button>

@@ -1,9 +1,10 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { Search, GraduationCap, MapPin, ArrowRight, X } from 'lucide-react';
 import { motion } from 'framer-motion';
 import api from '../lib/api';
 import { useAuthStore } from '../store/authStore';
+import { useQuery } from '@tanstack/react-query';
 
 interface University {
   id: number;
@@ -76,33 +77,29 @@ const US_STATES = [
 
 export default function UniversitiesPage() {
   const { user } = useAuthStore();
-  const [universities, setUniversities] = useState<University[]>([]);
-  const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
   const [selectedState, setSelectedState] = useState('');
   const debounceRef = useRef<ReturnType<typeof setTimeout>>(undefined);
 
-  const fetchUniversities = async (searchTerm: string, state: string) => {
-    setLoading(true);
-    try {
-      const params: Record<string, string | number> = { search: searchTerm, page: 1, limit: 100 };
-      if (state) params.state = state;
-      const { data } = await api.get('/universities', { params });
-      setUniversities(data.universities ?? []);
-    } catch { /* */ } finally {
-      setLoading(false);
-    }
+  // Debounce search input into debouncedSearch
+  const handleSearchChange = (value: string) => {
+    setSearch(value);
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => setDebouncedSearch(value), 300);
   };
 
-  useEffect(() => {
-    fetchUniversities('', selectedState);
-  }, []);
+  const { data, isLoading: loading } = useQuery({
+    queryKey: ['universities', debouncedSearch, selectedState],
+    queryFn: () => {
+      const params: Record<string, string | number> = { search: debouncedSearch, page: 1, limit: 100 };
+      if (selectedState) params.state = selectedState;
+      return api.get('/universities', { params }).then(r => r.data as { universities: University[] });
+    },
+    staleTime: 1000 * 60 * 10,
+  });
 
-  useEffect(() => {
-    if (debounceRef.current) clearTimeout(debounceRef.current);
-    debounceRef.current = setTimeout(() => fetchUniversities(search, selectedState), 300);
-    return () => { if (debounceRef.current) clearTimeout(debounceRef.current); };
-  }, [search, selectedState]);
+  const universities = data?.universities ?? [];
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
@@ -118,7 +115,7 @@ export default function UniversitiesPage() {
           <input
             type="text"
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            onChange={(e) => handleSearchChange(e.target.value)}
             placeholder="Search universities..."
             className="w-full pl-11 pr-4 py-3 border border-slate-200 rounded-2xl bg-white focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 card-shadow text-sm transition-all"
           />
@@ -165,7 +162,7 @@ export default function UniversitiesPage() {
           </div>
           <h3 className="text-lg font-semibold text-slate-700">No universities found</h3>
           <p className="text-slate-500 mt-1.5 text-sm">Try a different search term</p>
-          <button onClick={() => setSearch('')} className="mt-4 text-brand-600 hover:text-brand-700 font-semibold text-sm">Clear search</button>
+          <button onClick={() => handleSearchChange('')} className="mt-4 text-brand-600 hover:text-brand-700 font-semibold text-sm">Clear search</button>
         </div>
       ) : (
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">

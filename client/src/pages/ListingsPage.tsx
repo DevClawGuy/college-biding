@@ -1,10 +1,11 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Search, SlidersHorizontal, MapPin, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import api from '../lib/api';
 import ListingCard from '../components/ListingCard';
 import { useAuthStore } from '../store/authStore';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 
 const towns = ['All', 'West Long Branch', 'Long Branch', 'Deal', 'Ocean Township', 'Oakhurst'];
 const bedOptions = [
@@ -21,11 +22,9 @@ const sortOptions = [
 
 export default function ListingsPage() {
   const [searchParams] = useSearchParams();
-  const [listings, setListings] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
   const [showFilters, setShowFilters] = useState(false);
-  const [favorites, setFavorites] = useState<Set<string>>(new Set());
   const { user } = useAuthStore();
+  const queryClient = useQueryClient();
   const debounceRef = useRef<ReturnType<typeof setTimeout>>(undefined);
 
   const [filters, setFilters] = useState({
@@ -38,56 +37,60 @@ export default function ListingsPage() {
     amenities: [] as string[],
   });
 
-  // Debounced fetch on filter change
-  useEffect(() => {
+  const [debouncedFilters, setDebouncedFilters] = useState(filters);
+
+  const updateFilter = (key: string, value: string | string[]) => {
+    const next = { ...filters, [key]: value };
+    setFilters(next);
     if (debounceRef.current) clearTimeout(debounceRef.current);
-    debounceRef.current = setTimeout(fetchListings, 300);
-    return () => { if (debounceRef.current) clearTimeout(debounceRef.current); };
-  }, [filters]);
-
-  useEffect(() => {
-    if (user) {
-      api.get('/favorites').then(({ data }) => {
-        setFavorites(new Set(data.map((l: any) => l.id)));
-      }).catch(() => {});
-    }
-  }, [user]);
-
-  const fetchListings = async () => {
-    setLoading(true);
-    try {
-      const params = new URLSearchParams();
-      if (filters.search) params.set('search', filters.search);
-      if (filters.town && filters.town !== 'All') params.set('town', filters.town);
-      if (filters.sort) params.set('sortBy', filters.sort);
-      if (filters.beds) params.set('beds', filters.beds);
-      if (filters.minPrice) params.set('minPrice', filters.minPrice);
-      if (filters.maxPrice) params.set('maxPrice', filters.maxPrice);
-      if (filters.amenities.length > 0) params.set('amenities', filters.amenities.join(','));
-      const { data } = await api.get(`/listings?${params.toString()}`);
-      setListings(data);
-    } catch { /* */ } finally { setLoading(false); }
+    debounceRef.current = setTimeout(() => setDebouncedFilters(next), 300);
   };
 
-  const updateFilter = (key: string, value: any) => setFilters(prev => ({ ...prev, [key]: value }));
   const toggleAmenity = (a: string) => {
-    setFilters(prev => ({
-      ...prev,
-      amenities: prev.amenities.includes(a) ? prev.amenities.filter(x => x !== a) : [...prev.amenities, a],
-    }));
+    const next = filters.amenities.includes(a) ? filters.amenities.filter(x => x !== a) : [...filters.amenities, a];
+    updateFilter('amenities', next);
   };
 
-  const clearFilters = () => setFilters({ search: '', town: '', sort: 'ending_soonest', beds: '', minPrice: '', maxPrice: '', amenities: [] });
+  const clearFilters = () => {
+    const cleared = { search: '', town: '', sort: 'ending_soonest', beds: '', minPrice: '', maxPrice: '', amenities: [] as string[] };
+    setFilters(cleared);
+    setDebouncedFilters(cleared);
+  };
+
+  const { data: listingsData, isLoading: loading } = useQuery({
+    queryKey: ['listings', debouncedFilters],
+    queryFn: () => {
+      const params = new URLSearchParams();
+      if (debouncedFilters.search) params.set('search', debouncedFilters.search);
+      if (debouncedFilters.town && debouncedFilters.town !== 'All') params.set('town', debouncedFilters.town);
+      if (debouncedFilters.sort) params.set('sortBy', debouncedFilters.sort);
+      if (debouncedFilters.beds) params.set('beds', debouncedFilters.beds);
+      if (debouncedFilters.minPrice) params.set('minPrice', debouncedFilters.minPrice);
+      if (debouncedFilters.maxPrice) params.set('maxPrice', debouncedFilters.maxPrice);
+      if (debouncedFilters.amenities.length > 0) params.set('amenities', debouncedFilters.amenities.join(','));
+      return api.get(`/listings?${params.toString()}`).then(r => r.data as any[]);
+    },
+    staleTime: 1000 * 60 * 2,
+  });
+
+  const { data: favoritesData } = useQuery({
+    queryKey: ['favorites'],
+    queryFn: () => api.get('/favorites').then(r => r.data as Array<{ id: string }>),
+    enabled: !!user,
+    staleTime: 1000 * 60 * 2,
+  });
+
+  const listings = listingsData ?? [];
+  const favorites = new Set((favoritesData ?? []).map((f: { id: string }) => f.id));
 
   const toggleFavorite = async (listingId: string) => {
     if (!user) return;
     if (favorites.has(listingId)) {
       await api.delete(`/favorites/${listingId}`);
-      setFavorites(prev => { const next = new Set(prev); next.delete(listingId); return next; });
     } else {
       await api.post(`/favorites/${listingId}`);
-      setFavorites(prev => new Set(prev).add(listingId));
     }
+    queryClient.invalidateQueries({ queryKey: ['favorites'] });
   };
 
   const activeFilterCount = [
@@ -230,7 +233,7 @@ export default function ListingsPage() {
         </div>
       ) : (
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-          {listings.map((listing) => (
+          {listings.map((listing: any) => (
             <ListingCard key={listing.id} listing={listing} onFavorite={user ? toggleFavorite : undefined} isFavorited={favorites.has(listing.id)} />
           ))}
         </div>

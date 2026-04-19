@@ -3,6 +3,7 @@ import { useParams, Link, useNavigate, useLocation } from 'react-router-dom';
 import { ChevronLeft, ArrowRight, ShieldCheck, FileText, DollarSign, Users, Info, Eye, MapPin, Bed, Bath, ShoppingCart, Bus, Coffee, Bike, CreditCard, Pill, Shirt, Search, SlidersHorizontal, X, ChevronDown } from 'lucide-react';
 import api from '../lib/api';
 import { useAuthStore } from '../store/authStore';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 
 interface MarketDataItem {
   id: number;
@@ -84,11 +85,7 @@ export default function UniversityPortalPage() {
   const location = useLocation();
   const stateColor = (location.state as { primaryColor?: string } | null)?.primaryColor ?? null;
   const { user } = useAuthStore();
-
-  const [university, setUniversity] = useState<UniversityDetail | null>(null);
-  const [listings, setListings] = useState<any[]>([]);
-  const [favorites, setFavorites] = useState<Set<string>>(new Set());
-  const [loading, setLoading] = useState(true);
+  const queryClient = useQueryClient();
 
   // Filter state
   const [searchQuery, setSearchQuery] = useState('');
@@ -101,41 +98,44 @@ export default function UniversityPortalPage() {
   const [isFmrOpen, setIsFmrOpen] = useState(false);
   const [isGoodToKnowOpen, setIsGoodToKnowOpen] = useState(false);
 
-  useEffect(() => {
-    if (!slug) return;
-    setLoading(true);
+  const { data: university, isLoading: uniLoading, isError: uniError } = useQuery({
+    queryKey: ['university', slug],
+    queryFn: () => api.get(`/universities/${slug}`).then(r => r.data as UniversityDetail),
+    staleTime: 1000 * 60 * 5,
+    enabled: !!slug,
+  });
 
-    const fetches: Promise<any>[] = [
-      api.get(`/universities/${slug}`),
-      api.get(`/universities/${slug}/listings`),
-    ];
+  const { data: listingsData, isLoading: listingsLoading } = useQuery({
+    queryKey: ['university-listings', slug],
+    queryFn: () => api.get(`/universities/${slug}/listings`).then(r => r.data as any[]),
+    staleTime: 1000 * 60 * 2,
+    enabled: !!slug,
+  });
 
-    Promise.all(fetches)
-      .then(([uniRes, listRes]) => {
-        setUniversity(uniRes.data);
-        setListings(listRes.data ?? []);
-      })
-      .catch(() => {
-        navigate('/universities', { replace: true });
-      })
-      .finally(() => setLoading(false));
+  const { data: favoritesData } = useQuery({
+    queryKey: ['favorites'],
+    queryFn: () => api.get('/favorites').then(r => r.data as Array<{ id: string }>),
+    enabled: !!user && user.role === 'student',
+    staleTime: 1000 * 60 * 2,
+  });
 
-    if (user?.role === 'student') {
-      api.get('/favorites').then(({ data }) => {
-        setFavorites(new Set(data.map((l: any) => l.id)));
-      }).catch(() => {});
-    }
-  }, [slug, user]);
+  const listings = listingsData ?? [];
+  const favorites = new Set((favoritesData ?? []).map((f: { id: string }) => f.id));
+  const loading = uniLoading || listingsLoading;
+
+  // Redirect on error
+  if (uniError) {
+    navigate('/universities', { replace: true });
+  }
 
   const toggleFavorite = async (listingId: string) => {
     if (!user) return;
     if (favorites.has(listingId)) {
       await api.delete(`/favorites/${listingId}`);
-      setFavorites(prev => { const next = new Set(prev); next.delete(listingId); return next; });
     } else {
       await api.post(`/favorites/${listingId}`);
-      setFavorites(prev => new Set(prev).add(listingId));
     }
+    queryClient.invalidateQueries({ queryKey: ['favorites'] });
   };
 
   const showLandlordCTA = !user || user.role === 'landlord';
