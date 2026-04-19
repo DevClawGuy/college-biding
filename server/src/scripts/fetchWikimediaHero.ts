@@ -2,112 +2,133 @@ import 'dotenv/config';
 import { drizzle } from 'drizzle-orm/libsql';
 import { createClient } from '@libsql/client';
 import { getClientConfig } from '../db/index';
-import { eq } from 'drizzle-orm';
+import { eq, isNull } from 'drizzle-orm';
 import * as schema from '../db/schema';
 
 const HEADERS = { 'User-Agent': 'HouseRush/1.0 (https://houserush.app; contact@houserush.app)' };
 
+const FILTER_PATTERNS = [/logo/i, /seal/i, /coat_of_arms/i, /flag/i, /map/i, /\.svg$/i];
+
 interface WikiPagesResponse {
-  query: {
-    pages: Record<string, {
+  query?: {
+    pages?: Record<string, {
       original?: { source: string };
-      imageinfo?: Array<{ url: string }>;
     }>;
   };
 }
 
-interface WikiSearchResponse {
-  query: {
-    search: Array<{ title: string }>;
-  };
+function isFiltered(url: string): boolean {
+  return FILTER_PATTERNS.some(p => p.test(url));
 }
 
-async function fetchImageUrl(universityName: string): Promise<string | null> {
-  // Strategy 1: Wikipedia pageimages API
-  const wikiUrl = new URL('https://en.wikipedia.org/w/api.php');
-  wikiUrl.searchParams.set('action', 'query');
-  wikiUrl.searchParams.set('titles', universityName);
-  wikiUrl.searchParams.set('prop', 'pageimages');
-  wikiUrl.searchParams.set('piprop', 'original');
-  wikiUrl.searchParams.set('format', 'json');
-  wikiUrl.searchParams.set('origin', '*');
+async function fetchImageUrl(name: string): Promise<string | null> {
+  // Attempt 1: exact university name
+  const url1 = new URL('https://en.wikipedia.org/w/api.php');
+  url1.searchParams.set('action', 'query');
+  url1.searchParams.set('titles', name);
+  url1.searchParams.set('prop', 'pageimages');
+  url1.searchParams.set('piprop', 'original');
+  url1.searchParams.set('format', 'json');
+  url1.searchParams.set('origin', '*');
 
   try {
-    const res = await fetch(wikiUrl.toString(), { headers: HEADERS });
+    const res = await fetch(url1.toString(), { headers: HEADERS });
     if (res.ok) {
       const data = (await res.json()) as WikiPagesResponse;
       const pages = data.query?.pages ?? {};
       const pageId = Object.keys(pages)[0];
-      const url = pages[pageId]?.original?.source;
-      if (url) return url;
+      const imgUrl = pages[pageId]?.original?.source;
+      if (imgUrl) return imgUrl;
     }
-  } catch { /* continue to fallback */ }
+  } catch { /* continue */ }
 
-  // Strategy 2: Search Wikimedia Commons
-  const commonsSearchUrl = new URL('https://commons.wikimedia.org/w/api.php');
-  commonsSearchUrl.searchParams.set('action', 'query');
-  commonsSearchUrl.searchParams.set('list', 'search');
-  commonsSearchUrl.searchParams.set('srsearch', `${universityName} campus`);
-  commonsSearchUrl.searchParams.set('srnamespace', '6');
-  commonsSearchUrl.searchParams.set('srlimit', '1');
-  commonsSearchUrl.searchParams.set('format', 'json');
-  commonsSearchUrl.searchParams.set('origin', '*');
+  // Attempt 2: "[name] campus"
+  const url2 = new URL('https://en.wikipedia.org/w/api.php');
+  url2.searchParams.set('action', 'query');
+  url2.searchParams.set('titles', `${name} campus`);
+  url2.searchParams.set('prop', 'pageimages');
+  url2.searchParams.set('piprop', 'original');
+  url2.searchParams.set('format', 'json');
+  url2.searchParams.set('origin', '*');
 
   try {
-    const res = await fetch(commonsSearchUrl.toString(), { headers: HEADERS });
-    if (!res.ok) return null;
-    const data = (await res.json()) as WikiSearchResponse;
-    const firstResult = data.query?.search?.[0];
-    if (!firstResult) return null;
+    const res = await fetch(url2.toString(), { headers: HEADERS });
+    if (res.ok) {
+      const data = (await res.json()) as WikiPagesResponse;
+      const pages = data.query?.pages ?? {};
+      const pageId = Object.keys(pages)[0];
+      const imgUrl = pages[pageId]?.original?.source;
+      if (imgUrl) return imgUrl;
+    }
+  } catch { /* continue */ }
 
-    // Get the actual image URL
-    const infoUrl = new URL('https://commons.wikimedia.org/w/api.php');
-    infoUrl.searchParams.set('action', 'query');
-    infoUrl.searchParams.set('titles', firstResult.title);
-    infoUrl.searchParams.set('prop', 'imageinfo');
-    infoUrl.searchParams.set('iiprop', 'url');
-    infoUrl.searchParams.set('format', 'json');
-    infoUrl.searchParams.set('origin', '*');
+  return null;
+}
 
-    const infoRes = await fetch(infoUrl.toString(), { headers: HEADERS });
-    if (!infoRes.ok) return null;
-    const infoData = (await infoRes.json()) as WikiPagesResponse;
-    const infoPages = infoData.query?.pages ?? {};
-    const infoPageId = Object.keys(infoPages)[0];
-    return infoPages[infoPageId]?.imageinfo?.[0]?.url ?? null;
-  } catch {
-    return null;
-  }
+function sleep(ms: number): Promise<void> {
+  return new Promise(r => setTimeout(r, ms));
 }
 
 async function run() {
-  console.log('Fetching Wikimedia hero image for Monmouth University...');
-
-  const imageUrl = await fetchImageUrl('Monmouth University');
-
-  if (!imageUrl) {
-    console.log('No image found for Monmouth University');
-    process.exit(0);
-  }
-
-  console.log(`Found image: ${imageUrl}`);
-
   const config = getClientConfig();
   console.log(`Connecting to DB: ${config.url.substring(0, 45)}...`);
   const client = createClient(config);
   const db = drizzle(client, { schema });
 
-  try {
-    await db.update(schema.universities)
-      .set({ heroImageUrl: imageUrl })
-      .where(eq(schema.universities.slug, 'monmouth-university-nj'))
-      .run();
+  // Fetch all universities
+  const allUnis = await db.select({
+    id: schema.universities.id,
+    name: schema.universities.name,
+    heroImageUrl: schema.universities.heroImageUrl,
+  }).from(schema.universities);
 
-    console.log('Successfully saved heroImageUrl for monmouth-university-nj');
-  } catch (err) {
-    console.error('Failed to update DB:', err);
-    process.exit(1);
+  const toProcess = allUnis.filter(u => !u.heroImageUrl);
+  console.log(`Total universities: ${allUnis.length}`);
+  console.log(`Already have images: ${allUnis.length - toProcess.length}`);
+  console.log(`To process: ${toProcess.length}\n`);
+
+  let saved = 0;
+  let noImage = 0;
+  let filtered = 0;
+  let errors = 0;
+
+  for (let i = 0; i < toProcess.length; i++) {
+    const uni = toProcess[i];
+
+    try {
+      const imageUrl = await fetchImageUrl(uni.name);
+
+      if (!imageUrl) {
+        noImage++;
+      } else if (isFiltered(imageUrl)) {
+        filtered++;
+      } else {
+        await db.update(schema.universities)
+          .set({ heroImageUrl: imageUrl })
+          .where(eq(schema.universities.id, uni.id))
+          .run();
+        saved++;
+      }
+    } catch (err) {
+      console.error(`  Error for ${uni.name}: ${err}`);
+      errors++;
+    }
+
+    // Progress logging every 50
+    if ((i + 1) % 50 === 0) {
+      console.log(`Progress: ${i + 1}/${toProcess.length} — ${saved} images saved, ${noImage} no image, ${filtered} filtered, ${errors} errors`);
+    }
+
+    // Rate limit
+    await sleep(500);
   }
+
+  console.log('\n=== WIKIMEDIA HERO FETCH COMPLETE ===');
+  console.log(`Total processed: ${toProcess.length}`);
+  console.log(`Images saved: ${saved}`);
+  console.log(`No image found: ${noImage}`);
+  console.log(`Filtered as logos/seals: ${filtered}`);
+  console.log(`Errors: ${errors}`);
 
   process.exit(0);
 }
