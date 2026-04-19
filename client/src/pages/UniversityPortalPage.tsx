@@ -273,7 +273,7 @@ export default function UniversityPortalPage() {
   return (
     <div>
       {/* ═══ HERO ═══ */}
-      <section className="relative overflow-hidden">
+      <section className="relative overflow-hidden min-h-[480px]">
         {/* Layer 1: Campus photo (when available) */}
         {university.heroImageUrl && (
           <div
@@ -307,7 +307,7 @@ export default function UniversityPortalPage() {
           </Link>
 
           {/* Title */}
-          <h1 className={`text-6xl font-bold tracking-tight ${isLight ? 'text-slate-900' : 'text-white'}`}>{university.name}</h1>
+          <h1 className={`text-7xl font-bold tracking-tight ${isLight ? 'text-slate-900' : 'text-white'}`}>{university.name}</h1>
           <p className={`mt-1.5 text-lg ${isLight ? 'text-slate-700' : 'text-white/75'}`}>
             Off-Campus Housing Portal · {university.city}, {university.state}
             {university.enrollment != null && ` · ${university.enrollment.toLocaleString()} students`}
