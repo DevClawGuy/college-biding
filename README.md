@@ -1,56 +1,64 @@
 # HouseRush — Off-Campus Student Housing Platform
 
-The fastest way to find off-campus housing near Monmouth University. Students browse verified listings, place real-time bids, and move in with confidence. Think Zillow meets StubHub for college housing.
+The Zestimate for college students. 2,716 university portals live nationally with real rent data, fair market benchmarks, and verified off-campus listings. Free for students. Free for housing providers.
 
-**Live site:** https://houserush.vercel.app
+**Live site:** https://houserush.app
+**Vercel backup:** https://houserush.vercel.app
 
 ## Tech Stack
 
 - **Frontend:** React + TypeScript + Tailwind CSS + Vite → Vercel
 - **Backend:** Node.js + Express + TypeScript → Railway
 - **Database:** Turso (LibSQL/SQLite cloud) — persists across Railway redeploys
+- **ORM:** Drizzle ORM — type-safe database queries
+- **Data Fetching:** TanStack Query (React Query v5) — data fetching and caching layer
 - **Auth:** JWT-based (email + password), .edu email verification via Resend
-- **Real-time:** Socket.io (live bid updates, auction events, notifications, messages)
-- **Email:** Resend SDK (verification, winner notifications, landlord alerts, parent invites, group invites, contact form, admin reminders)
+- **Real-time:** Socket.io (live updates, notifications, messages)
+- **Email:** Resend SDK — transactional email only (welcome, verification, notifications). Never used for cold outreach.
 - **Maps:** Leaflet.js (OpenStreetMap) on listing detail pages
-- **AI:** Pure algorithmic bid recommendation engine (no external API, zero cost)
+- **AI:** Claude API (Haiku 4.5) — Fair Housing listing linter (planned). Algorithmic bid recommendation engine (live, zero API cost).
 
 ## Features
 
-### Core Auction System
-- **Live Bidding** — Real-time bid updates via Socket.io, atomic race condition prevention (`UPDATE...WHERE current_bid < ?`)
-- **Auto-Bid** — Set a max bid, system counter-bids automatically up to 20 iterations
-- **Auction Extension** — Last-minute bids (within 5 min) extend auction by 5 minutes (anti-snipe)
-- **Auction Close Job** — Runs every 60s, detects expired auctions, declares winners, sends emails to winner + landlord + losers
-- **Secure Lease Now** — Landlord sets a fixed premium price; students can skip the auction and lock in the lease instantly
-- **Group Bidding** — Roommate groups bid as one unit; leader creates group, invites members by email, places bids on behalf of the group
+### Interest Expression System
+Students express interest in listings with an optional rent suggestion. No bidding. No auctions. Legally clean interest expressions only.
 
-### AI & Analytics
-- **AI Bid Recommendation Engine** — Distribution-based win probability, weighted comp analysis, competition scoring, urgency signals, 5-minute cache, one-click recommended bid action
+### Data Moat
+- 2,716 university portals with HUD Fair Market Rent data
+- RentCheck scoring: per-bed price vs HUD FMR on every listing (score 1-5)
+- IPEDS housing cost data: 2,236 universities
+- ~450 universities with Wikimedia campus hero photos
+- Drifting university name ticker on every portal hero
+
+### University Portals
+- Dynamic school colors on every portal hero
+- Combined Rent Data & Good to Know accordion
+- Federal Rent Guide (FMR) bedroom breakdown
+- Street View metadata for 79% of universities
+
+### Analytics
 - **Listing View Count** — Tracks unique student views per listing (deduplicated by user ID or IP), urgency tiers at 50+ and 100+ views
 - **View Snapshots** — Time-series view velocity tracking for recommendation engine
 
 ### User Experience
 - **Authentication** — Signup/login with .edu email verification, JWT auth, bcrypt password migration
-- **Listings** — Browse, search, filter by price/beds/town/amenities, sort by ending soon/price/bids
-- **Winner Notifications** — Confetti on win, email to winner and landlord via Resend
+- **Listings** — Browse, search, filter by price/beds/town/amenities, sort by ending soon/price
 - **Dashboard** — Role-specific tabs: Students (My Bids, Messages, Saved, Notifications), Landlords (My Listings, Messages, Notifications)
 - **In-App Messaging** — Real-time student-landlord messages per listing via Socket.io, unread count in navbar
-- **Parent Access** — Student invites parent email for read-only view of saved listings and bid status (no login required)
+- **Parent Access** — Student invites parent email for read-only view of saved listings (no login required)
 - **Profile** — Update name, phone, parent access email
 - **Favorites** — Save/unsave listings with deduplication (unique index)
 
 ### Landlord Tools
-- **Create Listings** — Auction end date, image URLs, amenities, secure lease price, approval queue
-- **Landlord Dashboard** — View all listings with winner details (name, email, phone), delete zero-bid listings
-- **Landlord Bid Block** — Landlords cannot place bids; simplified view-only panel on other landlords' listings
+- **Create Listings** — Image URLs, amenities, approval queue
+- **Landlord Dashboard** — View all listings, delete zero-interest listings
+- **Landlord Block** — Landlords cannot express interest; simplified view-only panel on other landlords' listings
 
 ### Admin
 - **Listing Approval** — Approve/reject listings at /admin
-- **Analytics Dashboard** — Live stats at /admin/dashboard (users, listings, bids, activity feed, auto-refreshes 30s)
-- **User Outreach** — User table with filters (role, activity, bid count), search, bulk email reminders via Resend with `[first name]` personalization
+- **Analytics Dashboard** — Live stats at /admin/dashboard (users, listings, activity feed, auto-refreshes 30s)
+- **User Outreach** — User table with filters (role, activity), search, bulk email reminders via Resend with `[first name]` personalization
 - **Active User Tracking** — `last_seen_at` updated on every authenticated request
-- **Test Data Management** — Seed/wipe test bidders and listings
 
 ### Content & Legal
 - **Guides & Checklists** — 6 downloadable student housing guides (move-in essentials, lease red flags, roommate agreement, rental scams, apartment inspection, post-auction steps)
@@ -59,7 +67,7 @@ The fastest way to find off-campus housing near Monmouth University. Students br
 - **Maintenance Mode** — Toggle via `VITE_MAINTENANCE_MODE`, preview bypass via `?preview=houserush2024`, parent-view and guides always bypass
 
 ### Mobile & Polish
-- **Mobile Responsive** — Full mobile bid flow, responsive grid, bottom-sheet bid modal
+- **Mobile Responsive** — Full mobile flow, responsive grid
 - **Mobile Avatar** — User avatar + logout always visible on mobile navbar
 - **Open Graph** — Dynamic OG meta tags per listing
 - **Reusable Logo** — SVG house + lightning bolt component used across all pages
@@ -78,6 +86,9 @@ PORT=8080
 TURSO_DATABASE_URL=libsql://houserush-devclawguy.aws-us-east-1.turso.io
 TURSO_AUTH_TOKEN=
 RESEND_API_KEY=
+CONTACT_EMAIL=contact@houserush.app
+CLIENT_URL=https://houserush.app
+GOOGLE_STREET_VIEW_KEY=
 
 ## Quick Start (Local Development)
 
@@ -94,6 +105,8 @@ JWT_SECRET=localsecret
 NODE_ENV=development
 ADMIN_KEY=houserush2024
 TURSO_DATABASE_URL=file:./houserush.db
+GOOGLE_STREET_VIEW_KEY=your_key_here
+CONTACT_EMAIL=contact@houserush.app
 ```
 
 ### 3. Start development servers
@@ -113,12 +126,9 @@ curl -X POST http://localhost:3001/api/admin/seed \
   -H "x-admin-key: houserush2024"
 ```
 
-## Demo Accounts
+## Demo Access
 
-| Role     | Email                    | Password    |
-|----------|--------------------------|-------------|
-| Student  | alex.m@monmouth.edu      | password123 |
-| Landlord | sarah.chen@realty.com    | password123 |
+Demo access: use `?preview=houserush2024` to bypass maintenance mode on houserush.app
 
 ## Admin Access
 
@@ -148,23 +158,17 @@ curl -X POST http://localhost:3001/api/admin/seed \
 | DELETE | /api/listings/:id               | Delete listing           |
 | GET    | /api/listings/my/listings       | Landlord's listings      |
 
-### Bids (`/api/bids`)
+### Interest (`/api/interest`)
 | Method | Endpoint                        | Description              |
 |--------|---------------------------------|--------------------------|
-| POST   | /api/bids/listing/:listingId    | Place a bid              |
-| GET    | /api/bids/listing/:listingId    | Get bid history          |
-| POST   | /api/bids/auto/:listingId       | Set auto-bid             |
-| POST   | /api/bids/secure-lease/:listingId | Secure Lease Now       |
-| GET    | /api/bids/my/bids               | Get user's bids          |
+| POST   | /api/interest/:listingId        | Express interest         |
+| GET    | /api/interest/:listingId        | Get expressions          |
 
-### Group Bidding (`/api/bid-groups`)
+### Universities (`/api/universities`)
 | Method | Endpoint                        | Description              |
 |--------|---------------------------------|--------------------------|
-| POST   | /api/bid-groups                 | Create group             |
-| GET    | /api/bid-groups/:listingId      | Get user's group         |
-| POST   | /api/bid-groups/:groupId/join   | Join group               |
-| DELETE | /api/bid-groups/:groupId/leave  | Leave/dissolve group     |
-| POST   | /api/bid-groups/:groupId/bid    | Place group bid          |
+| GET    | /api/universities               | List all universities    |
+| GET    | /api/universities/:slug         | Get university portal    |
 
 ### Messages (`/api/messages`)
 | Method | Endpoint                        | Description              |
@@ -173,12 +177,6 @@ curl -X POST http://localhost:3001/api/admin/seed \
 | GET    | /api/messages/conversations     | All conversations        |
 | GET    | /api/messages/:listingId        | Get thread               |
 | POST   | /api/messages/:listingId        | Send message             |
-
-### AI Recommendation (`/api/ai`)
-| Method | Endpoint                              | Description              |
-|--------|---------------------------------------|--------------------------|
-| POST   | /api/ai/bid-recommendation/:listingId | Generate recommendation  |
-| GET    | /api/ai/bid-recommendation/:listingId | Get recommendation       |
 
 ### Parent Access (`/api/parent-access`)
 | Method | Endpoint                        | Description              |
@@ -217,35 +215,37 @@ curl -X POST http://localhost:3001/api/admin/seed \
 | POST   | /api/admin/listings/:id/reject        | Reject listing                |
 | POST   | /api/admin/clear-listings             | Wipe all listings (keep users)|
 | POST   | /api/admin/seed-test-listings         | Insert 3 test listings        |
-| GET    | /api/admin/users                      | List all users + bid counts   |
+| GET    | /api/admin/users                      | List all users                |
 | POST   | /api/admin/send-reminder              | Send email to selected users  |
-| POST   | /api/admin/seed-test-bidders          | Create test bidders + bids    |
-| POST   | /api/admin/wipe-test-bidders          | Remove test bidders + bids    |
 
 ## Project Structure
 
 ```
 /client                      - React frontend (Vite)
   /src
-    /components              - Logo, Navbar, Footer, BidModal, CreateGroupModal, ListingCard
+    /components              - Logo, Navbar, Footer, ListingCard, etc.
     /pages                   - HomePage, ListingsPage, ListingDetailPage, DashboardPage,
                                CreateListingPage, ProfilePage, LoginPage, SignupPage,
                                AdminPage, AdminDashboardPage, ParentViewPage, GuidesPage,
                                VerifyEmailPage, HowItWorksPage, TermsPage, PrivacyPage,
-                               ContactPage
+                               ContactPage, UniversitiesPage, UniversityPortalPage
     /hooks                   - useCountdown
     /store                   - authStore (Zustand)
-    /lib                     - api (Axios), socket (Socket.io client)
+    /lib                     - api (Axios), socket (Socket.io client), rentcheck.ts,
+                               recommendation.ts
   /public                    - Static assets
   vercel.json                - Catch-all rewrite for React Router
 /server                      - Express backend
   /src
-    /db                      - schema.ts (Drizzle ORM), init.ts (migrations), index.ts (client)
-    /routes                  - auth, listings, bids, bidGroups, messages, ai, favorites,
-                               notifications, admin, contact, parentAccess
+    /db                      - schema.ts (Drizzle ORM), index.ts (client)
+    /routes                  - auth, listings, universities, interest, contact,
+                               messages, favorites, notifications, admin, parentAccess
     /middleware               - JWT auth (+ last_seen_at tracking)
     /jobs                    - auctionClose (runs every 60s)
     /lib                     - email (Resend), recommendation (AI engine)
+    /scripts                 - 17 data scripts including IPEDS backfill, HUD FMR seeding,
+                               Wikimedia/Google hero image fetching, color seeding,
+                               ZORI backfill
 /tests                       - Playwright test specs
 /thunder-client              - API request examples
 ```
@@ -254,7 +254,9 @@ curl -X POST http://localhost:3001/api/admin/seed \
 
 Hosted on Turso (persistent LibSQL cloud). Survives Railway redeploys.
 
-**Tables:** users, listings, bids, auto_bids, notifications, favorites, bid_groups, bid_group_members, messages, listing_views, view_snapshots
+**Tables:** users, listings, bids, autoBids, notifications, favorites, bidGroups, bidGroupMembers, messages, listingViews, viewSnapshots, universities, universityMarketData, expressionsOfInterest
+
+**universities table:** 2,716 rows with IPEDS data, HUD FMR market data, school colors, hero image URLs, ZORI rent trends
 
 **To reset and reseed production:**
 ```bash
@@ -271,4 +273,11 @@ curl -X POST https://college-biding-production.up.railway.app/api/admin/seed \
 
 - **Frontend:** Push to GitHub → auto-deploys to Vercel
 - **Backend:** Push to GitHub → auto-deploys to Railway (root: /server)
-- **Every commit must end with:** `git add . && git commit -m "description" && git push`
+
+## Legal & Compliance
+
+- Independent housing marketplace. Not affiliated with or endorsed by any university.
+- Not a real estate broker, agent, or property manager under NJ law.
+- HUD FMR and IPEDS data sourced from federal public databases (NCES, HUD).
+- Campus photos sourced from Wikimedia Commons under respective Creative Commons licenses.
+- Interest Expression System: non-binding, landlord retains full selection discretion.
